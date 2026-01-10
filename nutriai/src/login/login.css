@@ -2,110 +2,107 @@
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .auth-page {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
   min-height: 100vh;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f5f5f5;
+  background: #ffffff;
+  max-width: 100%;
+  margin: 0;
 }
 
-/* Left image area */
-
+/* Left image area - Takes full height */
 .auth-left {
-  flex: 1.1;
   background-image: url("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80");
   background-size: cover;
   background-position: center;
   position: relative;
-  display: none;
+  display: flex;
+  align-items: flex-end;
+  padding: 60px;
 }
 
 .auth-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55));
   color: #fff;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  max-width: 500px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .auth-overlay h1 {
-  font-size: 28px;
-  letter-spacing: -0.5px;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
 }
 
 .auth-overlay p {
-  max-width: 260px;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 20px;
+  line-height: 1.6;
+  opacity: 0.95;
 }
 
-/* Right side card */
-
+/* Right side - Form area */
 .auth-right {
-  flex: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 32px 24px;
+  justify-content: center;
+  padding: 60px;
+  background: #fafafa;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 32px 28px 28px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-}
-
-.signup-card {
-  max-width: 460px;
+  max-width: 560px;
 }
 
 .auth-heading {
-  font-size: 24px;
-  margin-bottom: 4px;
+  font-size: 40px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.2;
 }
 
 .auth-heading.center {
   text-align: center;
 }
 
-.auth-title {
-  font-size: 20px;
-  margin-top: 8px;
-}
-
 .auth-subtext {
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 20px;
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
 }
 
 .auth-subtext.center {
   text-align: center;
 }
 
+/* Form styling */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 24px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
+  gap: 10px;
 }
 
 .input-group label {
-  color: #555;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
 }
 
 .input-pill {
@@ -116,100 +113,171 @@
 
 .input-pill input {
   width: 100%;
-  padding: 13px 16px;
-  border-radius: 999px;
-  border: 1px solid #ddd;
-  background: #fafafa;
-  font-size: 14px;
+  padding: 18px 22px;
+  border-radius: 14px;
+  border: 2px solid #e5e5e5;
+  background: #ffffff;
+  font-size: 16px;
   outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.input-pill input::placeholder {
+  color: #999;
 }
 
 .input-pill input:focus {
-  border-color: #f0a73d;
-  background: #fffdf7;
-  box-shadow: 0 0 0 1px rgba(240, 167, 61, 0.2);
+  border-color: #eea641;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(238, 166, 65, 0.1);
 }
 
 .eye {
   position: absolute;
-  right: 14px;
+  right: 18px;
   border: none;
   background: transparent;
-  font-size: 11px;
+  font-size: 22px;
   cursor: pointer;
-  color: #666;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
 }
 
-/* Buttons & links */
+.eye:hover {
+  transform: scale(1.1);
+}
 
+/* Button styling */
 .primary {
   margin-top: 8px;
   background: #eea641;
   border: none;
   color: #fff;
-  padding: 13px 16px;
-  border-radius: 999px;
+  padding: 18px 28px;
+  border-radius: 14px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 17px;
   width: 100%;
-  transition: background 0.15s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.3);
 }
 
 .primary:hover {
   background: #d99536;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 166, 65, 0.4);
 }
 
-.primary-wide {
-  margin-top: 16px;
+.primary:active {
+  transform: translateY(0);
 }
 
 .link-btn {
   border: none;
   background: none;
   color: #eea641;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link-btn:hover {
+  color: #d99536;
+  text-decoration: underline;
 }
 
 .auth-footer {
-  margin-top: 10px;
-  font-size: 13px;
+  margin-top: 28px;
+  font-size: 15px;
   color: #666;
-}
-
-.auth-footer.center {
   text-align: center;
 }
 
-/* Checkboxes on signup */
-
+/* Checkbox styling */
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 12px;
+  font-size: 15px;
   color: #555;
+  cursor: pointer;
 }
 
 .checkbox-row input {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #eea641;
 }
 
-/* Responsive */
-
-@media (min-width: 900px) {
-  .auth-left {
-    display: block;
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .auth-page {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
+  .auth-page {
+    grid-template-columns: 45% 55%;
+  }
+  
+  .auth-overlay h1 {
+    font-size: 40px;
+  }
+  
+  .auth-overlay p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 968px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+  
+  .auth-left {
+    display: none;
+  }
+  
+  .auth-right {
+    padding: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-right {
+    padding: 24px;
+  }
+  
   .auth-card {
-    border-radius: 0;
-    box-shadow: none;
+    max-width: 100%;
+  }
+  
+  .auth-heading {
+    font-size: 32px;
+  }
+  
+  .auth-subtext {
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+  
+  .input-pill input {
+    padding: 16px 18px;
+    font-size: 15px;
+  }
+  
+  .primary {
+    padding: 16px 24px;
+    font-size: 16px;
   }
 }

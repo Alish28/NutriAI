@@ -60,7 +60,7 @@ export default function Login({ onLogin, onGoToSignup }) {
                   className="eye"
                   onClick={() => setShow((s) => !s)}
                 >
-                  {show ? "Hide" : "Show"}
+                  {show ? "👁️" : "👁️‍🗨️"}
                 </button>
               </div>
             </div>

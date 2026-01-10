@@ -115,7 +115,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                   className="eye"
                   onClick={() => setShow((s) => !s)}
                 >
-                  {show ? "Hide" : "Show"}
+                  {show ? "👁️" : "👁️‍🗨️"}
                 </button>
               </div>
             </div>
