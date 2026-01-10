@@ -1,6 +1,10 @@
+import { useState } from "react";
 import "./dashboard.css";
+import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
+  const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
+
   return (
     <div className="dashboard-page">
       {/* Top navigation */}
@@ -15,6 +19,13 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </div>
 
         <div className="dash-header-right">
+          <button 
+            className="icon-btn add-meal-btn"
+            onClick={() => setIsMealSidebarOpen(true)}
+            title="Add Meal"
+          >
+            ➕ Add Meal
+          </button>
           <button className="icon-btn">🔔</button>
           <button className="icon-btn">⚙️</button>
           <button className="avatar-btn" onClick={onOpenProfile}>
@@ -212,6 +223,12 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </span>
         </footer>
       </main>
+
+      {/* Meal Sidebar */}
+      <MealSidebar
+        isOpen={isMealSidebarOpen}
+        onClose={() => setIsMealSidebarOpen(false)}
+      />
     </div>
   );
 }
