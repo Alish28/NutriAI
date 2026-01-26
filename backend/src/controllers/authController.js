@@ -1,13 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const User = require('../models/UserModel');
 
-// Register new user
 exports.register = async (req, res) => {
   try {
     const { email, password, full_name, role } = req.body;
 
-    // Validate input
     if (!email || !password || !full_name) {
       return res.status(400).json({
         success: false,
@@ -15,7 +13,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({
@@ -24,11 +21,9 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Create user
     const newUser = await User.create({
       email,
       password_hash,
@@ -36,7 +31,6 @@ exports.register = async (req, res) => {
       role: role || 'consumer'
     });
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email, role: newUser.role },
       process.env.JWT_SECRET,
@@ -61,12 +55,10 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login user
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -74,7 +66,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findByEmail(email);
     if (!user) {
       return res.status(401).json({
@@ -83,7 +74,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -92,14 +82,12 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Remove password from response
     delete user.password_hash;
 
     res.status(200).json({
@@ -120,10 +108,8 @@ exports.login = async (req, res) => {
   }
 };
 
-// Get current user profile
 exports.getProfile = async (req, res) => {
   try {
-    // req.user is set by auth middleware
     const user = await User.findById(req.user.id);
     
     if (!user) {
