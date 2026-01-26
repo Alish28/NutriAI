@@ -1,9 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { logout } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Load user from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    if (onLogout) onLogout();
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className="dashboard-page">
@@ -19,7 +44,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </div>
 
         <div className="dash-header-right">
-          <button 
+          <button
             className="icon-btn add-meal-btn"
             onClick={() => setIsMealSidebarOpen(true)}
             title="Add Meal"
@@ -28,14 +53,38 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </button>
           <button className="icon-btn">🔔</button>
           <button className="icon-btn">⚙️</button>
-          <button className="avatar-btn" onClick={onOpenProfile}>
-            NA
+
+          <button
+            className="avatar-btn"
+            onClick={onOpenProfile}
+            title={user?.full_name || "User"}
+          >
+            {user ? getInitials(user.full_name) : "U"}
           </button>
-          <button className="logout-btn" onClick={onLogout}>
+
+          <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
         </div>
       </header>
+
+      {/* Welcome */}
+      {user && (
+        <div
+          style={{
+            padding: "16px 24px",
+            background: "#fff",
+            borderBottom: "1px solid #ececec",
+          }}
+        >
+          <h2 style={{ fontSize: "20px", margin: 0 }}>
+            Welcome back, {user.full_name}! 👋
+          </h2>
+          <p style={{ fontSize: "14px", color: "#777", margin: "4px 0 0 0" }}>
+            {user.email}
+          </p>
+        </div>
+      )}
 
       {/* Main scrollable content */}
       <main className="dash-main">
@@ -45,15 +94,9 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
 
           <div className="todays-meals">
             <h3>Today's Meals</h3>
-            <p>
-              <strong>Breakfast:</strong> Oatmeal with berries
-            </p>
-            <p>
-              <strong>Lunch:</strong> Quinoa salad
-            </p>
-            <p>
-              <strong>Dinner:</strong> Baked salmon with roasted vegetables
-            </p>
+            <p><strong>Breakfast:</strong> Oatmeal with berries</p>
+            <p><strong>Lunch:</strong> Quinoa salad</p>
+            <p><strong>Dinner:</strong> Baked salmon with roasted vegetables</p>
           </div>
 
           <div className="weekly-overview">
@@ -87,9 +130,10 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </div>
         </section>
 
-        {/* Right column: leftovers */}
+        {/* Right column */}
         <aside className="card expiry-card">
           <h2 className="card-title">Leftovers &amp; Expiry Tracker</h2>
+
           <div className="expiry-table">
             <div className="expiry-row expiry-head">
               <span>Item</span>
@@ -125,97 +169,46 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </div>
         </aside>
 
-        {/* Bottom section: 3 columns */}
+        {/* Bottom grid */}
         <section className="bottom-grid">
-          {/* Recipe recommendations */}
           <div className="card">
             <h2 className="card-title">Recipe Recommendations</h2>
             <div className="card-grid">
-              <RecipeCard
-                title="Spicy Tofu Stir-fry"
-                desc="A quick and flavorful vegetarian dish with crisp tofu and fresh vegetables."
-                img="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Classic Chicken Curry"
-                desc="A comforting aromatic curry, perfect with basmati rice."
-                img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Veggie Pasta Primavera"
-                desc="Light and fresh pasta with seasonal vegetables."
-                img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Hearty Beef Stew"
-                desc="Slow-cooked to perfection, ideal for a cold evening."
-                img="https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=600&q=80"
-              />
+              <RecipeCard title="Spicy Tofu Stir-fry" desc="A quick and flavorful vegetarian dish." img="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80" />
+              <RecipeCard title="Classic Chicken Curry" desc="A comforting aromatic curry." img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80" />
+              <RecipeCard title="Veggie Pasta Primavera" desc="Light and fresh pasta." img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80" />
+              <RecipeCard title="Hearty Beef Stew" desc="Slow-cooked to perfection." img="https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=600&q=80" />
             </div>
           </div>
 
-          {/* Cultural & Nepali recipes */}
           <div className="card">
             <h2 className="card-title">Cultural &amp; Nepali Recipes</h2>
-            <div className="card-column">
-              <RecipeRow
-                title="Authentic Dal Bhat"
-                desc="The staple meal of Nepal, rich in flavor and nutrition."
-                img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeRow
-                title="Steamed Momos"
-                desc="Delicious Nepali dumplings served with spicy tomato chutney."
-                img="https://images.unsplash.com/photo-1600628421055-4bb3afe8f96e?auto=format&fit=crop&w=600&q=80"
-              />
-            </div>
+            <RecipeRow title="Authentic Dal Bhat" desc="The staple meal of Nepal." img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80" />
+            <RecipeRow title="Steamed Momos" desc="Nepali dumplings with chutney." img="https://images.unsplash.com/photo-1600628421055-4bb3afe8f96e?auto=format&fit=crop&w=600&q=80" />
           </div>
 
-          {/* Budget-friendly suggestions */}
           <div className="card">
             <h2 className="card-title">Budget-Friendly Suggestions</h2>
             <ul className="tips-list">
-              <li>Plan meals around weekly sales and seasonal produce.</li>
-              <li>Use versatile ingredients like eggs, rice, and beans for multiple meals.</li>
-              <li>Cook in batches and repurpose leftovers for lunches.</li>
-              <li>Track expiry dates to minimize food waste.</li>
-              <li>Grow herbs at home to save money and add fresh flavor.</li>
+              <li>Plan meals around seasonal produce.</li>
+              <li>Use versatile ingredients.</li>
+              <li>Batch cook and reuse leftovers.</li>
+              <li>Track expiry dates.</li>
+              <li>Grow herbs at home.</li>
             </ul>
           </div>
         </section>
 
-        {/* Marketplace */}
         <section className="card marketplace-card">
           <h2 className="card-title">Homecooked Meal Marketplace</h2>
           <div className="card-grid marketplace-grid">
-            <MarketplaceCard
-              title="Homemade Chicken Biryani"
-              cook="Aisha's Kitchen"
-              price="$12.50"
-              img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Vegan Lentil Lasagna"
-              cook="Green Goodness"
-              price="$11.00"
-              img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Spicy Palak Paneer & Naan"
-              cook="Chef Rahul"
-              price="$10.00"
-              img="https://images.unsplash.com/photo-1625944229409-2c7020e4e0aa?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Lemon Herb Grilled Fish"
-              cook="Ocean Delights"
-              price="$14.00"
-              img="https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=600&q=80"
-            />
+            <MarketplaceCard title="Homemade Chicken Biryani" cook="Aisha's Kitchen" price="$12.50" img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80" />
+            <MarketplaceCard title="Vegan Lentil Lasagna" cook="Green Goodness" price="$11.00" img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80" />
+            <MarketplaceCard title="Palak Paneer & Naan" cook="Chef Rahul" price="$10.00" img="https://images.unsplash.com/photo-1625944229409-2c7020e4e0aa?auto=format&fit=crop&w=600&q=80" />
+            <MarketplaceCard title="Lemon Herb Grilled Fish" cook="Ocean Delights" price="$14.00" img="https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=600&q=80" />
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="dash-footer">
           <span>© 2025 NutriAI. All rights reserved.</span>
           <span className="footer-right">
@@ -224,7 +217,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </footer>
       </main>
 
-      {/* Meal Sidebar */}
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
@@ -232,6 +224,8 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
     </div>
   );
 }
+
+/* Helper components (unchanged UI) */
 
 function RecipeCard({ title, desc, img }) {
   return (

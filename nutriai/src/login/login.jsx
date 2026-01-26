@@ -1,18 +1,40 @@
 import { useState } from "react";
+import { login as loginAPI } from "../services/api";
 import "./login.css";
 
 export default function Login({ onLogin, onGoToSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setError("");
+    
     if (!email || !password) {
-      alert("Please fill in email and password");
+      setError("Please fill in email and password");
       return;
     }
-    if (onLogin) onLogin();
+
+    setLoading(true);
+
+    try {
+      const response = await loginAPI({ email, password });
+      
+      // Save token and user to localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Call parent component's onLogin
+      if (onLogin) onLogin();
+      
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -31,6 +53,19 @@ export default function Login({ onLogin, onGoToSignup }) {
             Log in to view your personalized NutriAI dashboard.
           </p>
 
+          {error && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#fee',
+              color: '#c00',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
+
           <form className="form" onSubmit={submit}>
             <div className="input-group">
               <label>Email</label>
@@ -40,6 +75,7 @@ export default function Login({ onLogin, onGoToSignup }) {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                   required
                 />
               </div>
@@ -53,6 +89,7 @@ export default function Login({ onLogin, onGoToSignup }) {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
                   required
                 />
                 <button
@@ -65,8 +102,8 @@ export default function Login({ onLogin, onGoToSignup }) {
               </div>
             </div>
 
-            <button className="primary" type="submit">
-              Login
+            <button className="primary" type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <p className="auth-footer">
@@ -75,6 +112,7 @@ export default function Login({ onLogin, onGoToSignup }) {
                 type="button"
                 className="link-btn"
                 onClick={onGoToSignup}
+                disabled={loading}
               >
                 Sign up
               </button>

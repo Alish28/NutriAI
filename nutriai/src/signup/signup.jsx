@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { register as registerAPI } from "../services/api";
 import "./signup.css";
 
 export default function Signup({ onBackToLogin, onSignedUp }) {
@@ -11,6 +12,8 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
     enableAi: false,
   });
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function change(e) {
     const { name, type, checked, value } = e.target;
@@ -20,24 +23,44 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
     }));
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setError("");
+    
     if (!form.name || !form.email || !form.password || !form.confirm) {
-      alert("Please fill in all fields");
+      setError("Please fill in all fields");
       return;
     }
     if (form.password.length < 6) {
-      alert("Password should be at least 6 characters");
+      setError("Password should be at least 6 characters");
       return;
     }
     if (form.password !== form.confirm) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
-    // For now: simulate success and go to dashboard
-    console.log("signup", form);
-    if (onSignedUp) onSignedUp();
+    setLoading(true);
+
+    try {
+      const response = await registerAPI({
+        email: form.email,
+        password: form.password,
+        full_name: form.name,
+      });
+      
+      // Save token and user to localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Call parent component's onSignedUp
+      if (onSignedUp) onSignedUp();
+      
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -57,6 +80,19 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
             Start your journey to healthier, sustainable eating today!
           </p>
 
+          {error && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#fee',
+              color: '#c00',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
+
           <form className="form" onSubmit={submit}>
             <div className="input-group">
               <label>Full Name</label>
@@ -66,6 +102,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                   value={form.name}
                   onChange={change}
                   placeholder="Full Name"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -80,6 +117,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                   value={form.email}
                   onChange={change}
                   placeholder="Email"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -94,6 +132,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                   value={form.password}
                   onChange={change}
                   placeholder="Password"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -108,12 +147,14 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                   value={form.confirm}
                   onChange={change}
                   placeholder="Confirm Password"
+                  disabled={loading}
                   required
                 />
                 <button
                   type="button"
                   className="eye"
                   onClick={() => setShow((s) => !s)}
+                  disabled={loading}
                 >
                   {show ? "👁️" : "👁️‍🗨️"}
                 </button>
@@ -126,6 +167,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                 name="hasDietary"
                 checked={form.hasDietary}
                 onChange={change}
+                disabled={loading}
               />
               <span>I have dietary restrictions</span>
             </label>
@@ -136,12 +178,13 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                 name="enableAi"
                 checked={form.enableAi}
                 onChange={change}
+                disabled={loading}
               />
               <span>Enable personalized nutrition suggestions</span>
             </label>
 
-            <button className="primary primary-wide" type="submit">
-              Create Account
+            <button className="primary primary-wide" type="submit" disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
 
             <p className="auth-footer center">
@@ -150,6 +193,7 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
                 type="button"
                 className="link-btn"
                 onClick={onBackToLogin}
+                disabled={loading}
               >
                 Sign in
               </button>
