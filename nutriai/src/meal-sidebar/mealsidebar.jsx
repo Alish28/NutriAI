@@ -45,39 +45,46 @@ export default function MealSidebar({ isOpen, onClose }) {
     }
   };
 
-  const handleSaveMeal = async () => {
+const handleSaveMeal = async () => {
+  setError("");
+  
+  if (!mealType || !mealName) {
+    setError("Please select a meal type and enter a meal name");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    await createMeal({
+      meal_date: date,
+      meal_type: mealType,
+      meal_name: mealName,
+      description,
+      calories: parseFloat(calories) || 0,    // Now handles float values
+      protein: parseFloat(protein) || 0,      
+      carbs: parseFloat(carbs) || 0,          
+      fats: parseFloat(fats) || 0             
+    });
+
+    await loadMeals();
+
+    // Reset form
+    setMealType("");
+    setMealName("");
+    setDescription("");
+    setCalories("");
+    setProtein("");
+    setCarbs("");
+    setFats("");
+    
     setError("");
-
-    if (!mealType || !mealName.trim()) {
-      setError("Please select a meal type and enter a meal name");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await createMeal({
-        meal_date: date,
-        meal_type: mealType,
-        meal_name: mealName.trim(),
-        description: description.trim(),
-        calories: parseInt(calories) || 0,
-        protein: parseFloat(protein) || 0,
-        carbs: parseFloat(carbs) || 0,
-        fats: parseFloat(fats) || 0,
-      });
-
-      // Reload meals
-      await loadMeals();
-
-      // Reset form
-      resetForm();
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to add meal");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err.message || "Failed to add meal");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleDeleteMeal = async (id) => {
     if (!window.confirm("Are you sure you want to delete this meal?")) return;
@@ -212,6 +219,7 @@ export default function MealSidebar({ isOpen, onClose }) {
                 <label htmlFor="meal-calories">Calories</label>
                 <input
                   id="meal-calories"
+                  step="0.1"  
                   type="number"
                   className="nutrition-input-small"
                   placeholder="0"
@@ -225,6 +233,7 @@ export default function MealSidebar({ isOpen, onClose }) {
                 <label htmlFor="meal-protein">Protein (g)</label>
                 <input
                   id="meal-protein"
+                  step="0.1"
                   type="number"
                   className="nutrition-input-small"
                   placeholder="0"
@@ -232,13 +241,13 @@ export default function MealSidebar({ isOpen, onClose }) {
                   onChange={(e) => setProtein(e.target.value)}
                   disabled={loading}
                   min="0"
-                  step="0.1"
                 />
               </div>
               <div className="meal-input-group">
                 <label htmlFor="meal-carbs">Carbs (g)</label>
                 <input
                   id="meal-carbs"
+                  step="0.1"
                   type="number"
                   className="nutrition-input-small"
                   placeholder="0"
@@ -246,13 +255,13 @@ export default function MealSidebar({ isOpen, onClose }) {
                   onChange={(e) => setCarbs(e.target.value)}
                   disabled={loading}
                   min="0"
-                  step="0.1"
                 />
               </div>
               <div className="meal-input-group">
                 <label htmlFor="meal-fats">Fats (g)</label>
                 <input
                   id="meal-fats"
+                  step="0.1"
                   type="number"
                   className="nutrition-input-small"
                   placeholder="0"
@@ -260,7 +269,6 @@ export default function MealSidebar({ isOpen, onClose }) {
                   onChange={(e) => setFats(e.target.value)}
                   disabled={loading}
                   min="0"
-                  step="0.1"
                 />
               </div>
             </div>

@@ -3,7 +3,7 @@ const Meal = require('../models/mealModel');
 // Create new meal
 exports.createMeal = async (req, res) => {
   try {
-    const userId = req.user.id; // From auth middleware
+    const userId = req.user.id;
     const {
       meal_date,
       meal_type,
@@ -15,7 +15,6 @@ exports.createMeal = async (req, res) => {
       fats
     } = req.body;
 
-    // Validate required fields
     if (!meal_date || !meal_type || !meal_name) {
       return res.status(400).json({
         success: false,
@@ -23,7 +22,6 @@ exports.createMeal = async (req, res) => {
       });
     }
 
-    // Validate meal_type
     const validTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
     if (!validTypes.includes(meal_type)) {
       return res.status(400).json({
@@ -38,10 +36,10 @@ exports.createMeal = async (req, res) => {
       meal_type,
       meal_name,
       description,
-      calories,
-      protein,
-      carbs,
-      fats
+      calories: parseFloat(calories) || 0,    //Handles decimal values
+      protein: parseFloat(protein) || 0,      
+      carbs: parseFloat(carbs) || 0,          
+      fats: parseFloat(fats) || 0             
     });
 
     res.status(201).json({
@@ -83,7 +81,7 @@ exports.getUserMeals = async (req, res) => {
 exports.getMealsByDate = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { date } = req.params; // Format: YYYY-MM-DD
+    const { date } = req.params;
 
     const meals = await Meal.findByUserAndDate(userId, date);
 
@@ -105,7 +103,7 @@ exports.getMealsByDate = async (req, res) => {
 exports.getMealsByWeek = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { startDate, endDate } = req.query; // Format: YYYY-MM-DD
+    const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
       return res.status(400).json({
@@ -165,6 +163,12 @@ exports.updateMeal = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
     const mealData = req.body;
+
+    // Parse float values if they exist
+    if (mealData.calories) mealData.calories = parseFloat(mealData.calories);
+    if (mealData.protein) mealData.protein = parseFloat(mealData.protein);
+    if (mealData.carbs) mealData.carbs = parseFloat(mealData.carbs);
+    if (mealData.fats) mealData.fats = parseFloat(mealData.fats);
 
     const updatedMeal = await Meal.update(id, userId, mealData);
 
