@@ -44,7 +44,7 @@ export const login = async (credentials) => {
   return data;
 };
 
-// Get user profile
+// Get user profile (basic - from auth)
 export const getProfile = async () => {
   const response = await fetch(`${API_URL}/auth/profile`, {
     method: 'GET',
@@ -61,6 +61,105 @@ export const getProfile = async () => {
   
   return data;
 };
+//Profile section
+
+// Get full user profile with all fields
+export const getFullProfile = async () => {
+  const response = await fetch(`${API_URL}/profile`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get profile');
+  }
+  
+  return data;
+};
+
+// Update user profile
+export const updateProfile = async (profileData) => {
+  const response = await fetch(`${API_URL}/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to update profile');
+  }
+  
+  return data;
+};
+
+// Update password
+export const updatePassword = async (passwordData) => {
+  const response = await fetch(`${API_URL}/profile/password`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(passwordData),
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to update password');
+  }
+  
+  return data;
+};
+
+// Export user data
+export const exportUserData = async () => {
+  const response = await fetch(`${API_URL}/profile/export`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to export data');
+  }
+  
+  return data;
+};
+
+// Delete account
+export const deleteAccount = async (password) => {
+  const response = await fetch(`${API_URL}/profile`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ password }),
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to delete account');
+  }
+  
+  return data;
+};
+
+// ========== MEAL ENDPOINTS (EXISTING) ==========
 
 // Create meal
 export const createMeal = async (mealData) => {
