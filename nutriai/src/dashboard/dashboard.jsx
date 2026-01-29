@@ -1,19 +1,38 @@
 import { useState, useEffect } from "react";
-import { logout } from "../services/api";
+import { logout, getFullProfile } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
+  const [isNavSidebarOpen, setIsNavSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage
+  // Load user from localStorage and fetch full profile
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    const loadUserData = async () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+        
+        try {
+          // Fetch full profile for personalization
+          const profileResponse = await getFullProfile();
+          setUserProfile(profileResponse.data.user);
+        } catch (error) {
+          console.error("Error loading profile:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
   }, []);
 
   const handleLogout = () => {
@@ -31,17 +50,110 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       .slice(0, 2);
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <div className="dashboard-page">
+      {/* Navigation Sidebar */}
+      <aside className={`nav-sidebar ${isNavSidebarOpen ? 'open' : ''}`}>
+        <div className="nav-sidebar-header">
+          <h3>Menu</h3>
+          <button 
+            className="nav-close-btn"
+            onClick={() => setIsNavSidebarOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+
+        <nav className="nav-sidebar-content">
+          <button 
+            className="nav-item"
+            onClick={() => {
+              setIsMealSidebarOpen(true);
+              setIsNavSidebarOpen(false);
+            }}
+          >
+            <span className="nav-icon">🍽️</span>
+            <span>Add Meal</span>
+          </button>
+
+          <button 
+            className="nav-item"
+            onClick={() => {
+              onOpenProfile();
+              setIsNavSidebarOpen(false);
+            }}
+          >
+            <span className="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </button>
+
+          <div className="nav-divider"></div>
+
+          <div className="nav-section-title">Coming Soon</div>
+          
+          <button className="nav-item disabled">
+            <span className="nav-icon">📅</span>
+            <span>Meal Planner</span>
+          </button>
+
+          <button className="nav-item disabled">
+            <span className="nav-icon">🔍</span>
+            <span>Recipe Explorer</span>
+          </button>
+
+          <button className="nav-item disabled">
+            <span className="nav-icon">📦</span>
+            <span>Pantry Tracker</span>
+          </button>
+
+          <button className="nav-item disabled">
+            <span className="nav-icon">🏪</span>
+            <span>Marketplace</span>
+          </button>
+
+          <button className="nav-item disabled">
+            <span className="nav-icon">💬</span>
+            <span>AI Assistant</span>
+          </button>
+        </nav>
+      </aside>
+
+      {/* Sidebar overlay */}
+      {isNavSidebarOpen && (
+        <div 
+          className="nav-sidebar-overlay"
+          onClick={() => setIsNavSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Top navigation */}
       <header className="dash-header">
-        <div className="dash-logo">
-          <span className="logo-mark">🍽</span>
-          <span className="logo-text">NutriAI</span>
+        <div className="dash-header-left">
+          <button 
+            className="hamburger-btn"
+            onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)}
+            title="Menu"
+          >
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
+          </button>
+
+          <div className="dash-logo">
+            <span className="logo-mark">🍽</span>
+            <span className="logo-text">NutriAI</span>
+          </div>
         </div>
 
         <div className="dash-search">
-          <input placeholder="Search..." />
+          <input placeholder="Search recipes, meals..." />
         </div>
 
         <div className="dash-header-right">
@@ -52,8 +164,18 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           >
             ➕ Add Meal
           </button>
-          <button className="icon-btn">🔔</button>
-          <button className="icon-btn">⚙️</button>
+
+          <button className="icon-btn" title="Notifications">
+            🔔
+          </button>
+
+          <button 
+            className="icon-btn"
+            onClick={onOpenProfile}
+            title="Settings"
+          >
+            ⚙️
+          </button>
 
           <button
             className="avatar-btn"
@@ -69,21 +191,26 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </div>
       </header>
 
-      {/* Welcome */}
+      {/* Welcome Banner */}
       {user && (
-        <div
-          style={{
-            padding: "16px 24px",
-            background: "#fff",
-            borderBottom: "1px solid #ececec",
-          }}
-        >
-          <h2 style={{ fontSize: "20px", margin: 0 }}>
-            Welcome back, {user.full_name}! 👋
+        <div className="welcome-banner">
+          <h2>
+            {getGreeting()}, {user.full_name.split(' ')[0]}! 👋
           </h2>
-          <p style={{ fontSize: "14px", color: "#777", margin: "4px 0 0 0" }}>
-            {user.email}
-          </p>
+          {userProfile && (
+            <div className="welcome-stats">
+              {userProfile.health_goals && userProfile.health_goals.length > 0 && (
+                <span className="stat-badge">
+                  🎯 Goals: {userProfile.health_goals.join(", ")}
+                </span>
+              )}
+              {userProfile.dietary_preferences && userProfile.dietary_preferences.length > 0 && (
+                <span className="stat-badge">
+                  🥗 {userProfile.dietary_preferences.join(", ")}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -91,10 +218,10 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       <main className="dash-main">
         {/* Left column - with Nutrition Summary */}
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {/* NEW: Today's Nutrition Summary */}
+          {/* Today's Nutrition Summary */}
           <NutritionSummary />
 
-          {/* Existing Meal Plan Card */}
+          {/* Personalized Meal Plan Card */}
           <section className="card meal-plan-card">
             <h2 className="card-title">Personalized Meal Plan</h2>
 
@@ -310,6 +437,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </span>
         </footer>
       </main>
+
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
@@ -318,8 +446,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   );
 }
 
-/* Helper components (unchanged UI) */
-
+/* Helper components */
 function RecipeCard({ title, desc, img }) {
   return (
     <div className="recipe-card">
