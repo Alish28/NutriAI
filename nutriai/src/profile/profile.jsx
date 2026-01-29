@@ -57,6 +57,14 @@ export default function Profile({ onBack, onLogout }) {
     loadProfile();
   }, []);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    const profilePage = document.querySelector('.profile-page');
+    if (profilePage) {
+      profilePage.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -141,9 +149,20 @@ export default function Profile({ onBack, onLogout }) {
       setSuccess("Profile updated successfully!");
       await loadProfile();
       
+      // Scroll to top to show success message
+      const profilePage = document.querySelector('.profile-page');
+      if (profilePage) {
+        profilePage.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Failed to update profile");
+      // Scroll to top to show error message
+      const profilePage = document.querySelector('.profile-page');
+      if (profilePage) {
+        profilePage.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } finally {
       setSaving(false);
     }
@@ -234,117 +253,110 @@ export default function Profile({ onBack, onLogout }) {
     <div className="profile-page">
       <header className="profile-header">
         <div className="profile-logo">NutriAI</div>
-        <div className="profile-header-right">
-          <button className="btn-outline back-btn" onClick={onBack}>
-            ← Back to Dashboard
-          </button>
-        </div>
+        <div style={{ fontSize: '13px', color: '#777' }}>Profile Settings</div>
       </header>
 
       <main className="profile-main">
-        <h1 className="profile-title">User Profile & Customization</h1>
+        <h1 className="profile-title">My Profile</h1>
 
-        {error && (
-          <div style={{
-            padding: '12px',
-            backgroundColor: '#fee',
-            color: '#c00',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div style={{
-            padding: '12px',
-            backgroundColor: '#e0ffe9',
-            color: '#15803d',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            {success}
-          </div>
-        )}
+        {/* Success/Error Messages */}
+        {success && <div className="alert alert-success">{success}</div>}
+        {error && <div className="alert alert-error">{error}</div>}
 
         <div className="profile-grid">
-          {/* Profile overview */}
+          {/* Overview Card */}
           <section className="p-card">
             <div className="p-card-header">
-              <h3>Profile Overview</h3>
+              <h3>Overview</h3>
             </div>
-            <div className="p-card-body profile-overview">
-              <div className="profile-avatar">
-                <img
-                  src={profile?.profile_image_url || "https://via.placeholder.com/80"}
-                  alt="User"
-                />
+            <div className="p-card-body">
+              <div className="profile-overview">
+                <div className="profile-avatar">
+                  <img
+                    src={profile?.avatar_url || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile?.full_name || "User") + "&background=22c55e&color=fff&size=200"}
+                    alt="Profile"
+                  />
+                </div>
+                <strong>{profile?.full_name || "User"}</strong>
+                <div className="muted">{profile?.email}</div>
+                <span className="badge premium">Premium</span>
               </div>
-              <h2>{profile?.full_name || "User"}</h2>
-              <p className="muted">{profile?.email}</p>
-              <span className="badge premium">
-                {profile?.role === 'admin' ? 'Admin' : 'Premium Member'}
-              </span>
             </div>
           </section>
 
-          {/* Personal information */}
+          {/* Basic Info */}
           <section className="p-card">
             <div className="p-card-header">
-              <h3>Personal Information</h3>
+              <h3>Basic Information</h3>
             </div>
-            <div className="p-card-body p-form-2col">
-              <div className="field">
-                <label>Full Name</label>
-                <input
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="field">
-                <label>Age</label>
-                <input
-                  name="age"
-                  type="number"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="field">
-                <label>Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select...</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="field">
-                <label>Weight (kg)</label>
-                <input
-                  name="weight"
-                  type="number"
-                  step="0.1"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="field">
-                <label>Height (cm)</label>
-                <input
-                  name="height"
-                  type="number"
-                  step="0.1"
-                  value={formData.height}
-                  onChange={handleInputChange}
-                />
-              </div>
+            <div className="p-card-body">
+              <form className="p-form-2col">
+                <div className="field field-full">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="field">
+                  <label>Age</label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="field">
+                  <label>Gender</label>
+                  <select name="gender" value={formData.gender} onChange={handleInputChange}>
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Weight (kg)</label>
+                  <input
+                    type="number"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="field">
+                  <label>Height (cm)</label>
+                  <input
+                    type="number"
+                    name="height"
+                    value={formData.height}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          {/* Activity & Goals */}
+          <section className="p-card">
+            <div className="p-card-header">
+              <h3>Activity & Goals</h3>
+            </div>
+            <div className="p-card-body">
               <div className="field">
                 <label>Activity Level</label>
                 <select
@@ -352,15 +364,15 @@ export default function Profile({ onBack, onLogout }) {
                   value={formData.activity_level}
                   onChange={handleInputChange}
                 >
-                  <option value="">Select...</option>
+                  <option value="">Select</option>
                   <option value="Sedentary">Sedentary</option>
-                  <option value="Light">Light</option>
-                  <option value="Moderate">Moderate</option>
-                  <option value="Active">Active</option>
+                  <option value="Lightly Active">Lightly Active</option>
+                  <option value="Moderately Active">Moderately Active</option>
+                  <option value="Very Active">Very Active</option>
                 </select>
               </div>
-              <div className="field field-full">
-                <label>Health Goals</label>
+              <label className="field">
+                <span>Health Goals</span>
                 <div className="pill-row">
                   {["Weight Management", "Muscle Gain", "Heart Health", "Energy Boost"].map(goal => (
                     <span
@@ -372,52 +384,40 @@ export default function Profile({ onBack, onLogout }) {
                     </span>
                   ))}
                 </div>
-              </div>
-              <div className="form-actions">
-                <button className="btn-outline" onClick={loadProfile}>Cancel</button>
-                <button className="btn-primary" onClick={handleSaveProfile} disabled={saving}>
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
+              </label>
             </div>
           </section>
 
-          {/* Dietary preferences */}
+          {/* Dietary Preferences */}
           <section className="p-card">
             <div className="p-card-header">
-              <h3>Dietary Preferences & Restrictions</h3>
+              <h3>Dietary Preferences</h3>
             </div>
             <div className="p-card-body">
-              <div className="pill-row">
-                {["Vegan", "Vegetarian", "Gluten-Free", "Dairy-Free", "Keto", "Paleo"].map(pref => (
-                  <span
-                    key={pref}
-                    className={`pill pill-toggle ${formData.dietary_preferences.includes(pref) ? "on" : ""}`}
-                    onClick={() => toggleArrayItem("dietary_preferences", pref)}
-                  >
-                    {pref}
-                  </span>
-                ))}
-              </div>
-
-              <div className="field" style={{ marginTop: '12px' }}>
-                <label>Allergies (comma-separated)</label>
+              <label className="field">
+                <span>Dietary Restrictions</span>
+                <div className="pill-row">
+                  {["Vegan", "Vegetarian", "Keto", "Gluten-Free"].map(pref => (
+                    <span
+                      key={pref}
+                      className={`pill pill-toggle ${formData.dietary_preferences.includes(pref) ? "pill-selected" : ""}`}
+                      onClick={() => toggleArrayItem("dietary_preferences", pref)}
+                    >
+                      {pref}
+                    </span>
+                  ))}
+                </div>
+              </label>
+              <div className="field">
+                <label>Allergies (comma separated)</label>
                 <input
+                  type="text"
                   name="allergies"
-                  placeholder="e.g., Nuts, Shellfish, Soy"
                   value={formData.allergies}
                   onChange={handleInputChange}
+                  placeholder="e.g., Nuts, Shellfish"
                 />
               </div>
-            </div>
-          </section>
-
-          {/* Cultural preferences */}
-          <section className="p-card">
-            <div className="p-card-header">
-              <h3>Cultural & Cuisine Preferences</h3>
-            </div>
-            <div className="p-card-body">
               <label className="field">
                 <span>Preferred Cuisines</span>
                 <div className="pill-row">
@@ -447,55 +447,50 @@ export default function Profile({ onBack, onLogout }) {
             </div>
           </section>
 
-          {/* Budget settings */}
+          {/* Budget & Shopping */}
           <section className="p-card">
             <div className="p-card-header">
-              <h3>Budget Settings</h3>
+              <h3>Budget & Shopping</h3>
             </div>
             <div className="p-card-body">
               <div className="field">
-                <label>Daily Food Budget: ${formData.daily_budget || 0}</label>
+                <label>Daily Budget ($)</label>
                 <input
-                  type="range"
+                  type="number"
                   name="daily_budget"
-                  min="10"
-                  max="100"
-                  value={formData.daily_budget || 25}
+                  value={formData.daily_budget}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="field">
-                <label>Weekly Food Budget: ${formData.weekly_budget || 0}</label>
+                <label>Weekly Budget ($)</label>
                 <input
-                  type="range"
+                  type="number"
                   name="weekly_budget"
-                  min="50"
-                  max="500"
-                  value={formData.weekly_budget || 150}
+                  value={formData.weekly_budget}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="field">
-                <label>Preferred Shopping Style</label>
-                <div className="pill-row">
-                  {["Budget-conscious", "Organic Focus", "Convenience First"].map(style => (
-                    <span
-                      key={style}
-                      className={`pill pill-toggle ${formData.shopping_style === style ? "pill-selected" : ""}`}
-                      onClick={() => setFormData(prev => ({ ...prev, shopping_style: style }))}
-                    >
-                      {style}
-                    </span>
-                  ))}
-                </div>
+                <label>Shopping Style</label>
+                <select
+                  name="shopping_style"
+                  value={formData.shopping_style}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select</option>
+                  <option value="Budget-conscious">Budget-conscious</option>
+                  <option value="Organic Focus">Organic Focus</option>
+                  <option value="Convenience First">Convenience First</option>
+                </select>
               </div>
             </div>
           </section>
 
-          {/* Inventory settings */}
+          {/* Home cooking */}
           <section className="p-card">
             <div className="p-card-header">
-              <h3>Inventory & Home Cooking Settings</h3>
+              <h3>Home Cooking</h3>
             </div>
             <div className="p-card-body">
               <div className="switch-row">

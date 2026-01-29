@@ -1,5 +1,7 @@
 .profile-page {
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: #f7f7f7;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
   color: #111;
@@ -13,6 +15,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .profile-logo {
@@ -21,7 +26,7 @@
 }
 
 .profile-main {
-  padding: 24px;
+  padding: 24px 24px 80px 24px;
 }
 
 .profile-title {
@@ -101,14 +106,26 @@
   color: #fff;
 }
 
+.btn-primary:hover {
+  background: #16a34a;
+}
+
 .btn-outline {
   background: #f4f4f4;
   color: #111;
 }
 
+.btn-outline:hover {
+  background: #e5e5e5;
+}
+
 .btn-danger {
   background: #ef4444;
   color: #fff;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
 }
 
 .back-btn {
@@ -144,6 +161,13 @@
   border: 1px solid #e2e2e2;
   padding: 7px 10px;
   font-size: 12px;
+  box-sizing: border-box;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #22c55e;
 }
 
 .field input[type="range"] {
@@ -178,6 +202,11 @@
 
 .pill-toggle {
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-toggle:hover {
+  background: #e5e5e5;
 }
 
 .pill-toggle.on {
@@ -251,6 +280,26 @@
   color: #555;
 }
 
+/* Alert Messages */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.alert-success {
+  background: #e0ffe9;
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+.alert-error {
+  background: #fee;
+  color: #dc2626;
+  border: 1px solid #ef4444;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .profile-grid {
@@ -260,10 +309,14 @@
 
 @media (max-width: 640px) {
   .profile-main {
-    padding: 16px;
+    padding: 16px 16px 80px 16px;
   }
 
   .p-form-2col {
     grid-template-columns: 1fr;
+  }
+  
+  .profile-title {
+    font-size: 20px;
   }
 }
