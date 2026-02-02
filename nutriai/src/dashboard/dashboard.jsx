@@ -3,6 +3,9 @@ import { logout, getFullProfile } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
+import WeeklyChart from '../analytics/weeklyChart.jsx';
+import StreakTracker from '../analytics/streakTracker';
+import WeeklyAverages from '../analytics/weeklyAverages';
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);

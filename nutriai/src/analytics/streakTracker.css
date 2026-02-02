@@ -1,0 +1,291 @@
+.streak-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+.streak-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.streak-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: #f5f5f5;
+  transform: rotate(90deg);
+}
+
+.streak-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.streak-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #fff7e9 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 3px solid;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.streak-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), transparent);
+  pointer-events: none;
+}
+
+.streak-emoji {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.streak-number {
+  font-size: 56px;
+  font-weight: 800;
+  color: #111;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.streak-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.streak-level {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.streak-message {
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.streak-message p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.streak-progress {
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.progress-percentage {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.streak-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+.stat-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #777;
+  font-weight: 500;
+}
+
+.milestone-section {
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.milestone-section h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px 0;
+}
+
+.milestone-badges {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.milestone-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.milestone-badge.unlocked {
+  background: linear-gradient(135deg, #fff7e9 0%, #ffe8cc 100%);
+  border: 2px solid #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  transform: scale(1.05);
+}
+
+.milestone-badge.locked {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.badge-emoji {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.badge-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+}
+
+.milestone-badge.unlocked .badge-label {
+  color: #111;
+}
+
+@media (max-width: 768px) {
+  .streak-card {
+    padding: 20px;
+  }
+
+  .streak-number {
+    font-size: 48px;
+  }
+
+  .streak-emoji {
+    font-size: 40px;
+  }
+
+  .milestone-badges {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .badge-emoji {
+    font-size: 20px;
+  }
+
+  .badge-label {
+    font-size: 9px;
+  }
+
+  .stat-item {
+    padding: 10px;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+}

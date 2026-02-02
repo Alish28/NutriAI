@@ -61,6 +61,7 @@ export const getProfile = async () => {
   
   return data;
 };
+
 //Profile section
 
 // Get full user profile with all fields
@@ -286,6 +287,60 @@ export const getNutritionSummary = async (date) => {
   
   if (!response.ok) {
     throw new Error(data.message || 'Failed to get nutrition summary');
+  }
+  
+  return data;
+};
+
+// Get 7-day nutrition trends
+export const getWeeklyTrends = async () => {
+  const response = await fetch(`${API_URL}/analytics/weekly`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get weekly trends');
+  }
+  
+  return data;
+};
+
+// Get streak data
+export const getStreak = async () => {
+  const response = await fetch(`${API_URL}/analytics/streak`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get streak');
+  }
+  
+  return data;
+};
+
+// Get weekly averages vs goals
+export const getWeeklyAverages = async () => {
+  const response = await fetch(`${API_URL}/analytics/weekly-averages`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get weekly averages');
   }
   
   return data;
