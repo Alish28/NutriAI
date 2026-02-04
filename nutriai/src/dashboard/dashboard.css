@@ -439,6 +439,24 @@ body,
   color: #166534;
 }
 
+/* Analytics Section */
+.analytics-section {
+  grid-column: 1 / -1;
+  margin-bottom: 24px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Bottom grid */
 .bottom-grid {
   grid-column: 1 / -1;

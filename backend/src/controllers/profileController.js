@@ -33,22 +33,32 @@ exports.updateProfile = async (req, res) => {
     const userId = req.user.id;
     const profileData = req.body;
 
-    // Convert string arrays from frontend to PostgreSQL arrays
-    if (profileData.health_goals && typeof profileData.health_goals === 'string') {
-      profileData.health_goals = profileData.health_goals.split(',').map(s => s.trim());
-    }
-    if (profileData.dietary_preferences && typeof profileData.dietary_preferences === 'string') {
-      profileData.dietary_preferences = profileData.dietary_preferences.split(',').map(s => s.trim());
-    }
-    if (profileData.allergies && typeof profileData.allergies === 'string') {
-      profileData.allergies = profileData.allergies.split(',').map(s => s.trim());
-    }
-    if (profileData.preferred_cuisines && typeof profileData.preferred_cuisines === 'string') {
-      profileData.preferred_cuisines = profileData.preferred_cuisines.split(',').map(s => s.trim());
-    }
-    if (profileData.nutrition_focus && typeof profileData.nutrition_focus === 'string') {
-      profileData.nutrition_focus = profileData.nutrition_focus.split(',').map(s => s.trim());
-    }
+    // FIXED: Convert string arrays AND empty strings to proper arrays or null
+    const arrayFields = ['health_goals', 'dietary_preferences', 'allergies', 'preferred_cuisines', 'nutrition_focus'];
+    
+    arrayFields.forEach(field => {
+      if (profileData[field] !== undefined) {
+        // If it's a string, try to convert it
+        if (typeof profileData[field] === 'string') {
+          if (profileData[field].trim() === '') {
+            // Empty string → null (prevents array error)
+            profileData[field] = null;
+          } else {
+            // Non-empty string → array
+            profileData[field] = profileData[field].split(',').map(s => s.trim()).filter(Boolean);
+            // If result is empty array, set to null
+            if (profileData[field].length === 0) {
+              profileData[field] = null;
+            }
+          }
+        } else if (Array.isArray(profileData[field])) {
+          // If it's already an array but empty, set to null
+          if (profileData[field].length === 0) {
+            profileData[field] = null;
+          }
+        }
+      }
+    });
 
     const updatedUser = await User.updateProfile(userId, profileData);
 

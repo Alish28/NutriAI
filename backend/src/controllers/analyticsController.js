@@ -3,7 +3,7 @@ const db = require('../config/database');
 // Get 7-day nutrition trends
 exports.getWeeklyTrends = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.id; // FIXED: was req.userId
     
     // Get last 7 days of data
     const query = `
@@ -54,7 +54,8 @@ exports.getWeeklyTrends = async (req, res) => {
     console.error('Error fetching weekly trends:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch weekly trends'
+      message: 'Failed to fetch weekly trends',
+      error: error.message
     });
   }
 };
@@ -62,7 +63,7 @@ exports.getWeeklyTrends = async (req, res) => {
 // Get current streak (consecutive days with at least 1 meal logged)
 exports.getStreak = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.id; // FIXED: was req.userId
     
     // Get all unique dates with meals in the last 60 days
     const query = `
@@ -82,7 +83,8 @@ exports.getStreak = async (req, res) => {
         data: {
           currentStreak: 0,
           longestStreak: 0,
-          lastLoggedDate: null
+          lastLoggedDate: null,
+          totalDaysLogged: 0
         }
       });
     }
@@ -139,7 +141,8 @@ exports.getStreak = async (req, res) => {
     console.error('Error calculating streak:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to calculate streak'
+      message: 'Failed to calculate streak',
+      error: error.message
     });
   }
 };
@@ -147,7 +150,7 @@ exports.getStreak = async (req, res) => {
 // Get weekly averages compared to goals
 exports.getWeeklyAverages = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.id; // FIXED: was req.userId
     
     // Get weekly averages
     const query = `
@@ -185,9 +188,8 @@ exports.getWeeklyAverages = async (req, res) => {
     const profileResult = await db.query(profileQuery, [userId]);
     const profile = profileResult.rows[0];
     
-    // Calculate goals (you can import your nutritionCalculator here)
-    // For now, using basic defaults
-    const goals = {
+    // Calculate goals
+    let goals = {
       calories: 2000,
       protein: 150,
       carbs: 250,
@@ -195,9 +197,8 @@ exports.getWeeklyAverages = async (req, res) => {
     };
     
     // If profile is complete, calculate personalized goals
-    if (profile && profile.age && profile.weight && profile.height) {
-      // You can import and use your calculateNutritionGoals function here
-      // For simplicity, using basic calculation
+    if (profile && profile.age && profile.weight && profile.height && profile.gender) {
+      // Basic BMR calculation (Mifflin-St Jeor)
       const bmr = profile.gender === 'Male' 
         ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
         : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
@@ -206,7 +207,8 @@ exports.getWeeklyAverages = async (req, res) => {
         'Sedentary': 1.2,
         'Lightly Active': 1.375,
         'Moderately Active': 1.55,
-        'Very Active': 1.725
+        'Very Active': 1.725,
+        'Extremely Active': 1.9
       };
       
       const multiplier = activityMultipliers[profile.activity_level] || 1.2;
@@ -240,7 +242,8 @@ exports.getWeeklyAverages = async (req, res) => {
     console.error('Error fetching weekly averages:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch weekly averages'
+      message: 'Failed to fetch weekly averages',
+      error: error.message
     });
   }
 };

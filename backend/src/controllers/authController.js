@@ -41,7 +41,14 @@ exports.register = async (req, res) => {
       success: true,
       message: 'User registered successfully',
       data: {
-        user: newUser,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          full_name: newUser.full_name,
+          role: newUser.role,
+          onboarding_completed: false, // FIXED: Explicitly set to false
+          created_at: newUser.created_at
+        },
         token
       }
     });
@@ -94,7 +101,10 @@ exports.login = async (req, res) => {
       success: true,
       message: 'Login successful',
       data: {
-        user,
+        user: {
+          ...user,
+          onboarding_completed: user.onboarding_completed || false // FIXED: Ensure it's always set
+        },
         token
       }
     });

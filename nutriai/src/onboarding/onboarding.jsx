@@ -83,11 +83,33 @@ export default function Onboarding({ onComplete }) {
 
   const handleCompleteOnboarding = async () => {
     try {
+      // FIXED: Prepare data properly before sending
+      const dataToSend = { ...onboardingData };
+
+      // FIXED: Mark onboarding as complete
+      dataToSend.onboarding_completed = true;
+
+      // FIXED: Convert allergies string to array if needed
+      if (typeof dataToSend.allergies === 'string' && dataToSend.allergies.trim()) {
+        dataToSend.allergies = dataToSend.allergies.split(',').map(a => a.trim()).filter(Boolean);
+      } else if (!dataToSend.allergies || dataToSend.allergies === '') {
+        dataToSend.allergies = []; // Empty array instead of empty string
+      }
+
+      // FIXED: Ensure all array fields are proper arrays (not empty strings)
+      const arrayFields = ['health_goals', 'dietary_preferences', 'allergies', 'preferred_cuisines', 'nutrition_focus'];
+      arrayFields.forEach(field => {
+        if (!Array.isArray(dataToSend[field])) {
+          dataToSend[field] = [];
+        }
+        // If array is empty, it's okay - backend will convert to null
+      });
+
       // Save all profile data to database
-      await updateProfile(onboardingData);
+      await updateProfile(dataToSend);
       
       // Update localStorage to mark onboarding as complete
-      const currentUser = JSON.parse(localStorage.getItem('user'));
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       localStorage.setItem('user', JSON.stringify({
         ...currentUser,
         onboarding_completed: true

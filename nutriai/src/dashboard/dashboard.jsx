@@ -4,8 +4,8 @@ import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
 import WeeklyChart from '../analytics/weeklyChart.jsx';
-import StreakTracker from '../analytics/streakTracker';
-import WeeklyAverages from '../analytics/weeklyAverages';
+import StreakTracker from '../analytics/streakTracker.jsx';
+import WeeklyAverages from '../analytics/weeklyAverages.jsx';
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -346,6 +346,20 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             ))}
           </div>
         </aside>
+        
+        {/* Analytics Section - Full Width */}
+        <section className="analytics-section">
+          <div className="analytics-grid">
+            {/* Weekly Chart */}
+            <WeeklyChart />
+            
+            {/* Streak Tracker */}
+            <StreakTracker />
+            
+            {/* Weekly Averages */}
+            <WeeklyAverages />
+          </div>
+        </section>
 
         {/* Bottom grid */}
         <section className="bottom-grid">
