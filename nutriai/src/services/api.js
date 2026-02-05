@@ -345,7 +345,68 @@ export const getWeeklyAverages = async () => {
   
   return data;
 };
+// ========== AI RECOMMENDATION ENDPOINTS ==========
 
+// Get AI meal recommendations
+export const getAIRecommendations = async (mealType, date = null) => {
+  const dateParam = date || new Date().toISOString().split('T')[0];
+  const response = await fetch(`${API_URL}/ai/recommendations?meal_type=${mealType}&date=${dateParam}`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get AI recommendations');
+  }
+  
+  return data;
+};
+
+// Submit feedback on AI recommendation
+export const submitAIFeedback = async (recommendationId, accepted, mealTemplateId) => {
+  const response = await fetch(`${API_URL}/ai/feedback`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({
+      recommendation_id: recommendationId,
+      accepted,
+      meal_template_id: mealTemplateId
+    }),
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to submit feedback');
+  }
+  
+  return data;
+};
+
+// Get AI insights about eating patterns
+export const getAIInsights = async () => {
+  const response = await fetch(`${API_URL}/ai/insights`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get AI insights');
+  }
+  
+  return data;
+};
 // Logout (clear token)
 export const logout = () => {
   localStorage.removeItem('token');

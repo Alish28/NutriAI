@@ -1,0 +1,468 @@
+.ai-recommendations-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+/* ========== Header ========== */
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.ai-title-section {
+  flex: 1;
+}
+
+.ai-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 6px 0;
+}
+
+.ai-subtitle {
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+}
+
+.ai-refresh-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.ai-refresh-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  transform: rotate(180deg);
+}
+
+.ai-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== Success Banner ========== */
+.ai-success-banner {
+  background: linear-gradient(135deg, #e0ffe9 0%, #c6f3d5 100%);
+  border-left: 4px solid #22c55e;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #166534;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ========== Meal Type Selector ========== */
+.ai-meal-type-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.ai-meal-type-btn {
+  background: #f9f9f9;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-meal-type-btn:hover {
+  background: #f0f0f0;
+  border-color: #eea641;
+}
+
+.ai-meal-type-btn.active {
+  background: linear-gradient(135deg, #fff7e9 0%, #ffe8cc 100%);
+  border-color: #eea641;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.2);
+}
+
+.meal-type-icon {
+  font-size: 24px;
+}
+
+.meal-type-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+
+.meal-type-time {
+  font-size: 11px;
+  color: #999;
+}
+
+/* ========== Loading State ========== */
+.ai-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.ai-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f0f0f0;
+  border-top-color: #eea641;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-loading p {
+  font-size: 14px;
+  color: #777;
+  margin: 0;
+}
+
+/* ========== Empty State ========== */
+.ai-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.ai-empty-state p {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.btn-refresh {
+  background: #eea641;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: #d99536;
+  transform: translateY(-2px);
+}
+
+/* ========== Recommendations List ========== */
+.ai-recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ========== Recommendation Card ========== */
+.ai-recommendation-card {
+  position: relative;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+  border: 2px solid #f0f0f0;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.ai-recommendation-card:hover {
+  border-color: #eea641;
+  box-shadow: 0 8px 24px rgba(238, 166, 65, 0.15);
+  transform: translateY(-4px);
+}
+
+/* Rank Badge */
+.ai-rank-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #fff7e9 0%, #ffe8cc 100%);
+  border: 2px solid #eea641;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.rank-text {
+  font-size: 12px;
+  color: #111;
+}
+
+/* Confidence Bar */
+.ai-confidence-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+  transition: width 0.6s ease;
+}
+
+/* Meal Info */
+.ai-meal-info {
+  position: relative;
+  padding-top: 8px;
+}
+
+.ai-meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding-right: 60px; /* Space for rank badge */
+}
+
+.ai-meal-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+  flex: 1;
+}
+
+.ai-confidence-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ai-meal-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 14px 0;
+}
+
+/* Meta Tags */
+.ai-meal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.meta-tag {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: #f5f5f5;
+  border-radius: 999px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Nutrition Summary */
+.ai-nutrition-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.nutrition-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.nutrition-icon {
+  font-size: 20px;
+}
+
+.nutrition-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+}
+
+.nutrition-label {
+  font-size: 11px;
+  color: #999;
+}
+
+/* AI Explanation */
+.ai-explanation {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 3px solid #f59e0b;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.explanation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.explanation-icon {
+  font-size: 18px;
+}
+
+.explanation-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+}
+
+.explanation-text {
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Dietary Tags */
+.ai-dietary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.dietary-tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: #e0f9ea;
+  color: #166534;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.ai-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ai-btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ai-btn-accept {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.ai-btn-accept:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+}
+
+.ai-btn-reject {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.ai-btn-reject:hover {
+  background: #e5e5e5;
+  color: #333;
+}
+
+/* ========== Footer ========== */
+.ai-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.ai-footer-text {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .ai-recommendations-card {
+    padding: 20px;
+  }
+
+  .ai-meal-type-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ai-nutrition-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ai-meal-header {
+    flex-direction: column;
+    padding-right: 0;
+  }
+
+  .ai-rank-badge {
+    position: static;
+    align-self: flex-start;
+  }
+
+  .ai-actions {
+    grid-template-columns: 1fr;
+  }
+}

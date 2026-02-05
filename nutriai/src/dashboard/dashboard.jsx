@@ -6,6 +6,7 @@ import NutritionSummary from "../components/NutritionSummary.jsx";
 import WeeklyChart from '../analytics/weeklyChart.jsx';
 import StreakTracker from '../analytics/streakTracker.jsx';
 import WeeklyAverages from '../analytics/weeklyAverages.jsx';
+import AIRecommendations from '../components/aiRecommendations.jsx';
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -223,6 +224,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           {/* Today's Nutrition Summary */}
           <NutritionSummary />
+          <AIRecommendations />
 
           {/* Personalized Meal Plan Card */}
           <section className="card meal-plan-card">
