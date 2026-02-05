@@ -3,12 +3,12 @@ const db = require('../config/database');
 // Get 7-day nutrition trends
 exports.getWeeklyTrends = async (req, res) => {
   try {
-    const userId = req.user.id; // FIXED: was req.userId
+    const userId = req.user.id;
     
     // Get last 7 days of data
     const query = `
       SELECT 
-        DATE(meal_date) as date,
+        meal_date::date as date,
         COUNT(*) as meal_count,
         COALESCE(SUM(calories), 0) as total_calories,
         COALESCE(SUM(protein), 0) as total_protein,
@@ -18,7 +18,7 @@ exports.getWeeklyTrends = async (req, res) => {
       WHERE user_id = $1 
         AND meal_date >= CURRENT_DATE - INTERVAL '6 days'
         AND meal_date <= CURRENT_DATE
-      GROUP BY DATE(meal_date)
+      GROUP BY meal_date::date
       ORDER BY date ASC
     `;
     
@@ -63,11 +63,11 @@ exports.getWeeklyTrends = async (req, res) => {
 // Get current streak (consecutive days with at least 1 meal logged)
 exports.getStreak = async (req, res) => {
   try {
-    const userId = req.user.id; // FIXED: was req.userId
+    const userId = req.user.id;
     
-    // Get all unique dates with meals in the last 60 days
+    // FIXED: Get dates properly formatted from PostgreSQL
     const query = `
-      SELECT DISTINCT DATE(meal_date) as date
+      SELECT DISTINCT meal_date::date as date
       FROM meals
       WHERE user_id = $1 
         AND meal_date >= CURRENT_DATE - INTERVAL '60 days'
@@ -75,7 +75,15 @@ exports.getStreak = async (req, res) => {
     `;
     
     const result = await db.query(query, [userId]);
-    const dates = result.rows.map(row => row.date);
+    
+    // FIXED: Convert PostgreSQL dates to strings properly
+    const dates = result.rows.map(row => {
+      // PostgreSQL returns date as Date object, convert to YYYY-MM-DD string
+      const d = new Date(row.date);
+      return d.toISOString().split('T')[0];
+    });
+    
+    console.log('DEBUG - Dates from DB:', dates); // For debugging
     
     if (dates.length === 0) {
       return res.json({
@@ -89,24 +97,39 @@ exports.getStreak = async (req, res) => {
       });
     }
     
+    // FIXED: Get today and yesterday in LOCAL timezone (not UTC)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStr = today.toISOString().split('T')[0];
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    console.log('DEBUG - Today:', todayStr, 'Yesterday:', yesterdayStr); // For debugging
+    
     // Calculate current streak
     let currentStreak = 0;
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     
     // Check if user logged today or yesterday
-    if (dates[0] === today || dates[0] === yesterday) {
+    if (dates.includes(todayStr) || dates.includes(yesterdayStr)) {
       currentStreak = 1;
+      
+      // Start from the most recent date
       let checkDate = new Date(dates[0]);
       
       for (let i = 1; i < dates.length; i++) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        const expectedDate = checkDate.toISOString().split('T')[0];
+        // Calculate expected previous date
+        const expectedDate = new Date(checkDate);
+        expectedDate.setDate(expectedDate.getDate() - 1);
+        const expectedStr = expectedDate.toISOString().split('T')[0];
         
-        if (dates[i] === expectedDate) {
+        // Check if next date in array matches expected previous date
+        if (dates[i] === expectedStr) {
           currentStreak++;
+          checkDate = new Date(dates[i]);
         } else {
-          break;
+          break; // Streak broken
         }
       }
     }
@@ -115,10 +138,13 @@ exports.getStreak = async (req, res) => {
     let longestStreak = 1;
     let tempStreak = 1;
     
-    for (let i = 1; i < dates.length; i++) {
-      const prevDate = new Date(dates[i - 1]);
-      const currDate = new Date(dates[i]);
-      const diffDays = Math.round((prevDate - currDate) / (1000 * 60 * 60 * 24));
+    for (let i = 0; i < dates.length - 1; i++) {
+      const currentDate = new Date(dates[i]);
+      const nextDate = new Date(dates[i + 1]);
+      
+      // Calculate difference in days
+      const diffTime = currentDate - nextDate;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
       
       if (diffDays === 1) {
         tempStreak++;
@@ -127,6 +153,8 @@ exports.getStreak = async (req, res) => {
         tempStreak = 1;
       }
     }
+    
+    console.log('DEBUG - Current streak:', currentStreak, 'Longest:', longestStreak); // For debugging
     
     res.json({
       success: true,
@@ -150,19 +178,19 @@ exports.getStreak = async (req, res) => {
 // Get weekly averages compared to goals
 exports.getWeeklyAverages = async (req, res) => {
   try {
-    const userId = req.user.id; // FIXED: was req.userId
+    const userId = req.user.id;
     
     // Get weekly averages
     const query = `
       SELECT 
-        COUNT(DISTINCT DATE(meal_date)) as days_logged,
+        COUNT(DISTINCT meal_date::date) as days_logged,
         COALESCE(AVG(daily_totals.calories), 0) as avg_calories,
         COALESCE(AVG(daily_totals.protein), 0) as avg_protein,
         COALESCE(AVG(daily_totals.carbs), 0) as avg_carbs,
         COALESCE(AVG(daily_totals.fats), 0) as avg_fats
       FROM (
         SELECT 
-          DATE(meal_date) as date,
+          meal_date::date as date,
           SUM(calories) as calories,
           SUM(protein) as protein,
           SUM(carbs) as carbs,
@@ -171,7 +199,7 @@ exports.getWeeklyAverages = async (req, res) => {
         WHERE user_id = $1 
           AND meal_date >= CURRENT_DATE - INTERVAL '6 days'
           AND meal_date <= CURRENT_DATE
-        GROUP BY DATE(meal_date)
+        GROUP BY meal_date::date
       ) as daily_totals
     `;
     

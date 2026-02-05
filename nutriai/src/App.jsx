@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getFullProfile } from "./services/api";
 import Login from "./login/login.jsx";
 import Signup from "./signup/signup.jsx";
 import Onboarding from "./onboarding/Onboarding.jsx";
@@ -9,28 +10,57 @@ import "./App.css";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [requiresOnboarding, setRequiresOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState("login"); // 'login' | 'signup' | 'onboarding' | 'dashboard' | 'profile'
+  const [currentView, setCurrentView] = useState("login");
+  const [loading, setLoading] = useState(true);
 
   // Check authentication and onboarding status on mount
   useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
     const token = localStorage.getItem('token');
-    const userString = localStorage.getItem('user');
     
-    if (token && userString) {
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // FIXED: Fetch FRESH profile data from server, not localStorage
+      const response = await getFullProfile();
+      const userData = response.data.user;
+      
+      // Update localStorage with fresh data
+      localStorage.setItem('user', JSON.stringify(userData));
+      
       setIsAuthenticated(true);
-      const userData = JSON.parse(userString);
       
-      // Check if user has completed onboarding
-      const hasCompletedOnboarding = userData.onboarding_completed || false;
-      
-      if (!hasCompletedOnboarding) {
+      // Check onboarding status from FRESH server data
+      if (!userData.onboarding_completed) {
         setRequiresOnboarding(true);
         setCurrentView("onboarding");
       } else {
+        setRequiresOnboarding(false);
         setCurrentView("dashboard");
       }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      // Token invalid, clear and show login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
+
+  const handleLoginSuccess = async () => {
+    // After login, check onboarding status
+    setIsAuthenticated(true);
+    await checkAuthStatus(); // This will determine if onboarding is needed
+  };
 
   const handleSignupSuccess = () => {
     setIsAuthenticated(true);
@@ -41,13 +71,36 @@ function App() {
   const handleOnboardingComplete = () => {
     setRequiresOnboarding(false);
     setCurrentView("dashboard");
+    
+    // Update localStorage
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    userData.onboarding_completed = true;
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const handleUserLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
     setRequiresOnboarding(false);
     setCurrentView("login");
   };
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="app-root" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   // Not authenticated - show login or signup
   if (!isAuthenticated) {
@@ -65,10 +118,7 @@ function App() {
     return (
       <div className="app-root">
         <Login
-          onLogin={() => {
-            setIsAuthenticated(true);
-            setCurrentView("dashboard");
-          }}
+          onLogin={handleLoginSuccess}
           onGoToSignup={() => setCurrentView("signup")}
         />
       </div>
