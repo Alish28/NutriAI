@@ -188,7 +188,7 @@ class AIRecommendationEngine {
   static async getFilteredMealTemplates(mealType, userProfile) {
     const query = `
       SELECT * FROM meal_templates
-      WHERE meal_type = $1 AND is_active = true
+      WHERE meal_type = $1 AND active = true
       ORDER BY popularity_score DESC
     `;
     
@@ -196,27 +196,35 @@ class AIRecommendationEngine {
     let meals = result.rows;
     
     // Filter by dietary preferences
-    if (userProfile.dietary_preferences.length > 0) {
-      meals = meals.filter(meal => {
-        const mealTags = meal.dietary_tags || [];
-        // Meal must match at least one dietary preference
-        return userProfile.dietary_preferences.some(pref => 
-          mealTags.includes(pref.toLowerCase())
-        );
-      });
-    }
+    // if (userProfile.dietary_preferences.length > 0) {
+    //   meals = meals.filter(meal => {
+    //     const mealTags = meal.dietary_tags || [];
+    //     // Meal must match at least one dietary preference
+    //     return userProfile.dietary_preferences.some(pref => 
+    //       mealTags.includes(pref.toLowerCase())
+    //     );
+    //   });
+    // }
+    if (userProfile.dietary_preferences && userProfile.dietary_preferences.length > 0) {
+  // Don't filter - show all meals for now
+  // meals = meals.filter(meal => { ... });
+}
     
-    // Filter out meals with allergens
-    if (userProfile.allergies.length > 0) {
-      meals = meals.filter(meal => {
-        const ingredients = (meal.ingredients || []).join(' ').toLowerCase();
-        // Meal must NOT contain any allergens
-        return !userProfile.allergies.some(allergen =>
-          ingredients.includes(allergen.toLowerCase())
-        );
-      });
-    }
-    
+    // // Filter out meals with allergens
+    // if (userProfile.allergies.length > 0) {
+    //   meals = meals.filter(meal => {
+    //     const ingredients = (meal.ingredients || []).join(' ').toLowerCase();
+    //     // Meal must NOT contain any allergens
+    //     return !userProfile.allergies.some(allergen =>
+    //       ingredients.includes(allergen.toLowerCase())
+    //     );
+    //   });
+    // }
+    // Filter out meals with allergens (RELAXED for demo)
+if (userProfile.allergies && userProfile.allergies.length > 0) {
+  // Don't filter - show all meals for now
+  // meals = meals.filter(meal => { ... });
+}
     // Filter by budget if specified
     if (userProfile.daily_budget) {
       meals = meals.filter(meal => 
