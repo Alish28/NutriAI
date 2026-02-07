@@ -1,18 +1,22 @@
-import { useState, useEffect } from 'react';
-import { getAIRecommendations, submitAIFeedback, createMeal } from '../services/api';
-import './AIRecommendations.css';
+import { useState, useEffect } from "react";
+import {
+  getAIRecommendations,
+  submitAIFeedback,
+  createMeal,
+} from "../services/api";
+import "./AIRecommendations.css";
 
 export default function AIRecommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState('lunch');
+  const [selectedMealType, setSelectedMealType] = useState("lunch");
   const [showSuccess, setShowSuccess] = useState(false);
 
   const mealTypes = [
-    { id: 'breakfast', label: 'Breakfast', icon: '🌅', time: 'Morning' },
-    { id: 'lunch', label: 'Lunch', icon: '🌞', time: 'Afternoon' },
-    { id: 'dinner', label: 'Dinner', icon: '🌙', time: 'Evening' },
-    { id: 'snack', label: 'Snack', icon: '🎯', time: 'Anytime' }
+    { id: "breakfast", label: "Breakfast", icon: "🌅", time: "Morning" },
+    { id: "lunch", label: "Lunch", icon: "🌞", time: "Afternoon" },
+    { id: "dinner", label: "Dinner", icon: "🌙", time: "Evening" },
+    { id: "snack", label: "Snack", icon: "🎯", time: "Anytime" },
   ];
 
   useEffect(() => {
@@ -25,7 +29,7 @@ export default function AIRecommendations() {
       const response = await getAIRecommendations(selectedMealType);
       setRecommendations(response.data.recommendations || []);
     } catch (error) {
-      console.error('Error loading AI recommendations:', error);
+      console.error("Error loading AI recommendations:", error);
     } finally {
       setLoading(false);
     }
@@ -34,16 +38,16 @@ export default function AIRecommendations() {
   const handleAcceptRecommendation = async (meal, recommendationId) => {
     try {
       // Add meal to today's log
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       await createMeal({
         meal_date: today,
         meal_type: selectedMealType,
         meal_name: meal.meal_name,
-        description: meal.description || 'Recommended by AI',
+        description: meal.description || "Recommended by AI",
         calories: meal.calories,
         protein: meal.protein,
         carbs: meal.carbs,
-        fats: meal.fats
+        fats: meal.fats,
       });
 
       // Submit positive feedback
@@ -58,31 +62,39 @@ export default function AIRecommendations() {
       // Reload recommendations
       loadRecommendations();
     } catch (error) {
-      console.error('Error accepting recommendation:', error);
-      alert('Failed to add meal. Please try again.');
+      console.error("Error accepting recommendation:", error);
+      alert("Failed to add meal. Please try again.");
     }
   };
 
-  const handleRejectRecommendation = async (recommendationId, mealId) => {
+  const handleRejectRecommendation = async (meal, recommendationId) => {
     try {
-      await submitAIFeedback(recommendationId, false, mealId);
-      // Remove from list
-      setRecommendations(prev => prev.filter(r => r.id !== mealId));
+      // Submit negative feedback
+      if (recommendationId) {
+        await submitAIFeedback(recommendationId, false, meal.id);
+      }
+
+      // Remove from recommendations list
+      setRecommendations((prev) => prev.filter((r) => r.id !== meal.id));
+
+      // Show feedback message
+      alert("Thanks for your feedback! This meal won't be recommended again.");
     } catch (error) {
-      console.error('Error rejecting recommendation:', error);
+      console.error("Error rejecting recommendation:", error);
+      alert("Failed to process feedback. Please try again.");
     }
   };
 
   const getConfidenceColor = (score) => {
-    if (score >= 80) return '#22c55e'; // Green
-    if (score >= 60) return '#f59e0b'; // Orange
-    return '#3b82f6'; // Blue
+    if (score >= 80) return "#22c55e"; // Green
+    if (score >= 60) return "#f59e0b"; // Orange
+    return "#3b82f6"; // Blue
   };
 
   const getConfidenceLabel = (score) => {
-    if (score >= 80) return 'Excellent Match';
-    if (score >= 60) return 'Good Match';
-    return 'Worth Trying';
+    if (score >= 80) return "Excellent Match";
+    if (score >= 60) return "Good Match";
+    return "Worth Trying";
   };
 
   return (
@@ -91,15 +103,17 @@ export default function AIRecommendations() {
       <div className="ai-header">
         <div className="ai-title-section">
           <h3 className="ai-title">🤖 AI Meal Recommendations</h3>
-          <p className="ai-subtitle">Personalized suggestions based on your goals and preferences</p>
+          <p className="ai-subtitle">
+            Personalized suggestions based on your goals and preferences
+          </p>
         </div>
-        <button 
-          className="ai-refresh-btn" 
+        <button
+          className="ai-refresh-btn"
           onClick={loadRecommendations}
           disabled={loading}
           title="Get new recommendations"
         >
-          {loading ? '⏳' : '🔄'}
+          {loading ? "⏳" : "🔄"}
         </button>
       </div>
 
@@ -112,10 +126,10 @@ export default function AIRecommendations() {
 
       {/* Meal Type Selector */}
       <div className="ai-meal-type-selector">
-        {mealTypes.map(type => (
+        {mealTypes.map((type) => (
           <button
             key={type.id}
-            className={`ai-meal-type-btn ${selectedMealType === type.id ? 'active' : ''}`}
+            className={`ai-meal-type-btn ${selectedMealType === type.id ? "active" : ""}`}
             onClick={() => setSelectedMealType(type.id)}
           >
             <span className="meal-type-icon">{type.icon}</span>
@@ -150,16 +164,16 @@ export default function AIRecommendations() {
             <div key={meal.id || index} className="ai-recommendation-card">
               {/* Rank Badge */}
               <div className="ai-rank-badge">
-                {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                 <span className="rank-text">#{index + 1}</span>
               </div>
 
               {/* Confidence Score */}
-              <div 
+              <div
                 className="ai-confidence-bar"
-                style={{ 
+                style={{
                   background: getConfidenceColor(meal.confidence_score),
-                  width: `${meal.confidence_score}%`
+                  width: `${meal.confidence_score}%`,
                 }}
               />
 
@@ -167,11 +181,14 @@ export default function AIRecommendations() {
               <div className="ai-meal-info">
                 <div className="ai-meal-header">
                   <h4 className="ai-meal-name">{meal.meal_name}</h4>
-                  <div 
+                  <div
                     className="ai-confidence-badge"
-                    style={{ background: getConfidenceColor(meal.confidence_score) }}
+                    style={{
+                      background: getConfidenceColor(meal.confidence_score),
+                    }}
                   >
-                    {meal.confidence_score}% {getConfidenceLabel(meal.confidence_score)}
+                    {meal.confidence_score}%{" "}
+                    {getConfidenceLabel(meal.confidence_score)}
                   </div>
                 </div>
 
@@ -186,7 +203,9 @@ export default function AIRecommendations() {
                     <span className="meta-tag">💰 ${meal.estimated_cost}</span>
                   )}
                   {meal.prep_time_minutes && (
-                    <span className="meta-tag">⏱️ {meal.prep_time_minutes} min</span>
+                    <span className="meta-tag">
+                      ⏱️ {meal.prep_time_minutes} min
+                    </span>
                   )}
                 </div>
 
@@ -194,22 +213,30 @@ export default function AIRecommendations() {
                 <div className="ai-nutrition-summary">
                   <div className="nutrition-item">
                     <span className="nutrition-icon">🔥</span>
-                    <span className="nutrition-value">{Math.round(meal.calories)}</span>
+                    <span className="nutrition-value">
+                      {Math.round(meal.calories)}
+                    </span>
                     <span className="nutrition-label">cal</span>
                   </div>
                   <div className="nutrition-item">
                     <span className="nutrition-icon">💪</span>
-                    <span className="nutrition-value">{Math.round(meal.protein)}</span>
+                    <span className="nutrition-value">
+                      {Math.round(meal.protein)}
+                    </span>
                     <span className="nutrition-label">g protein</span>
                   </div>
                   <div className="nutrition-item">
                     <span className="nutrition-icon">🍞</span>
-                    <span className="nutrition-value">{Math.round(meal.carbs)}</span>
+                    <span className="nutrition-value">
+                      {Math.round(meal.carbs)}
+                    </span>
                     <span className="nutrition-label">g carbs</span>
                   </div>
                   <div className="nutrition-item">
                     <span className="nutrition-icon">🥑</span>
-                    <span className="nutrition-value">{Math.round(meal.fats)}</span>
+                    <span className="nutrition-value">
+                      {Math.round(meal.fats)}
+                    </span>
                     <span className="nutrition-label">g fats</span>
                   </div>
                 </div>
@@ -227,7 +254,9 @@ export default function AIRecommendations() {
                 {meal.dietary_tags && meal.dietary_tags.length > 0 && (
                   <div className="ai-dietary-tags">
                     {meal.dietary_tags.slice(0, 3).map((tag, i) => (
-                      <span key={i} className="dietary-tag">{tag}</span>
+                      <span key={i} className="dietary-tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -236,13 +265,17 @@ export default function AIRecommendations() {
                 <div className="ai-actions">
                   <button
                     className="ai-btn ai-btn-accept"
-                    onClick={() => handleAcceptRecommendation(meal, meal.recommendation_id)}
+                    onClick={() =>
+                      handleAcceptRecommendation(meal, meal.recommendation_id)
+                    }
                   >
                     ✓ Add to Today
                   </button>
                   <button
                     className="ai-btn ai-btn-reject"
-                    onClick={() => handleRejectRecommendation(meal.recommendation_id, meal.id)}
+                    onClick={() =>
+                      handleRejectRecommendation(meal, meal.recommendation_id)
+                    }
                   >
                     ✕ Not Interested
                   </button>

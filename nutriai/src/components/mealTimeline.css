@@ -1,0 +1,332 @@
+.meal-timeline-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+/* Header */
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.timeline-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.timeline-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-item {
+  font-weight: 600;
+}
+
+.stat-divider {
+  color: #ddd;
+}
+
+/* Loading State */
+.timeline-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.loading-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eea641 0%, #f59e0b 100%);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+.timeline-loading p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Empty State */
+.timeline-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.empty-subtitle {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Timeline Container */
+.timeline-container {
+  position: relative;
+  padding-left: 0;
+}
+
+/* Timeline Item */
+.timeline-item {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  padding-bottom: 28px;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Timeline Line (connector between meals) */
+.timeline-line {
+  position: absolute;
+  left: 23px;
+  top: 48px;
+  bottom: -28px;
+  width: 2px;
+  background: linear-gradient(to bottom, #eea641 0%, #f0f0f0 100%);
+}
+
+/* Timeline Dot */
+.timeline-dot {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff7e9 0%, #ffe8cc 100%);
+  border: 3px solid #eea641;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.2);
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-dot {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(238, 166, 65, 0.3);
+}
+
+.timeline-icon {
+  font-size: 24px;
+}
+
+/* Empty dot for placeholder */
+.timeline-dot-empty {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  opacity: 0.6;
+}
+
+/* Timeline Content */
+.timeline-content {
+  flex: 1;
+  background: #fafafa;
+  border-radius: 14px;
+  padding: 16px 18px;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-content {
+  border-color: #eea641;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateX(4px);
+}
+
+.timeline-content-empty {
+  background: transparent;
+  border: 2px dashed #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.placeholder-text {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Meal Time Header */
+.meal-time-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+
+.meal-time-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meal-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eea641;
+}
+
+.meal-type-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  background: #f0f0f0;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.meal-calories {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f59e0b;
+  white-space: nowrap;
+}
+
+/* Meal Name */
+.meal-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 8px 0;
+}
+
+/* Meal Description */
+.meal-description {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+/* Meal Macros */
+.meal-macros {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.macro-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.macro-icon {
+  font-size: 16px;
+}
+
+.macro-value {
+  font-weight: 700;
+  color: #111;
+}
+
+.macro-label {
+  color: #999;
+}
+
+/* Footer */
+.timeline-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: center;
+}
+
+.timeline-refresh-btn {
+  background: #f5f5f5;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeline-refresh-btn:hover {
+  background: #eea641;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .meal-timeline-card {
+    padding: 20px;
+  }
+
+  .timeline-title {
+    font-size: 18px;
+  }
+
+  .timeline-dot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .timeline-icon {
+    font-size: 20px;
+  }
+
+  .timeline-line {
+    left: 19px;
+    top: 40px;
+  }
+
+  .meal-time-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .meal-macros {
+    gap: 12px;
+  }
+}
