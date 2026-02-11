@@ -65,7 +65,6 @@ exports.getStreak = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // FIXED: Get dates properly formatted from PostgreSQL
     const query = `
       SELECT DISTINCT meal_date::date as date
       FROM meals
@@ -76,14 +75,10 @@ exports.getStreak = async (req, res) => {
     
     const result = await db.query(query, [userId]);
     
-    // FIXED: Convert PostgreSQL dates to strings properly
     const dates = result.rows.map(row => {
-      // PostgreSQL returns date as Date object, convert to YYYY-MM-DD string
       const d = new Date(row.date);
       return d.toISOString().split('T')[0];
     });
-    
-    console.log('DEBUG - Dates from DB:', dates); // For debugging
     
     if (dates.length === 0) {
       return res.json({
@@ -97,7 +92,6 @@ exports.getStreak = async (req, res) => {
       });
     }
     
-    // FIXED: Get today and yesterday in LOCAL timezone (not UTC)
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayStr = today.toISOString().split('T')[0];
@@ -106,30 +100,23 @@ exports.getStreak = async (req, res) => {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
-    console.log('DEBUG - Today:', todayStr, 'Yesterday:', yesterdayStr); // For debugging
-    
     // Calculate current streak
     let currentStreak = 0;
     
-    // Check if user logged today or yesterday
     if (dates.includes(todayStr) || dates.includes(yesterdayStr)) {
       currentStreak = 1;
-      
-      // Start from the most recent date
       let checkDate = new Date(dates[0]);
       
       for (let i = 1; i < dates.length; i++) {
-        // Calculate expected previous date
         const expectedDate = new Date(checkDate);
         expectedDate.setDate(expectedDate.getDate() - 1);
         const expectedStr = expectedDate.toISOString().split('T')[0];
         
-        // Check if next date in array matches expected previous date
         if (dates[i] === expectedStr) {
           currentStreak++;
           checkDate = new Date(dates[i]);
         } else {
-          break; // Streak broken
+          break;
         }
       }
     }
@@ -141,8 +128,6 @@ exports.getStreak = async (req, res) => {
     for (let i = 0; i < dates.length - 1; i++) {
       const currentDate = new Date(dates[i]);
       const nextDate = new Date(dates[i + 1]);
-      
-      // Calculate difference in days
       const diffTime = currentDate - nextDate;
       const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
       
@@ -153,8 +138,6 @@ exports.getStreak = async (req, res) => {
         tempStreak = 1;
       }
     }
-    
-    console.log('DEBUG - Current streak:', currentStreak, 'Longest:', longestStreak); // For debugging
     
     res.json({
       success: true,
@@ -180,7 +163,6 @@ exports.getWeeklyAverages = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Get weekly averages
     const query = `
       SELECT 
         COUNT(DISTINCT meal_date::date) as days_logged,
@@ -206,7 +188,6 @@ exports.getWeeklyAverages = async (req, res) => {
     const result = await db.query(query, [userId]);
     const averages = result.rows[0];
     
-    // Get user's nutrition goals from profile
     const profileQuery = `
       SELECT age, gender, weight, height, activity_level, health_goals, nutrition_focus
       FROM users
@@ -216,7 +197,6 @@ exports.getWeeklyAverages = async (req, res) => {
     const profileResult = await db.query(profileQuery, [userId]);
     const profile = profileResult.rows[0];
     
-    // Calculate goals
     let goals = {
       calories: 2000,
       protein: 150,
@@ -224,9 +204,7 @@ exports.getWeeklyAverages = async (req, res) => {
       fats: 65
     };
     
-    // If profile is complete, calculate personalized goals
     if (profile && profile.age && profile.weight && profile.height && profile.gender) {
-      // Basic BMR calculation (Mifflin-St Jeor)
       const bmr = profile.gender === 'Male' 
         ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
         : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;

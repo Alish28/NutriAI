@@ -37,7 +37,6 @@ export default function AIRecommendations() {
 
   const handleAcceptRecommendation = async (meal, recommendationId) => {
     try {
-      // Add meal to today's log
       const today = new Date().toISOString().split("T")[0];
       await createMeal({
         meal_date: today,
@@ -50,16 +49,12 @@ export default function AIRecommendations() {
         fats: meal.fats,
       });
 
-      // Submit positive feedback
       if (recommendationId) {
         await submitAIFeedback(recommendationId, true, meal.id);
       }
 
-      // Show success message
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-
-      // Reload recommendations
       loadRecommendations();
     } catch (error) {
       console.error("Error accepting recommendation:", error);
@@ -69,15 +64,11 @@ export default function AIRecommendations() {
 
   const handleRejectRecommendation = async (meal, recommendationId) => {
     try {
-      // Submit negative feedback
       if (recommendationId) {
         await submitAIFeedback(recommendationId, false, meal.id);
       }
-
-      // Remove from recommendations list
+      
       setRecommendations((prev) => prev.filter((r) => r.id !== meal.id));
-
-      // Show feedback message
       alert("Thanks for your feedback! This meal won't be recommended again.");
     } catch (error) {
       console.error("Error rejecting recommendation:", error);
@@ -86,9 +77,9 @@ export default function AIRecommendations() {
   };
 
   const getConfidenceColor = (score) => {
-    if (score >= 80) return "#22c55e"; // Green
-    if (score >= 60) return "#f59e0b"; // Orange
-    return "#3b82f6"; // Blue
+    if (score >= 80) return "#22c55e";
+    if (score >= 60) return "#f59e0b";
+    return "#3b82f6";
   };
 
   const getConfidenceLabel = (score) => {
@@ -99,7 +90,6 @@ export default function AIRecommendations() {
 
   return (
     <div className="ai-recommendations-card">
-      {/* Header */}
       <div className="ai-header">
         <div className="ai-title-section">
           <h3 className="ai-title">🤖 AI Meal Recommendations</h3>
@@ -117,14 +107,12 @@ export default function AIRecommendations() {
         </button>
       </div>
 
-      {/* Success Message */}
       {showSuccess && (
         <div className="ai-success-banner">
           ✅ Meal added successfully! Keep up the great work!
         </div>
       )}
 
-      {/* Meal Type Selector */}
       <div className="ai-meal-type-selector">
         {mealTypes.map((type) => (
           <button
@@ -139,7 +127,6 @@ export default function AIRecommendations() {
         ))}
       </div>
 
-      {/* Loading State */}
       {loading && (
         <div className="ai-loading">
           <div className="ai-loading-spinner"></div>
@@ -147,7 +134,6 @@ export default function AIRecommendations() {
         </div>
       )}
 
-      {/* Recommendations List */}
       {!loading && recommendations.length === 0 && (
         <div className="ai-empty-state">
           <div className="empty-icon">🍽️</div>
@@ -162,13 +148,11 @@ export default function AIRecommendations() {
         <div className="ai-recommendations-list">
           {recommendations.map((meal, index) => (
             <div key={meal.id || index} className="ai-recommendation-card">
-              {/* Rank Badge */}
               <div className="ai-rank-badge">
                 {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                 <span className="rank-text">#{index + 1}</span>
               </div>
 
-              {/* Confidence Score */}
               <div
                 className="ai-confidence-bar"
                 style={{
@@ -177,7 +161,6 @@ export default function AIRecommendations() {
                 }}
               />
 
-              {/* Meal Info */}
               <div className="ai-meal-info">
                 <div className="ai-meal-header">
                   <h4 className="ai-meal-name">{meal.meal_name}</h4>
@@ -194,13 +177,14 @@ export default function AIRecommendations() {
 
                 <p className="ai-meal-description">{meal.description}</p>
 
-                {/* Cuisine & Cost */}
                 <div className="ai-meal-meta">
                   {meal.cuisine_type && (
                     <span className="meta-tag">🍴 {meal.cuisine_type}</span>
                   )}
                   {meal.estimated_cost && (
-                    <span className="meta-tag">💰 ${meal.estimated_cost}</span>
+                    <span className="meta-tag">
+                      💰 NPR {(meal.estimated_cost * 100).toFixed(0)}
+                    </span>
                   )}
                   {meal.prep_time_minutes && (
                     <span className="meta-tag">
@@ -209,7 +193,6 @@ export default function AIRecommendations() {
                   )}
                 </div>
 
-                {/* Nutrition Facts */}
                 <div className="ai-nutrition-summary">
                   <div className="nutrition-item">
                     <span className="nutrition-icon">🔥</span>
@@ -241,7 +224,6 @@ export default function AIRecommendations() {
                   </div>
                 </div>
 
-                {/* AI Explanation */}
                 <div className="ai-explanation">
                   <div className="explanation-header">
                     <span className="explanation-icon">💡</span>
@@ -250,7 +232,6 @@ export default function AIRecommendations() {
                   <p className="explanation-text">{meal.reason}</p>
                 </div>
 
-                {/* Dietary Tags */}
                 {meal.dietary_tags && meal.dietary_tags.length > 0 && (
                   <div className="ai-dietary-tags">
                     {meal.dietary_tags.slice(0, 3).map((tag, i) => (
@@ -261,7 +242,6 @@ export default function AIRecommendations() {
                   </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className="ai-actions">
                   <button
                     className="ai-btn ai-btn-accept"
@@ -286,7 +266,6 @@ export default function AIRecommendations() {
         </div>
       )}
 
-      {/* AI Learning Footer */}
       <div className="ai-footer">
         <p className="ai-footer-text">
           🧠 AI learns from your choices and gets smarter over time

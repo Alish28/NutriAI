@@ -161,28 +161,6 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
               </div>
             </div>
 
-            <label className="checkbox-row">
-              <input
-                type="checkbox"
-                name="hasDietary"
-                checked={form.hasDietary}
-                onChange={change}
-                disabled={loading}
-              />
-              <span>I have dietary restrictions</span>
-            </label>
-
-            <label className="checkbox-row">
-              <input
-                type="checkbox"
-                name="enableAi"
-                checked={form.enableAi}
-                onChange={change}
-                disabled={loading}
-              />
-              <span>Enable personalized nutrition suggestions</span>
-            </label>
-
             <button className="primary primary-wide" type="submit" disabled={loading}>
               {loading ? "Creating Account..." : "Create Account"}
             </button>

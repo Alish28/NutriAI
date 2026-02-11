@@ -52,31 +52,31 @@ export default function BudgetShoppingStep({ data, updateData, onNext, onBack })
       <div className="range-container">
         <div className="range-label">
           <span className="range-label-text">Daily Food Budget</span>
-          <span className="range-value">${data.daily_budget || 25}</span>
+          <span className="range-value">NPR {data.daily_budget || 25}</span>
         </div>
         <input
           type="range"
           className="range-slider"
-          min="10"
-          max="100"
-          value={data.daily_budget || 25}
+          min="200"
+          max="1000"
+          value={data.daily_budget || 200}
           onChange={handleDailyBudgetChange}
         />
-        <p className="range-hint">Average is $20-30/day</p>
+        <p className="range-hint">Average is NPR200-400/day</p>
       </div>
 
       {/* Weekly Budget */}
       <div className="range-container">
         <div className="range-label">
           <span className="range-label-text">Weekly Food Budget</span>
-          <span className="range-value">${data.weekly_budget || 150}</span>
+          <span className="range-value">NPR {data.weekly_budget || 4000}</span>
         </div>
         <input
           type="range"
           className="range-slider"
-          min="50"
-          max="500"
-          value={data.weekly_budget || 150}
+          min="1500"
+          max="4000"
+          value={data.weekly_budget || 1500}
           onChange={handleWeeklyBudgetChange}
         />
         <p className="range-hint">Automatically calculated based on daily budget</p>

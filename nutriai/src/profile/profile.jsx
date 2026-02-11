@@ -454,7 +454,7 @@ export default function Profile({ onBack, onLogout }) {
             </div>
             <div className="p-card-body">
               <div className="field">
-                <label>Daily Budget ($)</label>
+                <label>Daily Budget (NPR)</label>
                 <input
                   type="number"
                   name="daily_budget"
@@ -463,7 +463,7 @@ export default function Profile({ onBack, onLogout }) {
                 />
               </div>
               <div className="field">
-                <label>Weekly Budget ($)</label>
+                <label>Weekly Budget (NPR)</label>
                 <input
                   type="number"
                   name="weekly_budget"
