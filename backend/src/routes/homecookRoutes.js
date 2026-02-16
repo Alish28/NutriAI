@@ -1,12 +1,10 @@
-// backend/src/routes/homecookRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const homecookController = require('../controllers/homecookController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware'); 
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(protect); // FIXED: Use 'protect' function
 
 // ============================================
 // APPLICATION ROUTES

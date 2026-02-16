@@ -3,10 +3,11 @@ import { logout, getFullProfile } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
-import WeeklyChart from '../analytics/weeklyChart.jsx';
-import StreakTracker from '../analytics/streakTracker.jsx';
-import WeeklyAverages from '../analytics/weeklyAverages.jsx';
-import AIRecommendations from '../components/aiRecommendations.jsx';
+import WeeklyChart from "../analytics/weeklyChart.jsx";
+import StreakTracker from "../analytics/streakTracker.jsx";
+import WeeklyAverages from "../analytics/weeklyAverages.jsx";
+import AIRecommendations from "../components/aiRecommendations.jsx";
+import PantryTracker from '../components/PantryTracker';
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       const userData = localStorage.getItem("user");
       if (userData) {
         setUser(JSON.parse(userData));
-        
+
         try {
           // Fetch full profile for personalization
           const profileResponse = await getFullProfile();
@@ -64,10 +65,10 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   return (
     <div className="dashboard-page">
       {/* Navigation Sidebar */}
-      <aside className={`nav-sidebar ${isNavSidebarOpen ? 'open' : ''}`}>
+      <aside className={`nav-sidebar ${isNavSidebarOpen ? "open" : ""}`}>
         <div className="nav-sidebar-header">
           <h3>Menu</h3>
-          <button 
+          <button
             className="nav-close-btn"
             onClick={() => setIsNavSidebarOpen(false)}
           >
@@ -76,7 +77,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </div>
 
         <nav className="nav-sidebar-content">
-          <button 
+          <button
             className="nav-item"
             onClick={() => {
               setIsMealSidebarOpen(true);
@@ -87,7 +88,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             <span>Add Meal</span>
           </button>
 
-          <button 
+          <button
             className="nav-item"
             onClick={() => {
               onOpenProfile();
@@ -101,7 +102,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <div className="nav-divider"></div>
 
           <div className="nav-section-title">Coming Soon</div>
-          
+
           <button className="nav-item disabled">
             <span className="nav-icon">📅</span>
             <span>Meal Planner</span>
@@ -131,7 +132,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
 
       {/* Sidebar overlay */}
       {isNavSidebarOpen && (
-        <div 
+        <div
           className="nav-sidebar-overlay"
           onClick={() => setIsNavSidebarOpen(false)}
         ></div>
@@ -140,7 +141,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       {/* Top navigation */}
       <header className="dash-header">
         <div className="dash-header-left">
-          <button 
+          <button
             className="hamburger-btn"
             onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)}
             title="Menu"
@@ -173,11 +174,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             🔔
           </button>
 
-          <button 
-            className="icon-btn"
-            onClick={onOpenProfile}
-            title="Settings"
-          >
+          <button className="icon-btn" onClick={onOpenProfile} title="Settings">
             ⚙️
           </button>
 
@@ -199,20 +196,22 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       {user && (
         <div className="welcome-banner">
           <h2>
-            {getGreeting()}, {user.full_name.split(' ')[0]}! 👋
+            {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
           </h2>
           {userProfile && (
             <div className="welcome-stats">
-              {userProfile.health_goals && userProfile.health_goals.length > 0 && (
-                <span className="stat-badge">
-                  🎯 Goals: {userProfile.health_goals.join(", ")}
-                </span>
-              )}
-              {userProfile.dietary_preferences && userProfile.dietary_preferences.length > 0 && (
-                <span className="stat-badge">
-                  🥗 {userProfile.dietary_preferences.join(", ")}
-                </span>
-              )}
+              {userProfile.health_goals &&
+                userProfile.health_goals.length > 0 && (
+                  <span className="stat-badge">
+                    🎯 Goals: {userProfile.health_goals.join(", ")}
+                  </span>
+                )}
+              {userProfile.dietary_preferences &&
+                userProfile.dietary_preferences.length > 0 && (
+                  <span className="stat-badge">
+                    🥗 {userProfile.dietary_preferences.join(", ")}
+                  </span>
+                )}
             </div>
           )}
         </div>
@@ -311,53 +310,19 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         </div>
 
         {/* Right column */}
-        <aside className="card expiry-card">
-          <h2 className="card-title">Leftovers &amp; Expiry Tracker</h2>
-
-          <div className="expiry-table">
-            <div className="expiry-row expiry-head">
-              <span>Item</span>
-              <span>Qty</span>
-              <span>Expiry</span>
-              <span>Status</span>
-            </div>
-
-            {[
-              ["Chicken Breast", "200g", "2 days", "Expiring Soon"],
-              ["Spinach", "150g", "1 day", "Expiring Soon"],
-              ["Tomatoes", "3 pcs", "5 days", "Fresh"],
-              ["Milk", "500ml", "Today", "Expired"],
-              ["Potatoes", "500g", "7 days", "Fresh"],
-            ].map(([item, qty, expiry, status]) => (
-              <div className="expiry-row" key={item}>
-                <span>{item}</span>
-                <span>{qty}</span>
-                <span>{expiry}</span>
-                <span
-                  className={
-                    status === "Expired"
-                      ? "status-pill status-danger"
-                      : status === "Expiring Soon"
-                        ? "status-pill status-warn"
-                        : "status-pill status-ok"
-                  }
-                >
-                  {status}
-                </span>
-              </div>
-            ))}
-          </div>
+        <aside>
+          <PantryTracker />
         </aside>
-        
+
         {/* Analytics Section - Full Width */}
         <section className="analytics-section">
           <div className="analytics-grid">
             {/* Weekly Chart */}
             <WeeklyChart />
-            
+
             {/* Streak Tracker */}
             <StreakTracker />
-            
+
             {/* Weekly Averages */}
             <WeeklyAverages />
           </div>

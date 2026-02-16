@@ -1,12 +1,10 @@
-// backend/src/routes/pantryRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const pantryController = require('../controllers/pantryController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(protect); // FIXED: Use 'protect' function
 
 // Get all pantry items for logged-in user
 router.get('/', pantryController.getPantryItems);
