@@ -407,6 +407,270 @@ export const getAIInsights = async () => {
   
   return data;
 };
+
+// ============================================
+// ADD THESE FUNCTIONS TO: nutriai/src/services/api.js
+// Copy and paste AT THE END of your api.js file (before any export statements)
+// ============================================
+
+// ============================================
+// PANTRY API FUNCTIONS
+// ============================================
+
+export const getPantryItems = async () => {
+  const response = await fetch(`${API_URL}/pantry`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get pantry items');
+  return data;
+};
+
+export const getExpiringSoon = async () => {
+  const response = await fetch(`${API_URL}/pantry/expiring-soon`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get expiring items');
+  return data;
+};
+
+export const getPantryStats = async () => {
+  const response = await fetch(`${API_URL}/pantry/stats`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get pantry stats');
+  return data;
+};
+
+export const addPantryItem = async (itemData) => {
+  const response = await fetch(`${API_URL}/pantry`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(itemData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to add pantry item');
+  return data;
+};
+
+export const updatePantryItem = async (itemId, itemData) => {
+  const response = await fetch(`${API_URL}/pantry/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(itemData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to update pantry item');
+  return data;
+};
+
+export const deletePantryItem = async (itemId) => {
+  const response = await fetch(`${API_URL}/pantry/${itemId}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to delete pantry item');
+  return data;
+};
+
+// ============================================
+// HOMECOOK API FUNCTIONS
+// ============================================
+
+export const applyHomecook = async (applicationData) => {
+  const response = await fetch(`${API_URL}/homecook/apply`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(applicationData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to submit application');
+  return data;
+};
+
+export const getApplicationStatus = async () => {
+  const response = await fetch(`${API_URL}/homecook/application`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get application status');
+  return data;
+};
+
+export const toggleHomecookMode = async () => {
+  const response = await fetch(`${API_URL}/homecook/toggle-mode`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to toggle homecook mode');
+  return data;
+};
+
+export const getMyRecipes = async () => {
+  const response = await fetch(`${API_URL}/homecook/my-recipes`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get recipes');
+  return data;
+};
+
+export const addHomecookRecipe = async (recipeData) => {
+  const response = await fetch(`${API_URL}/homecook/recipes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(recipeData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to add recipe');
+  return data;
+};
+
+export const updateHomecookRecipe = async (recipeId, recipeData) => {
+  const response = await fetch(`${API_URL}/homecook/recipes/${recipeId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(recipeData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to update recipe');
+  return data;
+};
+
+export const deleteHomecookRecipe = async (recipeId) => {
+  const response = await fetch(`${API_URL}/homecook/recipes/${recipeId}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to delete recipe');
+  return data;
+};
+
+// ============================================
+// ADMIN API FUNCTIONS
+// ============================================
+
+export const getPendingApplications = async () => {
+  const response = await fetch(`${API_URL}/admin/applications/pending`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get applications');
+  return data;
+};
+
+export const getAllApplications = async (status = null) => {
+  const url = status 
+    ? `${API_URL}/admin/applications?status=${status}`
+    : `${API_URL}/admin/applications`;
+    
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get applications');
+  return data;
+};
+
+export const approveApplication = async (applicationId) => {
+  const response = await fetch(`${API_URL}/admin/applications/${applicationId}/approve`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to approve application');
+  return data;
+};
+
+export const rejectApplication = async (applicationId, rejectionReason) => {
+  const response = await fetch(`${API_URL}/admin/applications/${applicationId}/reject`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ rejection_reason: rejectionReason }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to reject application');
+  return data;
+};
+
+export const getAllUsers = async (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  const url = params ? `${API_URL}/admin/users?${params}` : `${API_URL}/admin/users`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get users');
+  return data;
+};
+
+export const getAdminStats = async () => {
+  const response = await fetch(`${API_URL}/admin/stats`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get statistics');
+  return data;
+};
 // Logout (clear token)
 export const logout = () => {
   localStorage.removeItem('token');
