@@ -1,5 +1,6 @@
 // nutriai/src/components/PantryTracker.jsx
 
+
 import { useState, useEffect } from 'react';
 import { 
   getPantryItems, 
@@ -17,13 +18,14 @@ export default function PantryTracker() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, fresh, expiring, expired
+  const [filter, setFilter] = useState('all'); // all, fresh, expiring_soon, expired
   
   const [formData, setFormData] = useState({
     item_name: '',
     category: 'Vegetables',
     quantity: '',
     unit: 'pieces',
+    purchase_date: '',  // ADDED
     expiry_date: '',
     storage_location: 'Fridge',
     notes: ''
@@ -40,6 +42,8 @@ export default function PantryTracker() {
         getPantryItems(),
         getPantryStats()
       ]);
+      
+      console.log('Items loaded:', itemsRes.data.items); // DEBUG
       setItems(itemsRes.data.items || []);
       setStats(statsRes.data.stats);
     } catch (error) {
@@ -58,10 +62,10 @@ export default function PantryTracker() {
         await addPantryItem(formData);
       }
       resetForm();
-      loadData();
+      await loadData(); // Reload to get updated status from database
     } catch (error) {
       console.error('Error saving item:', error);
-      alert('Failed to save item');
+      alert('Failed to save item: ' + error.message);
     }
   };
 
@@ -69,7 +73,7 @@ export default function PantryTracker() {
     if (!window.confirm('Delete this item?')) return;
     try {
       await deletePantryItem(id);
-      loadData();
+      await loadData();
     } catch (error) {
       console.error('Error deleting item:', error);
       alert('Failed to delete item');
@@ -83,6 +87,7 @@ export default function PantryTracker() {
       category: item.category || 'Vegetables',
       quantity: item.quantity || '',
       unit: item.unit || 'pieces',
+      purchase_date: item.purchase_date ? item.purchase_date.split('T')[0] : '',
       expiry_date: item.expiry_date ? item.expiry_date.split('T')[0] : '',
       storage_location: item.storage_location || 'Fridge',
       notes: item.notes || ''
@@ -96,6 +101,7 @@ export default function PantryTracker() {
       category: 'Vegetables',
       quantity: '',
       unit: 'pieces',
+      purchase_date: '',
       expiry_date: '',
       storage_location: 'Fridge',
       notes: ''
@@ -110,7 +116,10 @@ export default function PantryTracker() {
       expiring_soon: { color: '#fff4e1', text: '#c05621', label: 'Expiring Soon' },
       expired: { color: '#ffe5e5', text: '#b91c1c', label: 'Expired' }
     };
+    
+    // Default to fresh if status is null/undefined
     const badge = badges[status] || badges.fresh;
+    
     return (
       <span style={{
         background: badge.color,
@@ -173,7 +182,9 @@ export default function PantryTracker() {
             className={`filter-btn ${filter === f ? 'active' : ''}`}
             onClick={() => setFilter(f)}
           >
-            {f === 'expiring_soon' ? 'Expiring' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'all' ? 'All' : 
+             f === 'expiring_soon' ? 'Expiring' : 
+             f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
@@ -213,8 +224,8 @@ export default function PantryTracker() {
                   <td>{item.storage_location || '-'}</td>
                   <td>{getStatusBadge(item.status)}</td>
                   <td>
-                    <button className="btn-icon" onClick={() => handleEdit(item)}>✏️</button>
-                    <button className="btn-icon" onClick={() => handleDelete(item.id)}>🗑️</button>
+                    <button className="btn-icon" onClick={() => handleEdit(item)} title="Edit">✏️</button>
+                    <button className="btn-icon" onClick={() => handleDelete(item.id)} title="Delete">🗑️</button>
                   </td>
                 </tr>
               ))}
@@ -285,6 +296,16 @@ export default function PantryTracker() {
                     <option value="cans">cans</option>
                     <option value="bottles">bottles</option>
                   </select>
+                </div>
+
+                {/* ADDED: Purchase Date */}
+                <div className="form-group">
+                  <label>Purchase Date</label>
+                  <input
+                    type="date"
+                    value={formData.purchase_date}
+                    onChange={(e) => setFormData({...formData, purchase_date: e.target.value})}
+                  />
                 </div>
 
                 <div className="form-group">
