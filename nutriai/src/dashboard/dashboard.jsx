@@ -7,7 +7,8 @@ import WeeklyChart from "../analytics/weeklyChart.jsx";
 import StreakTracker from "../analytics/streakTracker.jsx";
 import WeeklyAverages from "../analytics/weeklyAverages.jsx";
 import AIRecommendations from "../components/aiRecommendations.jsx";
-import PantryTracker from '../components/PantryTracker';
+import PantryTracker from "../components/pantryTracker.jsx";
+import HomecookApplication from "../components/HomecookApplication.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -15,6 +16,8 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showHomecookApp, setShowHomecookApp] = useState(false);
+  x;
 
   // Load user from localStorage and fetch full profile
   useEffect(() => {
@@ -165,18 +168,11 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <button
             className="icon-btn add-meal-btn"
             onClick={() => setIsMealSidebarOpen(true)}
-            title="Add Meal"
           >
             ➕ Add Meal
           </button>
-
-          <button className="icon-btn" title="Notifications">
-            🔔
-          </button>
-
-          <button className="icon-btn" onClick={onOpenProfile} title="Settings">
-            ⚙️
-          </button>
+          <button className="icon-btn">🔔</button>
+          <button className="icon-btn">⚙️</button>
 
           <button
             className="avatar-btn"

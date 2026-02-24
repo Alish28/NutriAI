@@ -1,0 +1,393 @@
+/* nutriai/src/components/AdminPanel.css */
+
+.admin-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.admin-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 16px 28px 0;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.tab {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: #eea641;
+  background: #fffaf0;
+}
+
+.tab.active {
+  color: #eea641;
+  border-bottom-color: #eea641;
+}
+
+/* Content */
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+}
+
+.loading {
+  text-align: center;
+  padding: 48px;
+  color: #999;
+}
+
+.error-message {
+  background: #fee;
+  color: #c00;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-left: 4px solid #c00;
+}
+
+/* Applications */
+.applications-list h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.application-card {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.application-card.compact {
+  padding: 16px;
+}
+
+.app-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.app-card-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 4px 0;
+}
+
+.app-email {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.app-date {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 0 0;
+}
+
+.app-details {
+  margin-bottom: 16px;
+}
+
+.app-details p {
+  font-size: 14px;
+  color: #555;
+  margin: 8px 0;
+}
+
+.app-text {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.app-text p {
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tag {
+  background: #eea641;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tag-secondary {
+  background: #10b981;
+}
+
+/* Actions */
+.app-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.btn-success,
+.btn-danger,
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #555;
+}
+
+.btn-secondary:hover {
+  background: #e5e5e5;
+}
+
+/* Reject Form */
+.reject-form {
+  width: 100%;
+}
+
+.reject-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.reject-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.rejection-reason {
+  background: #ffe5e5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+/* Users Table */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.users-table thead {
+  background: #f5f5f5;
+}
+
+.users-table th {
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.users-table td {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.users-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.status-approved {
+  color: #10b981;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #eea641;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-na {
+  color: #ccc;
+}
+
+/* Statistics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  background: #fff7e9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-details h3 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.stat-details p {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 0 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: #999;
+}
+
+.empty-state p {
+  margin: 8px 0;
+  font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-panel {
+    height: auto;
+    min-height: 85vh;
+  }
+
+  .admin-header,
+  .admin-tabs,
+  .admin-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .admin-tabs {
+    overflow-x: auto;
+  }
+
+  .tab {
+    white-space: nowrap;
+  }
+
+  .app-actions {
+    flex-direction: column;
+  }
+
+  .btn-success,
+  .btn-danger,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

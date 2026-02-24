@@ -1,0 +1,312 @@
+/* nutriai/src/components/HomecookApplication.css */
+
+.homecook-app-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.homecook-app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.homecook-app-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.btn-close {
+  background: #f5f5f5;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: #e5e5e5;
+  transform: rotate(90deg);
+}
+
+/* Intro */
+.app-intro {
+  background: linear-gradient(135deg, #fff7e9 0%, #ffe5dd 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.app-intro p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 15px;
+}
+
+.app-intro p:first-child {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Status Display */
+.app-details {
+  margin-top: 20px;
+}
+
+.detail-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.detail-section h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  margin-bottom: 16px;
+}
+
+.detail-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.detail-value {
+  font-size: 15px;
+  color: #111;
+  font-weight: 500;
+}
+
+.detail-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background: #eea641;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Info Boxes */
+.info-box,
+.success-box,
+.error-box {
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.info-box {
+  background: #fff4e1;
+  border-left: 4px solid #eea641;
+}
+
+.success-box {
+  background: #e4f7e9;
+  border-left: 4px solid #10b981;
+}
+
+.error-box {
+  background: #ffe5e5;
+  border-left: 4px solid #dc2626;
+}
+
+.info-box p,
+.success-box p,
+.error-box p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid #e5e5e5;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #eea641;
+  box-shadow: 0 0 0 4px rgba(238, 166, 65, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.hint {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Requirements Box */
+.requirements-box {
+  background: #f9f9f9;
+  border: 2px dashed #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.requirements-box h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.requirements-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.requirements-box li {
+  font-size: 14px;
+  color: #555;
+  margin: 8px 0;
+  padding-left: 8px;
+}
+
+/* Error Message */
+.error-message {
+  background: #fee;
+  color: #c00;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border-left: 4px solid #c00;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #eea641;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(238, 166, 65, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #d99536;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.4);
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #555;
+}
+
+.btn-secondary:hover {
+  background: #e5e5e5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .homecook-app-card {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
