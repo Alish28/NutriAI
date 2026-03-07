@@ -5,6 +5,7 @@ import Signup from "./signup/signup.jsx";
 import Onboarding from "./onboarding/Onboarding.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Profile from "./profile/profile.jsx";
+import AdminDashboard from "./admin/adminDashboard.jsx";
 import "./App.css";
 
 function App() {
@@ -12,6 +13,8 @@ function App() {
   const [requiresOnboarding, setRequiresOnboarding] = useState(false);
   const [currentView, setCurrentView] = useState("login");
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // ADD THIS
 
   // Check authentication and onboarding status on mount
   useEffect(() => {
@@ -28,20 +31,28 @@ function App() {
     }
 
     try {
-      // FIXED: Fetch FRESH profile data from server, not localStorage
       const response = await getFullProfile();
       const userData = response.data.user;
       
       // Update localStorage with fresh data
       localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData); // ADD THIS
       
       setIsAuthenticated(true);
       
+      // CHECK IF USER IS ADMIN
+      if (userData.role === 'admin') {
+        setIsAdmin(true);
+        setCurrentView("adminDashboard");
+        setRequiresOnboarding(false); // Admins don't need onboarding
+      } 
       // Check onboarding status from FRESH server data
-      if (!userData.onboarding_completed) {
+      else if (!userData.onboarding_completed) {
+        setIsAdmin(false);
         setRequiresOnboarding(true);
         setCurrentView("onboarding");
       } else {
+        setIsAdmin(false);
         setRequiresOnboarding(false);
         setCurrentView("dashboard");
       }
@@ -51,6 +62,8 @@ function App() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setIsAuthenticated(false);
+      setUser(null);
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
@@ -59,7 +72,7 @@ function App() {
   const handleLoginSuccess = async () => {
     // After login, check onboarding status
     setIsAuthenticated(true);
-    await checkAuthStatus(); // This will determine if onboarding is needed
+    await checkAuthStatus(); // This will determine if admin or needs onboarding
   };
 
   const handleSignupSuccess = () => {
@@ -84,6 +97,8 @@ function App() {
     setIsAuthenticated(false);
     setRequiresOnboarding(false);
     setCurrentView("login");
+    setUser(null);
+    setIsAdmin(false);
   };
 
   // Show loading while checking auth
@@ -125,7 +140,20 @@ function App() {
     );
   }
 
-  // Authenticated but needs onboarding
+  // ====================================
+  // ADMIN DASHBOARD (NEW SECTION)
+  // ====================================
+  if (isAdmin && currentView === "adminDashboard") {
+    return (
+      <div className="app-root">
+        <AdminDashboard
+          onLogout={handleUserLogout}
+        />
+      </div>
+    );
+  }
+
+  // Authenticated but needs onboarding (regular users only)
   if (requiresOnboarding && currentView === "onboarding") {
     return (
       <div className="app-root">
@@ -134,7 +162,7 @@ function App() {
     );
   }
 
-  // Show profile page
+  // Show profile page (regular users only)
   if (currentView === "profile") {
     return (
       <div className="app-root">
@@ -146,7 +174,7 @@ function App() {
     );
   }
 
-  // Show dashboard
+  // Show dashboard (regular users only)
   return (
     <div className="app-root">
       <Dashboard

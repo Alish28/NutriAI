@@ -9,7 +9,6 @@ import WeeklyAverages from "../analytics/weeklyAverages.jsx";
 import AIRecommendations from "../components/aiRecommendations.jsx";
 import PantryTracker from "../components/pantryTracker.jsx";
 import HomecookApplication from "../components/homecookApplications.jsx";
-import AdminPanel from "../admin/adminPanel.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);

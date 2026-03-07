@@ -8,7 +8,7 @@ exports.getWeeklyTrends = async (req, res) => {
     // Get last 7 days of data
     const query = `
       SELECT 
-        meal_date::date as date,
+        DATE(meal_date) as date,
         COUNT(*) as meal_count,
         COALESCE(SUM(calories), 0) as total_calories,
         COALESCE(SUM(protein), 0) as total_protein,
@@ -16,9 +16,9 @@ exports.getWeeklyTrends = async (req, res) => {
         COALESCE(SUM(fats), 0) as total_fats
       FROM meals
       WHERE user_id = $1 
-        AND meal_date >= CURRENT_DATE - INTERVAL '6 days'
-        AND meal_date <= CURRENT_DATE
-      GROUP BY meal_date::date
+        AND DATE(meal_date) >= CURRENT_DATE - INTERVAL '6 days'
+        AND DATE(meal_date) <= CURRENT_DATE
+      GROUP BY DATE(meal_date)
       ORDER BY date ASC
     `;
     
@@ -31,7 +31,10 @@ exports.getWeeklyTrends = async (req, res) => {
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
       
-      const dayData = result.rows.find(row => row.date === dateStr);
+      const dayData = result.rows.find(row => {
+        const rowDate = new Date(row.date).toISOString().split('T')[0];
+        return rowDate === dateStr;
+      });
       
       last7Days.push({
         date: dateStr,
@@ -66,10 +69,10 @@ exports.getStreak = async (req, res) => {
     const userId = req.user.id;
     
     const query = `
-      SELECT DISTINCT meal_date::date as date
+      SELECT DISTINCT DATE(meal_date) as date
       FROM meals
       WHERE user_id = $1 
-        AND meal_date >= CURRENT_DATE - INTERVAL '60 days'
+        AND DATE(meal_date) >= CURRENT_DATE - INTERVAL '60 days'
       ORDER BY date DESC
     `;
     
@@ -163,25 +166,26 @@ exports.getWeeklyAverages = async (req, res) => {
   try {
     const userId = req.user.id;
     
+    // FIXED QUERY - Removed meal_date::date references in subquery
     const query = `
       SELECT 
-        COUNT(DISTINCT meal_date::date) as days_logged,
+        COUNT(DISTINCT daily_totals.date) as days_logged,
         COALESCE(AVG(daily_totals.calories), 0) as avg_calories,
         COALESCE(AVG(daily_totals.protein), 0) as avg_protein,
         COALESCE(AVG(daily_totals.carbs), 0) as avg_carbs,
         COALESCE(AVG(daily_totals.fats), 0) as avg_fats
       FROM (
         SELECT 
-          meal_date::date as date,
+          DATE(meal_date) as date,
           SUM(calories) as calories,
           SUM(protein) as protein,
           SUM(carbs) as carbs,
           SUM(fats) as fats
         FROM meals
         WHERE user_id = $1 
-          AND meal_date >= CURRENT_DATE - INTERVAL '6 days'
-          AND meal_date <= CURRENT_DATE
-        GROUP BY meal_date::date
+          AND DATE(meal_date) >= CURRENT_DATE - INTERVAL '6 days'
+          AND DATE(meal_date) <= CURRENT_DATE
+        GROUP BY DATE(meal_date)
       ) as daily_totals
     `;
     
