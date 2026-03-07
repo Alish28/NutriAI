@@ -1,4 +1,4 @@
-// nutriai/src/components/AdminPanel.jsx
+// nutriai/src/components/adminPanel.jsx
 // Admin panel to manage homecook applications
 
 import { useState, useEffect } from 'react';
@@ -10,10 +10,10 @@ import {
   getAllUsers,
   getAdminStats 
 } from '../services/api';
-import './AdminPanel.css';
+import './adminPanel.css';
 
 export default function AdminPanel({ onClose }) {
-  const [activeTab, setActiveTab] = useState('pending'); // pending, all, users, stats
+  const [activeTab, setActiveTab] = useState('pending');
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
@@ -132,13 +132,12 @@ export default function AdminPanel({ onClose }) {
         {onClose && <button className="btn-close" onClick={onClose}>✕</button>}
       </div>
 
-      {/* Tabs */}
       <div className="admin-tabs">
         <button 
           className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          Pending ({applications.filter(a => a.status === 'pending').length || '0'})
+          Pending
         </button>
         <button 
           className={`tab ${activeTab === 'all' ? 'active' : ''}`}
@@ -160,20 +159,17 @@ export default function AdminPanel({ onClose }) {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="error-message">
           {error}
         </div>
       )}
 
-      {/* Content */}
       <div className="admin-content">
         {loading ? (
           <div className="loading">Loading...</div>
         ) : (
           <>
-            {/* Pending Applications */}
             {activeTab === 'pending' && (
               <div className="applications-list">
                 <h3>Pending Homecook Applications</h3>
@@ -280,7 +276,6 @@ export default function AdminPanel({ onClose }) {
               </div>
             )}
 
-            {/* All Applications */}
             {activeTab === 'all' && (
               <div className="applications-list">
                 <h3>All Applications</h3>
@@ -311,7 +306,6 @@ export default function AdminPanel({ onClose }) {
               </div>
             )}
 
-            {/* Users List */}
             {activeTab === 'users' && (
               <div className="users-list">
                 <h3>All Users ({users.length})</h3>
@@ -348,7 +342,6 @@ export default function AdminPanel({ onClose }) {
               </div>
             )}
 
-            {/* Statistics */}
             {activeTab === 'stats' && stats && (
               <div className="stats-grid">
                 <div className="stat-card">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { logout, getFullProfile } from "../services/api";
+import { logout } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
@@ -8,7 +8,8 @@ import StreakTracker from "../analytics/streakTracker.jsx";
 import WeeklyAverages from "../analytics/weeklyAverages.jsx";
 import AIRecommendations from "../components/aiRecommendations.jsx";
 import PantryTracker from "../components/pantryTracker.jsx";
-import HomecookApplication from "../components/HomecookApplication.jsx";
+import HomecookApplication from "../components/homecookApplications.jsx";
+import AdminPanel from "../admin/adminPanel.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -17,8 +18,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showHomecookApp, setShowHomecookApp] = useState(false);
-  x;
-
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   // Load user from localStorage and fetch full profile
   useEffect(() => {
     const loadUserData = async () => {
@@ -171,6 +171,31 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           >
             ➕ Add Meal
           </button>
+          <button
+            className="icon-btn"
+            onClick={() => setShowHomecookApp(true)}
+            title="Become a Homecook"
+            style={{
+              background: "#fff7e9",
+              color: "#eea641",
+            }}
+          >
+            👨‍🍳
+          </button>
+          {/* only for admin */}
+          {user && user.role === "admin" && (
+            <button
+              className="icon-btn"
+              onClick={() => setShowAdminPanel(true)}
+              title="Admin Panel"
+              style={{
+                background: "#e0f2fe",
+                color: "#0369a1",
+              }}
+            >
+              ⚡
+            </button>
+          )}
           <button className="icon-btn">🔔</button>
           <button className="icon-btn">⚙️</button>
 
@@ -412,12 +437,75 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
 
         <footer className="dash-footer">
           <span>© 2025 NutriAI. All rights reserved.</span>
-          <span className="footer-right">
-            Made with <span className="visily-logo">Visily</span>
-          </span>
         </footer>
       </main>
+      {/* Homecook Application Modal */}
+      {showHomecookApp && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowHomecookApp(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "90%",
+              maxWidth: "900px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: "18px",
+            }}
+          >
+            <HomecookApplication onClose={() => setShowHomecookApp(false)} />
+          </div>
+        </div>
+      )}
 
+      {/* Admin Panel Modal */}
+      {showAdminPanel && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAdminPanel(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "95%",
+              maxWidth: "1200px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: "18px",
+            }}
+          >
+            <AdminPanel onClose={() => setShowAdminPanel(false)} />
+          </div>
+        </div>
+      )}
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
