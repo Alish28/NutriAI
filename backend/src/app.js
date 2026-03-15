@@ -8,7 +8,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const pantryRoutes = require('./routes/pantryRoutes');
-const homecookRoutes = require('./routes/homecookRoutes');
+const homecookRoutes = require('./routes/homeCookRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
 

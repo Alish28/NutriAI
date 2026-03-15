@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { logout } from "../services/api";
+import { logout, getFullProfile } from "../services/api";
 import "./dashboard.css";
 import MealSidebar from "../meal-sidebar/mealsidebar.jsx";
 import NutritionSummary from "../components/NutritionSummary.jsx";
@@ -9,6 +9,7 @@ import WeeklyAverages from "../analytics/weeklyAverages.jsx";
 import AIRecommendations from "../components/aiRecommendations.jsx";
 import PantryTracker from "../components/pantryTracker.jsx";
 import HomecookApplication from "../components/homecookApplications.jsx";
+import HomecookDashboard from "../homecook/homecookDashboard.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -18,6 +19,8 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   const [loading, setLoading] = useState(true);
   const [showHomecookApp, setShowHomecookApp] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [isHomecookMode, setIsHomecookMode] = useState(false); // ✅ ADDED
+  
   // Load user from localStorage and fetch full profile
   useEffect(() => {
     const loadUserData = async () => {
@@ -63,6 +66,24 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   };
+  const handleChefButtonClick = () => {
+    if (user?.homecook_approved) {
+      // User is approved - toggle homecook mode
+      setIsHomecookMode(true);
+    } else {
+      // User is not approved - show application modal
+      setShowHomecookApp(true);
+    }
+  };
+
+  if (isHomecookMode && user?.homecook_approved) {
+    return (
+      <HomecookDashboard 
+        user={user}
+        onSwitchToConsumer={() => setIsHomecookMode(false)}
+      />
+    );
+  }
 
   return (
     <div className="dashboard-page">
@@ -100,6 +121,24 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             <span className="nav-icon">⚙️</span>
             <span>Settings</span>
           </button>
+
+          {/*Homecook section in sidebar */}
+          {user?.homecook_approved && (
+            <>
+              <div className="nav-divider"></div>
+              <div className="nav-section-title">Homecook</div>
+              <button
+                className="nav-item"
+                onClick={() => {
+                  setIsHomecookMode(true);
+                  setIsNavSidebarOpen(false);
+                }}
+              >
+                <span className="nav-icon">👨‍🍳</span>
+                <span>My Homecook Dashboard</span>
+              </button>
+            </>
+          )}
 
           <div className="nav-divider"></div>
 
@@ -170,17 +209,20 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           >
             ➕ Add Meal
           </button>
+          
+          {/*FIXED: Chef button now checks approval status */}
           <button
             className="icon-btn"
-            onClick={() => setShowHomecookApp(true)}
-            title="Become a Homecook"
+            onClick={handleChefButtonClick}
+            title={user?.homecook_approved ? "Open Homecook Dashboard" : "Become a Homecook"}
             style={{
-              background: "#fff7e9",
-              color: "#eea641",
+              background: user?.homecook_approved ? "#dcfce7" : "#fff7e9",
+              color: user?.homecook_approved ? "#15803d" : "#eea641",
             }}
           >
             👨‍🍳
           </button>
+          
           {/* only for admin */}
           {user && user.role === "admin" && (
             <button
@@ -215,9 +257,15 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
       {/* Welcome Banner */}
       {user && (
         <div className="welcome-banner">
-          <h2>
-            {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
-          </h2>
+          <div className="welcome-content">
+            <h2>
+              {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
+            </h2>
+            {/* ADDED: Show homecook badge if approved */}
+            {user.homecook_approved && (
+              <span className="homecook-badge">✨ Approved Homecook</span>
+            )}
+          </div>
           {userProfile && (
             <div className="welcome-stats">
               {userProfile.health_goals &&
@@ -245,7 +293,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <NutritionSummary />
           <AIRecommendations />
 
-          {/* Personalized Meal Plan Card */}
+          {/* Existing Meal Plan Card */}
           <section className="card meal-plan-card">
             <h2 className="card-title">Personalized Meal Plan</h2>
 
@@ -438,6 +486,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <span>© 2025 NutriAI. All rights reserved.</span>
         </footer>
       </main>
+      
       {/* Homecook Application Modal */}
       {showHomecookApp && (
         <div
@@ -467,7 +516,15 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
               borderRadius: "18px",
             }}
           >
-            <HomecookApplication onClose={() => setShowHomecookApp(false)} />
+            <HomecookApplication 
+              onClose={() => setShowHomecookApp(false)}
+              onGoToDashboard={() => {
+                setShowHomecookApp(false);
+                if (user?.homecook_approved) {
+                  setIsHomecookMode(true);
+                }
+              }}
+            />
           </div>
         </div>
       )}
@@ -505,6 +562,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </div>
         </div>
       )}
+      
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}

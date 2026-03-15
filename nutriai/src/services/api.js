@@ -671,6 +671,85 @@ export const getAdminStats = async () => {
   if (!response.ok) throw new Error(data.message || 'Failed to get statistics');
   return data;
 };
+export const createRecipe = async (recipeData) => {
+  const response = await fetch(`${API_URL}/recipes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(recipeData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to create recipe');
+  return data;
+};
+ 
+export const getAllRecipes = async (filters = {}) => {
+  const queryParams = new URLSearchParams();
+  if (filters.cuisine) queryParams.append('cuisine', filters.cuisine);
+  if (filters.min_price) queryParams.append('min_price', filters.min_price);
+  if (filters.max_price) queryParams.append('max_price', filters.max_price);
+  if (filters.dietary) queryParams.append('dietary', filters.dietary);
+  
+  const url = queryParams.toString() 
+    ? `${API_URL}/recipes/all?${queryParams}`
+    : `${API_URL}/recipes/all`;
+    
+  const response = await fetch(url, {
+    method: 'GET',
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get recipes');
+  return data;
+};
+ 
+export const getRecipeById = async (id) => {
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: 'GET',
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get recipe');
+  return data;
+};
+ 
+export const updateRecipe = async (id, recipeData) => {
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(recipeData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to update recipe');
+  return data;
+};
+ 
+export const deleteRecipe = async (id) => {
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to delete recipe');
+  return data;
+};
+ 
+export const toggleRecipeAvailability = async (id) => {
+  const response = await fetch(`${API_URL}/recipes/${id}/toggle`, {
+    method: 'PATCH',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to toggle availability');
+  return data;
+};
 // Logout (clear token)
 export const logout = () => {
   localStorage.removeItem('token');

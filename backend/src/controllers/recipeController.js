@@ -1,6 +1,3 @@
-// backend/src/controllers/recipeController.js
-// Homecook recipe management
-
 const pool = require('../config/database');
 
 // Create a new recipe (homecooks only)
