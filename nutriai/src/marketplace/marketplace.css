@@ -1,0 +1,1172 @@
+/* ============================================================
+   src/marketplace/marketplace.css
+   Warm food-market aesthetic — consistent with NutriAI brand
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --mp-bg: #f7f4f0;
+  --mp-card: #ffffff;
+  --mp-amber: #eea641;
+  --mp-amber-dark: #d99536;
+  --mp-amber-light: #fff7e9;
+  --mp-text: #1a1208;
+  --mp-muted: #7a6e60;
+  --mp-border: #e8e0d5;
+  --mp-green: #2d7a4f;
+  --mp-green-light: #e8f5ee;
+  --mp-red: #c0392b;
+  --mp-red-light: #fdf0ef;
+  --mp-radius: 18px;
+  --mp-shadow: 0 4px 24px rgba(26, 18, 8, 0.07);
+  --mp-shadow-hover: 0 12px 40px rgba(26, 18, 8, 0.13);
+}
+
+/* ---- Page Shell ---- */
+.marketplacePage {
+  min-height: 100vh;
+  background: var(--mp-bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--mp-text);
+}
+
+/* ---- Header ---- */
+.marketplaceHeader {
+  background: #ffffff;
+  border-bottom: 1px solid var(--mp-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(26, 18, 8, 0.05);
+}
+
+.marketplaceHeaderInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.marketplaceLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--mp-text);
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.marketplaceLogoMark {
+  width: 36px;
+  height: 36px;
+  background: var(--mp-amber-light);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.marketplaceHeaderTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mp-text);
+  flex: 1;
+}
+
+.marketplaceHeaderTitle span {
+  color: var(--mp-amber);
+}
+
+.marketplaceHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerRoleBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.headerRoleBadge.homecook {
+  background: var(--mp-amber-light);
+  color: var(--mp-amber-dark);
+  border: 1.5px solid #f5d79e;
+}
+
+.headerRoleBadge.user {
+  background: var(--mp-green-light);
+  color: var(--mp-green);
+  border: 1.5px solid #b7dfc9;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mp-border);
+  background: transparent;
+  color: var(--mp-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  border-color: var(--mp-amber);
+  color: var(--mp-amber-dark);
+  background: var(--mp-amber-light);
+}
+
+.tabBtns {
+  display: flex;
+  background: #f5f0ea;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.tabBtn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--mp-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tabBtn.active {
+  background: #ffffff;
+  color: var(--mp-text);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(26, 18, 8, 0.08);
+}
+
+/* ---- Hero Banner ---- */
+.marketplaceHero {
+  background: linear-gradient(135deg, #1a1208 0%, #3d2a10 60%, #5c3d18 100%);
+  padding: 52px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.marketplaceHero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(238,166,65,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(238,166,65,0.1) 0%, transparent 60%);
+}
+
+.heroContent {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(238, 166, 65, 0.2);
+  border: 1px solid rgba(238, 166, 65, 0.4);
+  color: var(--mp-amber);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.heroTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.heroTitle span {
+  color: var(--mp-amber);
+}
+
+.heroSubtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Homecook hero variant */
+.marketplaceHero.homecookHero {
+  background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 60%, #3d5c3d 100%);
+}
+
+.marketplaceHero.homecookHero::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(45,122,79,0.2) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(45,122,79,0.1) 0%, transparent 60%);
+}
+
+.marketplaceHero.homecookHero .heroEyebrow {
+  background: rgba(45, 122, 79, 0.2);
+  border-color: rgba(45, 122, 79, 0.4);
+  color: #5dbb8a;
+}
+
+.marketplaceHero.homecookHero .heroTitle span {
+  color: #5dbb8a;
+}
+
+/* ---- Filter Bar ---- */
+.filterBar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--mp-border);
+  padding: 0 32px;
+}
+
+.filterBarInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filterBarInner::-webkit-scrollbar { display: none; }
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mp-bg);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 12px;
+  padding: 9px 14px;
+  min-width: 220px;
+  transition: border-color 0.2s;
+}
+
+.searchBox:focus-within {
+  border-color: var(--mp-amber);
+}
+
+.searchBox input {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--mp-text);
+  outline: none;
+  width: 100%;
+}
+
+.searchBox input::placeholder { color: var(--mp-muted); }
+
+.filterDivider {
+  width: 1px;
+  height: 28px;
+  background: var(--mp-border);
+  flex-shrink: 0;
+}
+
+.filterChips {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.filterChip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mp-border);
+  background: transparent;
+  color: var(--mp-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.filterChip:hover {
+  border-color: var(--mp-amber);
+  color: var(--mp-amber-dark);
+}
+
+.filterChip.active {
+  background: var(--mp-amber);
+  border-color: var(--mp-amber);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.resultsCount {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--mp-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---- Main Layout ---- */
+.marketplaceMain {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+/* ---- Listings Grid ---- */
+.listingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* ---- Recipe Card ---- */
+.recipeCard {
+  background: var(--mp-card);
+  border-radius: var(--mp-radius);
+  overflow: hidden;
+  box-shadow: var(--mp-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+}
+
+.recipeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mp-shadow-hover);
+  border-color: var(--mp-amber);
+}
+
+.recipeCard.myListing {
+  border-color: var(--mp-green);
+}
+
+.recipeCardImage {
+  height: 200px;
+  background: linear-gradient(135deg, #f5ede0 0%, #ffe8c4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  position: relative;
+  overflow: hidden;
+}
+
+.recipeCardImage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.04) 100%);
+}
+
+.myListingBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--mp-green);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 1;
+}
+
+.recipeCardBody {
+  padding: 20px;
+}
+
+.recipeCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.recipeCardName {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mp-text);
+  line-height: 1.3;
+}
+
+.recipeCardPrice {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mp-amber-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recipeCardCook {
+  font-size: 13px;
+  color: var(--mp-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.recipeCardDesc {
+  font-size: 13px;
+  color: var(--mp-muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.recipeCardTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.recipeTag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.recipeTag.veg { background: var(--mp-green-light); color: var(--mp-green); }
+.recipeTag.vegan { background: #e8f5ee; color: #1a6b3c; }
+.recipeTag.gf { background: #fff4e1; color: #92600a; }
+.recipeTag.cuisine { background: #f0ecff; color: #5b4b9a; }
+
+.recipeCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recipeRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mp-text);
+}
+
+.recipeRating .stars { color: var(--mp-amber); }
+.recipeRatingCount { font-weight: 400; color: var(--mp-muted); font-size: 12px; }
+
+.recipeCardMeta {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--mp-muted);
+}
+
+.recipeCardMeta span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ---- Empty State ---- */
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 32px;
+}
+
+.emptyStateIcon { font-size: 64px; margin-bottom: 16px; }
+.emptyStateTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--mp-text);
+  margin-bottom: 8px;
+}
+.emptyStateText { font-size: 15px; color: var(--mp-muted); line-height: 1.6; }
+
+/* ---- Loading Skeleton ---- */
+.skeletonCard {
+  background: var(--mp-card);
+  border-radius: var(--mp-radius);
+  overflow: hidden;
+  box-shadow: var(--mp-shadow);
+}
+
+.skeletonImage {
+  height: 200px;
+  background: linear-gradient(90deg, #f0ebe4 25%, #e8e0d6 50%, #f0ebe4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonBody { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.skeletonLine {
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #f0ebe4 25%, #e8e0d6 50%, #f0ebe4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonLine.short { width: 60%; }
+.skeletonLine.shorter { width: 40%; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ---- Recipe Detail Modal ---- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 18, 8, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modalContent {
+  background: var(--mp-card);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(26, 18, 8, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modalImageArea {
+  height: 220px;
+  background: linear-gradient(135deg, #f5ede0 0%, #ffe8c4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  position: relative;
+  border-radius: 24px 24px 0 0;
+}
+
+.modalCloseBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.modalCloseBtn:hover { background: #fff; }
+
+.modalBody { padding: 28px; }
+
+.modalRecipeName {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--mp-text);
+  margin-bottom: 6px;
+}
+
+.modalCookRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modalCookName {
+  font-size: 14px;
+  color: var(--mp-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modalPrice {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--mp-amber-dark);
+}
+
+.modalDesc {
+  font-size: 14px;
+  color: var(--mp-muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  padding: 14px;
+  background: var(--mp-bg);
+  border-radius: 12px;
+}
+
+.modalNutritionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.modalNutritionItem {
+  background: var(--mp-bg);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.modalNutritionValue {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mp-text);
+}
+
+.modalNutritionLabel {
+  font-size: 11px;
+  color: var(--mp-muted);
+  margin-top: 2px;
+}
+
+.modalDietTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.modalSection { margin-bottom: 20px; }
+
+.modalSectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mp-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.ingredientsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ingredientPill {
+  background: var(--mp-bg);
+  border: 1px solid var(--mp-border);
+  color: var(--mp-text);
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* Reviews section in modal */
+.reviewsList { display: flex; flex-direction: column; gap: 12px; }
+
+.reviewItem {
+  padding: 14px;
+  background: var(--mp-bg);
+  border-radius: 12px;
+}
+
+.reviewItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.reviewerName { font-size: 13px; font-weight: 600; color: var(--mp-text); }
+.reviewStars { font-size: 13px; color: var(--mp-amber); }
+.reviewComment { font-size: 13px; color: var(--mp-muted); line-height: 1.5; }
+
+/* Order form in modal */
+.orderForm {
+  border-top: 1.5px solid var(--mp-border);
+  padding-top: 20px;
+  margin-top: 4px;
+}
+
+.orderFormTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.orderFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.orderFormGroup { display: flex; flex-direction: column; gap: 6px; }
+
+.orderFormGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mp-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.orderInput {
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--mp-border);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--mp-text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.orderInput:focus { border-color: var(--mp-amber); }
+
+.orderTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: var(--mp-amber-light);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.orderTotalLabel { font-size: 14px; font-weight: 600; color: var(--mp-text); }
+.orderTotalAmount { font-size: 20px; font-weight: 700; color: var(--mp-amber-dark); }
+
+.orderBtn {
+  width: 100%;
+  padding: 15px;
+  background: var(--mp-amber);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.3);
+}
+
+.orderBtn:hover {
+  background: var(--mp-amber-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(238, 166, 65, 0.4);
+}
+
+.orderBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- Homecook Tab: My Listings ---- */
+.homecookSection { margin-bottom: 40px; }
+
+.homecookSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.homecookSectionTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mp-text);
+}
+
+.addRecipeBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--mp-amber);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.25);
+}
+
+.addRecipeBtn:hover {
+  background: var(--mp-amber-dark);
+  transform: translateY(-1px);
+}
+
+/* ---- Orders Tab ---- */
+.ordersSection { display: flex; flex-direction: column; gap: 16px; }
+
+.orderCard {
+  background: var(--mp-card);
+  border-radius: var(--mp-radius);
+  padding: 20px 24px;
+  box-shadow: var(--mp-shadow);
+  border: 1.5px solid var(--mp-border);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.orderCardIcon {
+  font-size: 40px;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  background: var(--mp-bg);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orderCardBody { flex: 1; }
+
+.orderCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.orderCardName {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mp-text);
+}
+
+.orderCardPrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mp-amber-dark);
+}
+
+.orderCardMeta {
+  font-size: 13px;
+  color: var(--mp-muted);
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.orderCardActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusBadge.pending    { background: #fff4e1; color: #92600a; }
+.statusBadge.confirmed  { background: #e8f5ee; color: var(--mp-green); }
+.statusBadge.ready      { background: #e8eeff; color: #3b5bdb; }
+.statusBadge.completed  { background: #f0f0f0; color: #555; }
+.statusBadge.cancelled  { background: var(--mp-red-light); color: var(--mp-red); }
+.statusBadge.no_show    { background: #ffe5e5; color: #9b2226; }
+
+.actionBtn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--mp-border);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  color: var(--mp-text);
+}
+
+.actionBtn:hover { background: var(--mp-bg); }
+.actionBtn.primary { background: var(--mp-amber); border-color: var(--mp-amber); color: #fff; }
+.actionBtn.primary:hover { background: var(--mp-amber-dark); }
+.actionBtn.danger { border-color: #fca5a5; color: var(--mp-red); }
+.actionBtn.danger:hover { background: var(--mp-red-light); }
+.actionBtn.success { border-color: #86efac; color: var(--mp-green); }
+.actionBtn.success:hover { background: var(--mp-green-light); }
+
+/* ---- Add/Edit Recipe Modal ---- */
+.recipeFormModal {
+  background: var(--mp-card);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(26, 18, 8, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+.recipeFormHeader {
+  padding: 24px 28px;
+  border-bottom: 1.5px solid var(--mp-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: var(--mp-card);
+  z-index: 1;
+  border-radius: 24px 24px 0 0;
+}
+
+.recipeFormTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mp-text);
+}
+
+.recipeFormBody { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+
+.formGroup { display: flex; flex-direction: column; gap: 6px; }
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mp-text);
+}
+
+.formGroup .required { color: var(--mp-red); }
+
+.formInput, .formTextarea, .formSelect {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--mp-border);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--mp-text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.formInput:focus, .formTextarea:focus, .formSelect:focus {
+  border-color: var(--mp-amber);
+  box-shadow: 0 0 0 3px rgba(238, 166, 65, 0.1);
+}
+
+.formTextarea { resize: vertical; min-height: 90px; }
+
+.formGrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.formGrid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.formCheckboxRow {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.formCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--mp-text);
+  cursor: pointer;
+}
+
+.formCheckbox input { accent-color: var(--mp-amber); width: 16px; height: 16px; }
+
+.recipeFormFooter {
+  padding: 20px 28px;
+  border-top: 1.5px solid var(--mp-border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancelFormBtn {
+  padding: 11px 22px;
+  border-radius: 12px;
+  border: 1.5px solid var(--mp-border);
+  background: transparent;
+  color: var(--mp-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.cancelFormBtn:hover { background: var(--mp-bg); }
+
+.saveFormBtn {
+  padding: 11px 28px;
+  border-radius: 12px;
+  border: none;
+  background: var(--mp-amber);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(238, 166, 65, 0.3);
+}
+
+.saveFormBtn:hover { background: var(--mp-amber-dark); }
+.saveFormBtn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+/* ---- Review Modal ---- */
+.reviewModal {
+  background: var(--mp-card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  box-shadow: 0 24px 80px rgba(26, 18, 8, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+.reviewModalTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--mp-text);
+}
+
+.starPicker {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.starPickerBtn {
+  font-size: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.starPickerBtn:hover { transform: scale(1.2); }
+
+.reviewModalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ---- Success Toast ---- */
+.successToast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mp-text);
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(26, 18, 8, 0.25);
+  animation: toastIn 0.3s ease;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .marketplaceHeaderInner { padding: 0 16px; gap: 10px; }
+  .marketplaceHeaderTitle { display: none; }
+  .tabBtns { gap: 0; }
+  .tabBtn { padding: 6px 10px; font-size: 12px; }
+  .marketplaceHero { padding: 36px 20px; }
+  .heroTitle { font-size: 30px; }
+  .filterBar { padding: 0 16px; }
+  .marketplaceMain { padding: 20px 16px; }
+  .listingsGrid { grid-template-columns: 1fr; }
+  .orderCard { flex-direction: column; }
+  .modalNutritionGrid { grid-template-columns: repeat(2, 1fr); }
+  .orderFormRow { grid-template-columns: 1fr; }
+  .formGrid2, .formGrid4 { grid-template-columns: 1fr; }
+}

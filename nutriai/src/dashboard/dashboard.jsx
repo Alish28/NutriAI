@@ -10,8 +10,9 @@ import AIRecommendations from "../components/aiRecommendations.jsx";
 import PantryTracker from "../components/pantryTracker.jsx";
 import HomecookApplication from "../components/homecookApplications.jsx";
 import HomecookDashboard from "../homecook/homecookDashboard.jsx";
+import AdminDashboard from "../admin/adminDashboard.jsx";
 
-export default function Dashboard({ onLogout, onOpenProfile }) {
+export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
   const [isNavSidebarOpen, setIsNavSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -19,17 +20,15 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   const [loading, setLoading] = useState(true);
   const [showHomecookApp, setShowHomecookApp] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [isHomecookMode, setIsHomecookMode] = useState(false); // ✅ ADDED
-  
+  const [isHomecookMode, setIsHomecookMode] = useState(false);
+
   // Load user from localStorage and fetch full profile
   useEffect(() => {
     const loadUserData = async () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         setUser(JSON.parse(userData));
-
         try {
-          // Fetch full profile for personalization
           const profileResponse = await getFullProfile();
           setUserProfile(profileResponse.data.user);
         } catch (error) {
@@ -41,7 +40,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         setLoading(false);
       }
     };
-
     loadUserData();
   }, []);
 
@@ -68,17 +66,15 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   };
   const handleChefButtonClick = () => {
     if (user?.homecook_approved) {
-      // User is approved - toggle homecook mode
       setIsHomecookMode(true);
     } else {
-      // User is not approved - show application modal
       setShowHomecookApp(true);
     }
   };
 
   if (isHomecookMode && user?.homecook_approved) {
     return (
-      <HomecookDashboard 
+      <HomecookDashboard
         user={user}
         onSwitchToConsumer={() => setIsHomecookMode(false)}
       />
@@ -122,7 +118,19 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             <span>Settings</span>
           </button>
 
-          {/*Homecook section in sidebar */}
+          {/* Marketplace — now active, was disabled before */}
+          <button
+            className="nav-item"
+            onClick={() => {
+              setIsNavSidebarOpen(false);
+              if (onOpenMarketplace) onOpenMarketplace();
+            }}
+          >
+            <span className="nav-icon">🏪</span>
+            <span>Marketplace</span>
+          </button>
+
+          {/* Homecook section in sidebar */}
           {user?.homecook_approved && (
             <>
               <div className="nav-divider"></div>
@@ -141,7 +149,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           )}
 
           <div className="nav-divider"></div>
-
           <div className="nav-section-title">Coming Soon</div>
 
           <button className="nav-item disabled">
@@ -157,11 +164,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <button className="nav-item disabled">
             <span className="nav-icon">📦</span>
             <span>Pantry Tracker</span>
-          </button>
-
-          <button className="nav-item disabled">
-            <span className="nav-icon">🏪</span>
-            <span>Marketplace</span>
           </button>
 
           <button className="nav-item disabled">
@@ -209,12 +211,26 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           >
             ➕ Add Meal
           </button>
-          
-          {/*FIXED: Chef button now checks approval status */}
+
+          {/* Marketplace button */}
+          <button
+            className="icon-btn"
+            onClick={() => onOpenMarketplace && onOpenMarketplace()}
+            title="Marketplace"
+            style={{ background: "#fff7e9", color: "#eea641" }}
+          >
+            🏪 Marketplace
+          </button>
+
+          {/* Chef button — checks approval status */}
           <button
             className="icon-btn"
             onClick={handleChefButtonClick}
-            title={user?.homecook_approved ? "Open Homecook Dashboard" : "Become a Homecook"}
+            title={
+              user?.homecook_approved
+                ? "Open Homecook Dashboard"
+                : "Become a Homecook"
+            }
             style={{
               background: user?.homecook_approved ? "#dcfce7" : "#fff7e9",
               color: user?.homecook_approved ? "#15803d" : "#eea641",
@@ -222,21 +238,19 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           >
             👨‍🍳
           </button>
-          
-          {/* only for admin */}
+
+          {/* Admin only */}
           {user && user.role === "admin" && (
             <button
               className="icon-btn"
               onClick={() => setShowAdminPanel(true)}
               title="Admin Panel"
-              style={{
-                background: "#e0f2fe",
-                color: "#0369a1",
-              }}
+              style={{ background: "#e0f2fe", color: "#0369a1" }}
             >
               ⚡
             </button>
           )}
+
           <button className="icon-btn">🔔</button>
           <button className="icon-btn">⚙️</button>
 
@@ -261,7 +275,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             <h2>
               {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
             </h2>
-            {/* ADDED: Show homecook badge if approved */}
             {user.homecook_approved && (
               <span className="homecook-badge">✨ Approved Homecook</span>
             )}
@@ -287,13 +300,12 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
 
       {/* Main scrollable content */}
       <main className="dash-main">
-        {/* Left column - with Nutrition Summary */}
+        {/* Left column */}
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {/* Today's Nutrition Summary */}
           <NutritionSummary />
           <AIRecommendations />
 
-          {/* Existing Meal Plan Card */}
+          {/* Meal Plan Card */}
           <section className="card meal-plan-card">
             <h2 className="card-title">Personalized Meal Plan</h2>
 
@@ -312,7 +324,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
 
             <div className="weekly-overview">
               <h3>Weekly Overview</h3>
-
               <div className="weekly-table">
                 <div className="weekly-row weekly-row-head">
                   <span>Day</span>
@@ -320,7 +331,6 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
                   <span>Lunch</span>
                   <span>Dinner</span>
                 </div>
-
                 {[
                   [
                     "Monday",
@@ -385,13 +395,8 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
         {/* Analytics Section - Full Width */}
         <section className="analytics-section">
           <div className="analytics-grid">
-            {/* Weekly Chart */}
             <WeeklyChart />
-
-            {/* Streak Tracker */}
             <StreakTracker />
-
-            {/* Weekly Averages */}
             <WeeklyAverages />
           </div>
         </section>
@@ -458,25 +463,25 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
             <MarketplaceCard
               title="Homemade Chicken Biryani"
               cook="Aisha's Kitchen"
-              price="$12.50"
+              price="Rs. 650"
               img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80"
             />
             <MarketplaceCard
               title="Vegan Lentil Lasagna"
               cook="Green Goodness"
-              price="$11.00"
+              price="Rs. 550"
               img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80"
             />
             <MarketplaceCard
               title="Palak Paneer & Naan"
               cook="Chef Rahul"
-              price="$10.00"
+              price="Rs. 500"
               img="https://images.unsplash.com/photo-1625944229409-2c7020e4e0aa?auto=format&fit=crop&w=600&q=80"
             />
             <MarketplaceCard
               title="Lemon Herb Grilled Fish"
               cook="Ocean Delights"
-              price="$14.00"
+              price="Rs. 700"
               img="https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=600&q=80"
             />
           </div>
@@ -486,7 +491,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           <span>© 2025 NutriAI. All rights reserved.</span>
         </footer>
       </main>
-      
+
       {/* Homecook Application Modal */}
       {showHomecookApp && (
         <div
@@ -516,7 +521,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
               borderRadius: "18px",
             }}
           >
-            <HomecookApplication 
+            <HomecookApplication
               onClose={() => setShowHomecookApp(false)}
               onGoToDashboard={() => {
                 setShowHomecookApp(false);
@@ -558,11 +563,11 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
               borderRadius: "18px",
             }}
           >
-            <AdminPanel onClose={() => setShowAdminPanel(false)} />
+            <AdminDashboard onClose={() => setShowAdminPanel(false)} />
           </div>
         </div>
       )}
-      
+
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
@@ -571,7 +576,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
   );
 }
 
-/* Helper components */
+/* ── Helper components ── */
 function RecipeCard({ title, desc, img }) {
   return (
     <div className="recipe-card">

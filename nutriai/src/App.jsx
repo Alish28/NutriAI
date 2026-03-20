@@ -6,24 +6,25 @@ import Onboarding from "./onboarding/Onboarding.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Profile from "./profile/profile.jsx";
 import AdminDashboard from "./admin/adminDashboard.jsx";
+import Marketplace from "./marketplace/marketplace.jsx";
 import "./App.css";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [requiresOnboarding, setRequiresOnboarding] = useState(false);
   const [currentView, setCurrentView] = useState("login");
+  // currentView values: "login" | "signup" | "onboarding" | "dashboard" | "profile" | "marketplace" | "adminDashboard"
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false); // ADD THIS
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check authentication and onboarding status on mount
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     if (!token) {
       setIsAuthenticated(false);
       setLoading(false);
@@ -33,21 +34,16 @@ function App() {
     try {
       const response = await getFullProfile();
       const userData = response.data.user;
-      
-      // Update localStorage with fresh data
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData); // ADD THIS
-      
+
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
       setIsAuthenticated(true);
-      
-      // CHECK IF USER IS ADMIN
-      if (userData.role === 'admin') {
+
+      if (userData.role === "admin") {
         setIsAdmin(true);
+        setRequiresOnboarding(false);
         setCurrentView("adminDashboard");
-        setRequiresOnboarding(false); // Admins don't need onboarding
-      } 
-      // Check onboarding status from FRESH server data
-      else if (!userData.onboarding_completed) {
+      } else if (!userData.onboarding_completed) {
         setIsAdmin(false);
         setRequiresOnboarding(true);
         setCurrentView("onboarding");
@@ -57,10 +53,9 @@ function App() {
         setCurrentView("dashboard");
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      // Token invalid, clear and show login
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      console.error("Auth check failed:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setIsAuthenticated(false);
       setUser(null);
       setIsAdmin(false);
@@ -70,9 +65,8 @@ function App() {
   };
 
   const handleLoginSuccess = async () => {
-    // After login, check onboarding status
     setIsAuthenticated(true);
-    await checkAuthStatus(); // This will determine if admin or needs onboarding
+    await checkAuthStatus();
   };
 
   const handleSignupSuccess = () => {
@@ -84,16 +78,14 @@ function App() {
   const handleOnboardingComplete = () => {
     setRequiresOnboarding(false);
     setCurrentView("dashboard");
-    
-    // Update localStorage
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
     userData.onboarding_completed = true;
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const handleUserLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
     setRequiresOnboarding(false);
     setCurrentView("login");
@@ -101,23 +93,26 @@ function App() {
     setIsAdmin(false);
   };
 
-  // Show loading while checking auth
+  // Loading screen
   if (loading) {
     return (
-      <div className="app-root" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        fontSize: '18px',
-        color: '#666'
-      }}>
+      <div
+        className="app-root"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          fontSize: "18px",
+          color: "#666",
+        }}
+      >
         Loading...
       </div>
     );
   }
 
-  // Not authenticated - show login or signup
+  // Not authenticated
   if (!isAuthenticated) {
     if (currentView === "signup") {
       return (
@@ -129,7 +124,6 @@ function App() {
         </div>
       );
     }
-
     return (
       <div className="app-root">
         <Login
@@ -140,20 +134,16 @@ function App() {
     );
   }
 
-  // ====================================
-  // ADMIN DASHBOARD (NEW SECTION)
-  // ====================================
+  // Admin dashboard
   if (isAdmin && currentView === "adminDashboard") {
     return (
       <div className="app-root">
-        <AdminDashboard
-          onLogout={handleUserLogout}
-        />
+        <AdminDashboard onLogout={handleUserLogout} />
       </div>
     );
   }
 
-  // Authenticated but needs onboarding (regular users only)
+  // Onboarding (regular users only)
   if (requiresOnboarding && currentView === "onboarding") {
     return (
       <div className="app-root">
@@ -162,7 +152,7 @@ function App() {
     );
   }
 
-  // Show profile page (regular users only)
+  // Profile page
   if (currentView === "profile") {
     return (
       <div className="app-root">
@@ -174,11 +164,21 @@ function App() {
     );
   }
 
-  // Show dashboard (regular users only)
+  // Marketplace page
+  if (currentView === "marketplace") {
+    return (
+      <div className="app-root">
+        <Marketplace onBack={() => setCurrentView("dashboard")} />
+      </div>
+    );
+  }
+
+  // Dashboard (default for regular users)
   return (
     <div className="app-root">
       <Dashboard
         onOpenProfile={() => setCurrentView("profile")}
+        onOpenMarketplace={() => setCurrentView("marketplace")}
         onLogout={handleUserLogout}
       />
     </div>

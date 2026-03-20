@@ -750,6 +750,123 @@ export const toggleRecipeAvailability = async (id) => {
   if (!response.ok) throw new Error(data.message || 'Failed to toggle availability');
   return data;
 };
+
+// ---- MARKETPLACE / RECIPES (public browsing) ----
+ 
+// Get all available marketplace listings (all users can access)
+export const getMarketplaceListings = async (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.cuisine_type) params.append('cuisine_type', filters.cuisine_type);
+  if (filters.is_vegetarian) params.append('is_vegetarian', filters.is_vegetarian);
+  if (filters.is_vegan) params.append('is_vegan', filters.is_vegan);
+  if (filters.is_gluten_free) params.append('is_gluten_free', filters.is_gluten_free);
+  if (filters.max_price) params.append('max_price', filters.max_price);
+  if (filters.search) params.append('search', filters.search);
+ 
+  const query = params.toString() ? `?${params.toString()}` : '';
+  const response = await fetch(`${API_URL}/marketplace/listings${query}`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get listings');
+  return data;
+};
+ 
+// Get single recipe detail
+export const getRecipeDetail = async (recipeId) => {
+  const response = await fetch(`${API_URL}/marketplace/listings/${recipeId}`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get recipe');
+  return data;
+};
+ 
+// ---- ORDERS ----
+ 
+// Place an order (buyer)
+export const placeOrder = async (orderData) => {
+  const response = await fetch(`${API_URL}/marketplace/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(orderData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to place order');
+  return data;
+};
+ 
+// Get my orders as buyer
+export const getMyOrders = async () => {
+  const response = await fetch(`${API_URL}/marketplace/orders/my-orders`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get orders');
+  return data;
+};
+ 
+// Get incoming orders as homecook
+export const getHomecookOrders = async () => {
+  const response = await fetch(`${API_URL}/marketplace/orders/homecook-orders`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get orders');
+  return data;
+};
+ 
+// Update order status (homecook updates: confirmed, ready_for_pickup, completed, no_show)
+export const updateOrderStatus = async (orderId, status) => {
+  const response = await fetch(`${API_URL}/marketplace/orders/${orderId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ status }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to update order');
+  return data;
+};
+ 
+// Cancel order (buyer)
+export const cancelOrder = async (orderId) => {
+  const response = await fetch(`${API_URL}/marketplace/orders/${orderId}/cancel`, {
+    method: 'PUT',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to cancel order');
+  return data;
+};
+ 
+// ---- REVIEWS ----
+ 
+// Submit a review (buyer reviews homecook, or homecook reviews buyer)
+export const submitReview = async (reviewData) => {
+  const response = await fetch(`${API_URL}/marketplace/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(reviewData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to submit review');
+  return data;
+};
+ 
+// Get reviews for a recipe
+export const getRecipeReviews = async (recipeId) => {
+  const response = await fetch(`${API_URL}/marketplace/reviews/recipe/${recipeId}`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to get reviews');
+  return data;
+};
 // Logout (clear token)
 export const logout = () => {
   localStorage.removeItem('token');
