@@ -1,385 +1,482 @@
-const db = require('../config/database');
+const pool = require('../config/database');
 
-// ============================================================
-// PUBLIC LISTINGS — all authenticated users
-// ============================================================
-
-// GET /api/marketplace/listings
-// Returns all available homecook_recipes with cook name joined
-exports.getListings = async (req, res) => {
+// ==========================================
+// GET ALL MARKETPLACE LISTINGS (Public)
+// ==========================================
+exports.getMarketplaceListings = async (req, res) => {
   try {
-    const { search, is_vegetarian, is_vegan, is_gluten_free, max_price, cuisine_type } = req.query;
+    const {
+      cuisine_type,
+      is_vegetarian,
+      is_vegan,
+      is_gluten_free,
+      max_price,
+      search
+    } = req.query;
 
-    let conditions = ['hr.available = true'];
-    const values = [];
-    let idx = 1;
+    console.log('📥 Marketplace query params:', req.query);
 
-    if (search) {
-      conditions.push(`(
-        hr.recipe_name ILIKE $${idx} OR
-        hr.description ILIKE $${idx} OR
-        hr.cuisine_type ILIKE $${idx} OR
-        u.full_name ILIKE $${idx}
-      )`);
-      values.push(`%${search}%`);
-      idx++;
-    }
-    if (is_vegetarian === 'true') { conditions.push(`hr.is_vegetarian = true`); }
-    if (is_vegan === 'true')      { conditions.push(`hr.is_vegan = true`); }
-    if (is_gluten_free === 'true') { conditions.push(`hr.is_gluten_free = true`); }
-    if (max_price)  { conditions.push(`hr.price_npr <= $${idx}`); values.push(parseFloat(max_price)); idx++; }
-    if (cuisine_type) { conditions.push(`hr.cuisine_type ILIKE $${idx}`); values.push(cuisine_type); idx++; }
-
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const query = `
-      SELECT
-        hr.*,
-        u.full_name AS cook_name
-      FROM homecook_recipes hr
-      JOIN users u ON hr.homecook_id = u.id
-      ${where}
-      ORDER BY hr.average_rating DESC NULLS LAST, hr.created_at DESC
+    // FIX: removed non-existent columns (cook_name, total_orders, average_rating)
+    // Backend JOINs users table, so homecook_name comes from u.full_name
+    let query = `
+      SELECT 
+        r.*,
+        u.full_name  AS homecook_name,
+        u.email      AS homecook_email
+      FROM homecook_recipes r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.is_available = true
+        AND u.homecook_approved = true
     `;
 
-    const result = await db.query(query, values);
+    const params = [];
+    let paramCount = 1;
+
+    if (cuisine_type) {
+      query += ` AND LOWER(r.cuisine_type) = LOWER($${paramCount})`;
+      params.push(cuisine_type);
+      paramCount++;
+    }
+
+    if (is_vegetarian === 'true') {
+      query += ` AND r.is_vegetarian = true`;
+    }
+
+    if (is_vegan === 'true') {
+      query += ` AND r.is_vegan = true`;
+    }
+
+    if (is_gluten_free === 'true') {
+      query += ` AND r.is_gluten_free = true`;
+    }
+
+    if (max_price) {
+      // FIX: column is 'price' not 'price_npr'
+      query += ` AND r.price <= $${paramCount}`;
+      params.push(parseFloat(max_price));
+      paramCount++;
+    }
+
+    if (search) {
+      query += ` AND (
+        LOWER(r.recipe_name) LIKE LOWER($${paramCount}) OR
+        LOWER(r.description)  LIKE LOWER($${paramCount}) OR
+        LOWER(u.full_name)    LIKE LOWER($${paramCount})
+      )`;
+      params.push(`%${search}%`);
+      paramCount++;
+    }
+
+    query += ' ORDER BY r.created_at DESC';
+
+    const result = await pool.query(query, params);
+
+    console.log(`✅ Found ${result.rows.length} marketplace listings`);
 
     res.json({
       success: true,
-      data: { recipes: result.rows }
+      data: {
+        // FIX: frontend reads data.data.listings
+        listings: result.rows,
+        count: result.rows.length
+      }
     });
+
   } catch (error) {
-    console.error('Get listings error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get listings', error: error.message });
+    console.error('❌ Error getting marketplace listings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while getting marketplace listings',
+      error: error.message
+    });
   }
 };
 
-// GET /api/marketplace/listings/:id
-exports.getListingById = async (req, res) => {
+// ==========================================
+// GET SINGLE LISTING DETAIL
+// ==========================================
+exports.getListingDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = `
-      SELECT hr.*, u.full_name AS cook_name
-      FROM homecook_recipes hr
-      JOIN users u ON hr.homecook_id = u.id
-      WHERE hr.id = $1
-    `;
-
-    const result = await db.query(query, [id]);
+    const result = await pool.query(
+      `SELECT 
+        r.*,
+        u.full_name AS homecook_name,
+        u.email     AS homecook_email
+      FROM homecook_recipes r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.id = $1`,
+      [id]
+    );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Recipe not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Listing not found'
+      });
     }
 
-    res.json({ success: true, data: { recipe: result.rows[0] } });
+    res.json({
+      success: true,
+      data: {
+        listing: result.rows[0]
+      }
+    });
+
   } catch (error) {
-    console.error('Get listing error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get listing', error: error.message });
+    console.error('❌ Error getting listing:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while getting listing',
+      error: error.message
+    });
   }
 };
 
-// ============================================================
-// ORDERS
-// ============================================================
-
-// POST /api/marketplace/orders
+// ==========================================
+// PLACE ORDER (Buyer)
+// ==========================================
 exports.placeOrder = async (req, res) => {
   try {
     const buyerId = req.user.id;
     const { recipe_id, quantity, pickup_date, pickup_time, special_notes } = req.body;
 
-    if (!recipe_id) {
-      return res.status(400).json({ success: false, message: 'Recipe ID is required' });
+    console.log('📥 Place order request:', { buyerId, recipe_id, quantity });
+
+    if (!recipe_id || !quantity) {
+      return res.status(400).json({
+        success: false,
+        message: 'Recipe ID and quantity are required'
+      });
     }
 
-    // Get recipe to verify it exists, is available, and get price + homecook
-    const recipeResult = await db.query(
-      'SELECT * FROM homecook_recipes WHERE id = $1 AND available = true',
+    // Get recipe details — FIX: use user_id (not homecook_id) in join
+    const recipeResult = await pool.query(
+      `SELECT r.*, u.id AS homecook_user_id
+       FROM homecook_recipes r
+       JOIN users u ON r.user_id = u.id
+       WHERE r.id = $1 AND r.is_available = true`,
       [recipe_id]
     );
 
     if (recipeResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Recipe not found or not available' });
+      return res.status(404).json({
+        success: false,
+        message: 'Recipe not found or not available'
+      });
     }
 
-    const recipe = recipeResult.rows[0];
+    const recipe     = recipeResult.rows[0];
+    const homecookId = recipe.homecook_user_id;
+    // FIX: use recipe.price (not price_npr)
+    const totalPrice = parseFloat(recipe.price) * parseInt(quantity);
 
-    // Prevent homecooks from ordering their own food
-    if (recipe.homecook_id === buyerId) {
-      return res.status(400).json({ success: false, message: 'You cannot order your own listing' });
+    // Prevent ordering your own listing
+    if (buyerId === homecookId) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot order your own listing'
+      });
     }
 
-    const qty = parseInt(quantity) || 1;
-    const totalPrice = parseFloat(recipe.price_npr) * qty;
-
-    const query = `
-      INSERT INTO marketplace_orders
-        (recipe_id, buyer_id, homecook_id, quantity, total_price_npr, pickup_date, pickup_time, special_notes, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
-      RETURNING *
-    `;
-
-    const result = await db.query(query, [
-      recipe_id, buyerId, recipe.homecook_id,
-      qty, totalPrice, pickup_date || null, pickup_time || null, special_notes || null
-    ]);
-
-    // Increment total_orders on recipe
-    await db.query(
-      'UPDATE homecook_recipes SET total_orders = COALESCE(total_orders, 0) + 1 WHERE id = $1',
-      [recipe_id]
+    const orderResult = await pool.query(
+      `INSERT INTO orders (
+        buyer_id, homecook_id, recipe_id, quantity,
+        total_price, pickup_date, pickup_time, special_notes, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+      RETURNING *`,
+      [buyerId, homecookId, recipe_id, quantity, totalPrice, pickup_date, pickup_time, special_notes]
     );
+
+    console.log('✅ Order created:', orderResult.rows[0].id);
 
     res.status(201).json({
       success: true,
       message: 'Order placed successfully',
-      data: { order: result.rows[0] }
+      data: {
+        order: orderResult.rows[0]
+      }
     });
+
   } catch (error) {
-    console.error('Place order error:', error);
-    res.status(500).json({ success: false, message: 'Failed to place order', error: error.message });
+    console.error('❌ Error placing order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while placing order',
+      error: error.message
+    });
   }
 };
 
-// GET /api/marketplace/orders/my-orders  (buyer's own orders)
+// ==========================================
+// GET MY ORDERS (Buyer)
+// ==========================================
 exports.getMyOrders = async (req, res) => {
   try {
     const buyerId = req.user.id;
 
-    const query = `
-      SELECT
-        mo.*,
-        hr.recipe_name,
-        hr.cuisine_type,
-        u.full_name AS cook_name,
-        CASE WHEN rr.id IS NOT NULL THEN true ELSE false END AS has_reviewed
-      FROM marketplace_orders mo
-      JOIN homecook_recipes hr ON mo.recipe_id = hr.id
-      JOIN users u ON mo.homecook_id = u.id
-      LEFT JOIN recipe_reviews rr
-        ON rr.order_id = mo.id AND rr.reviewer_id = $1 AND rr.review_type = 'buyer_to_homecook'
-      WHERE mo.buyer_id = $1
-      ORDER BY mo.created_at DESC
-    `;
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        r.recipe_name,
+        r.cuisine_type,
+        r.price,
+        u.full_name AS homecook_name,
+        u.email     AS homecook_email
+      FROM orders o
+      JOIN homecook_recipes r ON o.recipe_id = r.id
+      JOIN users u ON o.homecook_id = u.id
+      WHERE o.buyer_id = $1
+      ORDER BY o.created_at DESC`,
+      [buyerId]
+    );
 
-    const result = await db.query(query, [buyerId]);
+    res.json({
+      success: true,
+      data: {
+        orders: result.rows,
+        count: result.rows.length
+      }
+    });
 
-    res.json({ success: true, data: { orders: result.rows } });
   } catch (error) {
-    console.error('Get my orders error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get orders', error: error.message });
+    console.error('❌ Error getting orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while getting orders',
+      error: error.message
+    });
   }
 };
 
-// GET /api/marketplace/orders/homecook-orders  (incoming orders for homecook)
+// ==========================================
+// GET HOMECOOK ORDERS (Incoming orders)
+// ==========================================
 exports.getHomecookOrders = async (req, res) => {
   try {
     const homecookId = req.user.id;
 
-    // Verify homecook role
-    const userResult = await db.query('SELECT role FROM users WHERE id = $1', [homecookId]);
-    if (userResult.rows[0]?.role !== 'homecook') {
-      return res.status(403).json({ success: false, message: 'Only homecooks can access this' });
-    }
-
-    const query = `
-      SELECT
-        mo.*,
-        hr.recipe_name,
-        hr.cuisine_type,
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        r.recipe_name,
+        r.cuisine_type,
+        r.price,
         u.full_name AS buyer_name,
-        CASE WHEN rr.id IS NOT NULL THEN true ELSE false END AS has_reviewed
-      FROM marketplace_orders mo
-      JOIN homecook_recipes hr ON mo.recipe_id = hr.id
-      JOIN users u ON mo.buyer_id = u.id
-      LEFT JOIN recipe_reviews rr
-        ON rr.order_id = mo.id AND rr.reviewer_id = $1 AND rr.review_type = 'homecook_to_buyer'
-      WHERE mo.homecook_id = $1
-      ORDER BY mo.created_at DESC
-    `;
-
-    const result = await db.query(query, [homecookId]);
-
-    res.json({ success: true, data: { orders: result.rows } });
-  } catch (error) {
-    console.error('Get homecook orders error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get orders', error: error.message });
-  }
-};
-
-// PUT /api/marketplace/orders/:id/status  (homecook updates order status)
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const homecookId = req.user.id;
-    const orderId = req.params.id;
-    const { status } = req.body;
-
-    const validStatuses = ['confirmed', 'ready_for_pickup', 'completed', 'no_show', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
-    }
-
-    // Verify this order belongs to this homecook
-    const orderCheck = await db.query(
-      'SELECT * FROM marketplace_orders WHERE id = $1 AND homecook_id = $2',
-      [orderId, homecookId]
-    );
-
-    if (orderCheck.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Order not found or not authorized' });
-    }
-
-    const result = await db.query(
-      'UPDATE marketplace_orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-      [status, orderId]
+        u.email     AS buyer_email
+      FROM orders o
+      JOIN homecook_recipes r ON o.recipe_id = r.id
+      JOIN users u ON o.buyer_id = u.id
+      WHERE o.homecook_id = $1
+      ORDER BY o.created_at DESC`,
+      [homecookId]
     );
 
     res.json({
       success: true,
-      message: `Order status updated to ${status}`,
-      data: { order: result.rows[0] }
+      data: {
+        orders: result.rows,
+        count: result.rows.length
+      }
     });
+
   } catch (error) {
-    console.error('Update order status error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update order', error: error.message });
+    console.error('❌ Error getting homecook orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while getting orders',
+      error: error.message
+    });
   }
 };
 
-// PUT /api/marketplace/orders/:id/cancel  (buyer cancels their pending order)
-exports.cancelOrder = async (req, res) => {
+// ==========================================
+// UPDATE ORDER STATUS (Homecook)
+// ==========================================
+exports.updateOrderStatus = async (req, res) => {
   try {
-    const buyerId = req.user.id;
-    const orderId = req.params.id;
+    const { id }     = req.params;
+    const homecookId = req.user.id;
+    const { status } = req.body;
 
-    const orderCheck = await db.query(
-      "SELECT * FROM marketplace_orders WHERE id = $1 AND buyer_id = $2 AND status = 'pending'",
-      [orderId, buyerId]
-    );
+    const validStatuses = ['confirmed', 'ready_for_pickup', 'completed', 'no_show'];
 
-    if (orderCheck.rows.length === 0) {
-      return res.status(404).json({
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
         success: false,
-        message: 'Order not found, not yours, or cannot be cancelled (only pending orders can be cancelled)'
+        message: 'Invalid status. Must be one of: ' + validStatuses.join(', ')
       });
     }
 
-    const result = await db.query(
-      "UPDATE marketplace_orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1 RETURNING *",
-      [orderId]
+    const result = await pool.query(
+      `UPDATE orders
+       SET status = $1, updated_at = NOW()
+       WHERE id = $2 AND homecook_id = $3
+       RETURNING *`,
+      [status, id, homecookId]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found or unauthorized'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Order status updated',
+      data: {
+        order: result.rows[0]
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error updating order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating order',
+      error: error.message
+    });
+  }
+};
+
+// ==========================================
+// CANCEL ORDER (Buyer)
+// ==========================================
+exports.cancelOrder = async (req, res) => {
+  try {
+    const { id }  = req.params;
+    const buyerId = req.user.id;
+
+    const result = await pool.query(
+      `UPDATE orders
+       SET status = 'cancelled', updated_at = NOW()
+       WHERE id = $1 AND buyer_id = $2 AND status = 'pending'
+       RETURNING *`,
+      [id, buyerId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found, unauthorized, or cannot be cancelled'
+      });
+    }
 
     res.json({
       success: true,
       message: 'Order cancelled',
-      data: { order: result.rows[0] }
+      data: {
+        order: result.rows[0]
+      }
     });
+
   } catch (error) {
-    console.error('Cancel order error:', error);
-    res.status(500).json({ success: false, message: 'Failed to cancel order', error: error.message });
+    console.error('❌ Error cancelling order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while cancelling order',
+      error: error.message
+    });
   }
 };
 
-// ============================================================
-// REVIEWS
-// ============================================================
-
-// POST /api/marketplace/reviews
+// ==========================================
+// SUBMIT REVIEW
+// ==========================================
 exports.submitReview = async (req, res) => {
   try {
     const reviewerId = req.user.id;
-    const { order_id, recipe_id, reviewee_id, review_type, rating, comment } = req.body;
+    const { order_id, recipe_id, rating, comment, review_type } = req.body;
 
-    if (!order_id || !recipe_id || !reviewee_id || !review_type || !rating) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    if (!order_id || !rating || !review_type) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID, rating, and review type are required'
+      });
     }
 
     if (rating < 1 || rating > 5) {
-      return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+      return res.status(400).json({
+        success: false,
+        message: 'Rating must be between 1 and 5'
+      });
     }
 
-    // Verify order exists and is completed
-    const orderCheck = await db.query(
-      "SELECT * FROM marketplace_orders WHERE id = $1 AND status = 'completed'",
-      [order_id]
+    // Check order is completed
+    const orderCheck = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND status = $2',
+      [order_id, 'completed']
     );
 
     if (orderCheck.rows.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Can only review completed orders'
+        message: 'Order not found or not completed'
       });
     }
 
-    // Check reviewer is part of this order
-    const order = orderCheck.rows[0];
-    if (order.buyer_id !== reviewerId && order.homecook_id !== reviewerId) {
-      return res.status(403).json({ success: false, message: 'Not authorized to review this order' });
-    }
-
-    // Prevent duplicate reviews
-    const dupCheck = await db.query(
-      'SELECT id FROM recipe_reviews WHERE order_id = $1 AND reviewer_id = $2 AND review_type = $3',
-      [order_id, reviewerId, review_type]
+    // FIX: use 'comment' column name (frontend sends 'comment', not 'review_text')
+    const result = await pool.query(
+      `INSERT INTO reviews (
+        order_id, recipe_id, reviewer_id, rating, comment, review_type
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
+      [order_id, recipe_id, reviewerId, rating, comment, review_type]
     );
-
-    if (dupCheck.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'You have already reviewed this order' });
-    }
-
-    const result = await db.query(
-      `INSERT INTO recipe_reviews (recipe_id, order_id, reviewer_id, reviewee_id, review_type, rating, comment)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [recipe_id, order_id, reviewerId, reviewee_id, review_type, rating, comment || null]
-    );
-
-    // Recalculate average rating for recipe (buyer_to_homecook reviews only)
-    if (review_type === 'buyer_to_homecook') {
-      await db.query(
-        `UPDATE homecook_recipes
-         SET average_rating = (
-           SELECT AVG(rating) FROM recipe_reviews
-           WHERE recipe_id = $1 AND review_type = 'buyer_to_homecook'
-         )
-         WHERE id = $1`,
-        [recipe_id]
-      );
-    }
 
     res.status(201).json({
       success: true,
-      message: 'Review submitted successfully',
-      data: { review: result.rows[0] }
+      message: 'Review submitted',
+      data: {
+        review: result.rows[0]
+      }
     });
+
   } catch (error) {
-    console.error('Submit review error:', error);
-    res.status(500).json({ success: false, message: 'Failed to submit review', error: error.message });
+    console.error('❌ Error submitting review:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while submitting review',
+      error: error.message
+    });
   }
 };
 
-// GET /api/marketplace/reviews/recipe/:id
+// ==========================================
+// GET RECIPE REVIEWS
+// ==========================================
 exports.getRecipeReviews = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { recipeId } = req.params;
 
-    const query = `
-      SELECT
-        rr.*,
+    const result = await pool.query(
+      `SELECT 
+        r.*,
         u.full_name AS reviewer_name
-      FROM recipe_reviews rr
-      JOIN users u ON rr.reviewer_id = u.id
-      WHERE rr.recipe_id = $1 AND rr.review_type = 'buyer_to_homecook'
-      ORDER BY rr.created_at DESC
-    `;
+      FROM reviews r
+      JOIN users u ON r.reviewer_id = u.id
+      WHERE r.recipe_id = $1
+      ORDER BY r.created_at DESC`,
+      [recipeId]
+    );
 
-    const result = await db.query(query, [id]);
+    res.json({
+      success: true,
+      data: {
+        reviews: result.rows,
+        count: result.rows.length
+      }
+    });
 
-    res.json({ success: true, data: { reviews: result.rows } });
   } catch (error) {
-    console.error('Get recipe reviews error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get reviews', error: error.message });
+    console.error('❌ Error getting reviews:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while getting reviews',
+      error: error.message
+    });
   }
 };
-
-module.exports = exports;

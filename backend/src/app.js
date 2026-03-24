@@ -11,6 +11,7 @@ const pantryRoutes = require('./routes/pantryRoutes');
 const homecookRoutes = require('./routes/homeCookRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
+const marketplaceRoutes = require('./routes/marketplaceRoutes');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/pantry', pantryRoutes);
 app.use('/api/homecook', homecookRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'NutriAI Backend is running' });

@@ -1,24 +1,31 @@
 const express = require('express');
 const router = express.Router();
-const marketplaceController = require('../controllers/marketplaceController');
 const { protect } = require('../middleware/authMiddleware');
+const {
+  getMarketplaceListings,
+  getListingDetail,
+  placeOrder,
+  getMyOrders,
+  getHomecookOrders,
+  updateOrderStatus,
+  cancelOrder,
+  submitReview,
+  getRecipeReviews
+} = require('../controllers/marketplaceController');
 
-// All marketplace routes require authentication
-router.use(protect);
+// MARKETPLACE LISTING ROUTES (Public/Protected)
 
-// ── Listings (public browsing) ─────────────────────────────
-router.get('/listings',     marketplaceController.getListings);
-router.get('/listings/:id', marketplaceController.getListingById);
+// Public routes (no auth required)
+router.get('/listings', getMarketplaceListings);
+router.get('/listings/:id', getListingDetail);
+router.get('/reviews/recipe/:recipeId', getRecipeReviews);
 
-// ── Orders ─────────────────────────────────────────────────
-router.post('/orders',                      marketplaceController.placeOrder);
-router.get('/orders/my-orders',             marketplaceController.getMyOrders);
-router.get('/orders/homecook-orders',       marketplaceController.getHomecookOrders);
-router.put('/orders/:id/status',            marketplaceController.updateOrderStatus);
-router.put('/orders/:id/cancel',            marketplaceController.cancelOrder);
-
-// ── Reviews ────────────────────────────────────────────────
-router.post('/reviews',                     marketplaceController.submitReview);
-router.get('/reviews/recipe/:id',           marketplaceController.getRecipeReviews);
+// Protected routes (auth required)
+router.post('/orders', protect, placeOrder);
+router.get('/orders/my-orders', protect, getMyOrders);
+router.get('/orders/homecook-orders', protect, getHomecookOrders);
+router.put('/orders/:id/status', protect, updateOrderStatus);
+router.put('/orders/:id/cancel', protect, cancelOrder);
+router.post('/reviews', protect, submitReview);
 
 module.exports = router;

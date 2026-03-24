@@ -30,6 +30,7 @@ const cuisineEmoji = {
 const getCuisineEmoji = (type) =>
   cuisineEmoji[(type || '').toLowerCase()] || cuisineEmoji.default;
 
+// FIX: use recipe.price everywhere (not price_npr)
 const formatNpr = (n) => `Rs. ${parseFloat(n || 0).toLocaleString()}`;
 
 const statusMeta = {
@@ -76,16 +77,15 @@ const Toast = ({ message }) => (
 // RECIPE DETAIL MODAL
 // ════════════════════════════════════════════════════════════
 function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHomecook }) {
-  const [reviews, setReviews]         = useState([]);
+  const [reviews, setReviews]               = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
-  const [qty, setQty]                 = useState(1);
-  const [pickupDate, setPickupDate]   = useState('');
-  const [pickupTime, setPickupTime]   = useState('');
-  const [notes, setNotes]             = useState('');
-  const [placing, setPlacing]         = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [qty, setQty]                       = useState(1);
+  const [pickupDate, setPickupDate]         = useState('');
+  const [pickupTime, setPickupTime]         = useState('');
+  const [notes, setNotes]                   = useState('');
+  const [placing, setPlacing]               = useState(false);
+  const [orderSuccess, setOrderSuccess]     = useState(false);
 
-  // Min date = today
   const todayStr = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
@@ -129,7 +129,8 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
     }
   };
 
-  const isOwnListing = isHomecook && recipe.homecook_id === currentUser?.id;
+  // FIX: use user_id (not homecook_id) to check own listing
+  const isOwnListing = isHomecook && recipe.user_id === currentUser?.id;
 
   return (
     <div className="modalOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -145,7 +146,7 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
 
           <div className="modalCookRow">
             <span className="modalCookName">
-              👨‍🍳 by <strong>{recipe.cook_name || 'Homecook'}</strong>
+              👨‍🍳 by <strong>{recipe.homecook_name || 'Homecook'}</strong>
               {recipe.average_rating > 0 && (
                 <span style={{ marginLeft: 8 }}>
                   <Stars rating={recipe.average_rating} />
@@ -155,38 +156,21 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
                 </span>
               )}
             </span>
-            <span className="modalPrice">{formatNpr(recipe.price_npr)}</span>
+            {/* FIX: use recipe.price */}
+            <span className="modalPrice">{formatNpr(recipe.price)}</span>
           </div>
 
-          {/* Description */}
           {recipe.description && (
             <p className="modalDesc">{recipe.description}</p>
           )}
 
-          {/* Nutrition */}
-          {(recipe.calories || recipe.protein) && (
-            <div className="modalNutritionGrid">
-              {[
-                { label: 'Calories', value: recipe.calories ? `${Math.round(recipe.calories)}` : '—', unit: 'kcal' },
-                { label: 'Protein',  value: recipe.protein  ? `${parseFloat(recipe.protein).toFixed(1)}g` : '—', unit: '' },
-                { label: 'Carbs',    value: recipe.carbs    ? `${parseFloat(recipe.carbs).toFixed(1)}g` : '—', unit: '' },
-                { label: 'Fats',     value: recipe.fats     ? `${parseFloat(recipe.fats).toFixed(1)}g` : '—', unit: '' },
-              ].map(({ label, value, unit }) => (
-                <div className="modalNutritionItem" key={label}>
-                  <div className="modalNutritionValue">{value}</div>
-                  <div className="modalNutritionLabel">{unit || label}</div>
-                  {unit && <div className="modalNutritionLabel">{label}</div>}
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* Diet tags */}
           <div className="modalDietTags">
-            {recipe.is_vegetarian && <span className="recipeTag veg">🥬 Vegetarian</span>}
-            {recipe.is_vegan      && <span className="recipeTag vegan">🌱 Vegan</span>}
+            {recipe.is_vegetarian  && <span className="recipeTag veg">🥬 Vegetarian</span>}
+            {recipe.is_vegan       && <span className="recipeTag vegan">🌱 Vegan</span>}
             {recipe.is_gluten_free && <span className="recipeTag gf">🌾 Gluten-Free</span>}
-            {recipe.cuisine_type  && <span className="recipeTag cuisine">{recipe.cuisine_type}</span>}
+            {recipe.is_dairy_free  && <span className="recipeTag" style={{ background: '#dbeafe', color: '#1e40af' }}>🥛 Dairy-Free</span>}
+            {recipe.cuisine_type   && <span className="recipeTag cuisine">{recipe.cuisine_type}</span>}
             {recipe.prep_time_minutes && (
               <span className="recipeTag" style={{ background: '#f5f5f5', color: '#555' }}>
                 ⏱ {recipe.prep_time_minutes} min
@@ -233,7 +217,7 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
             )}
           </div>
 
-          {/* Order form — only for non-homecook users or when not own listing */}
+          {/* Order form — only for non-own listings */}
           {!isOwnListing && (
             <div className="orderForm">
               {orderSuccess ? (
@@ -251,8 +235,9 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
                     <div className="orderFormGroup">
                       <label>Quantity</label>
                       <input
-                        type="number" min={1} max={recipe.max_orders_per_day || 10}
-                        value={qty} onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+                        type="number" min={1} max={20}
+                        value={qty}
+                        onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
                         className="orderInput"
                       />
                     </div>
@@ -277,15 +262,17 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
                     <label>Special Notes</label>
                     <textarea
                       placeholder="Any dietary notes or requests…"
-                      value={notes} onChange={(e) => setNotes(e.target.value)}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
                       className="orderInput" rows={2}
                       style={{ resize: 'none' }}
                     />
                   </div>
+                  {/* FIX: use recipe.price */}
                   <div className="orderTotal">
-                    <span className="orderTotalLabel">Total ({qty} × {formatNpr(recipe.price_npr)})</span>
+                    <span className="orderTotalLabel">Total ({qty} × {formatNpr(recipe.price)})</span>
                     <span className="orderTotalAmount">
-                      {formatNpr(qty * parseFloat(recipe.price_npr || 0))}
+                      {formatNpr(qty * parseFloat(recipe.price || 0))}
                     </span>
                   </div>
                   <button className="orderBtn" onClick={handleOrder} disabled={placing}>
@@ -316,39 +303,61 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
 // ════════════════════════════════════════════════════════════
 // ADD / EDIT RECIPE MODAL (Homecook only)
 // ════════════════════════════════════════════════════════════
+
+// FIX: removed price_npr, calories, protein, carbs, fats, max_orders_per_day
+// (not in DB schema). Added is_dairy_free. price is now just 'price'.
 const emptyRecipeForm = {
-  recipe_name: '', description: '', cuisine_type: '', price_npr: '',
-  prep_time_minutes: '', servings: '', calories: '', protein: '',
-  carbs: '', fats: '', is_vegetarian: false, is_vegan: false,
-  is_gluten_free: false, ingredients: '', instructions: '',
-  max_orders_per_day: 10,
+  recipe_name: '',
+  description: '',
+  cuisine_type: '',
+  price: '',
+  prep_time_minutes: '',
+  servings: '',
+  is_vegetarian: false,
+  is_vegan: false,
+  is_gluten_free: false,
+  is_dairy_free: false,
+  ingredients: '',
+  instructions: '',
 };
 
 function RecipeFormModal({ recipe, onClose, onSaved }) {
-  const [form, setForm]     = useState(recipe ? {
-    ...emptyRecipeForm, ...recipe,
-    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join(', ') : '',
-    instructions: Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : '',
+  const [form, setForm] = useState(recipe ? {
+    ...emptyRecipeForm,
+    ...recipe,
+    price: recipe.price || '',
+    ingredients: Array.isArray(recipe.ingredients)
+      ? recipe.ingredients.join(', ')
+      : (recipe.ingredients || ''),
+    instructions: Array.isArray(recipe.instructions)
+      ? recipe.instructions.join('\n')
+      : (recipe.instructions || ''),
   } : { ...emptyRecipeForm });
+
   const [saving, setSaving] = useState(false);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
   const handleSave = async () => {
-    if (!form.recipe_name || !form.price_npr) {
-      return alert('Recipe name and price are required.');
+    // FIX: validate price (not price_npr), and also require description
+    if (!form.recipe_name || !form.description || !form.price) {
+      return alert('Recipe name, description, and price are required.');
     }
+
     setSaving(true);
     try {
       const payload = {
-        ...form,
-        price_npr: parseFloat(form.price_npr),
-        prep_time_minutes: parseInt(form.prep_time_minutes) || null,
-        servings: parseInt(form.servings) || null,
-        calories: parseFloat(form.calories) || null,
-        protein: parseFloat(form.protein) || null,
-        carbs: parseFloat(form.carbs) || null,
-        fats: parseFloat(form.fats) || null,
+        recipe_name: form.recipe_name,
+        description: form.description,
+        cuisine_type: form.cuisine_type || 'Nepali',
+        // FIX: send as 'price' to match DB column
+        price: parseFloat(form.price),
+        prep_time_minutes: parseInt(form.prep_time_minutes) || 30,
+        servings: parseInt(form.servings) || 2,
+        is_vegetarian: !!form.is_vegetarian,
+        is_vegan: !!form.is_vegan,
+        is_gluten_free: !!form.is_gluten_free,
+        is_dairy_free: !!form.is_dairy_free,
         ingredients: form.ingredients
           ? form.ingredients.split(',').map((s) => s.trim()).filter(Boolean)
           : [],
@@ -358,12 +367,14 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
       };
 
       if (recipe?.id) {
-        await apiFetch(`/homecook/recipes/${recipe.id}`, {
+        // FIX: use /recipes/:id route (matches recipeRoutes.js)
+        await apiFetch(`/recipes/${recipe.id}`, {
           method: 'PUT',
           body: JSON.stringify(payload),
         });
       } else {
-        await apiFetch('/homecook/recipes', {
+        // FIX: use /recipes route (matches recipeRoutes.js)
+        await apiFetch('/recipes', {
           method: 'POST',
           body: JSON.stringify(payload),
         });
@@ -392,7 +403,7 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
         </div>
 
         <div className="recipeFormBody">
-          {/* Basic info */}
+          {/* Recipe Name */}
           <div className="formGroup">
             <label>Recipe Name <span className="required">*</span></label>
             <input className="formInput" value={form.recipe_name}
@@ -400,13 +411,15 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
               placeholder="e.g. Momo with Achar" />
           </div>
 
+          {/* Description */}
           <div className="formGroup">
-            <label>Description</label>
+            <label>Description <span className="required">*</span></label>
             <textarea className="formTextarea" value={form.description}
               onChange={(e) => set('description', e.target.value)}
               placeholder="What makes this dish special?" />
           </div>
 
+          {/* Cuisine + Price */}
           <div className="formGrid2">
             <div className="formGroup">
               <label>Cuisine Type</label>
@@ -419,14 +432,16 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
               </select>
             </div>
             <div className="formGroup">
+              {/* FIX: label and field now use 'price' */}
               <label>Price (NPR) <span className="required">*</span></label>
               <input className="formInput" type="number" min="0" step="1"
-                value={form.price_npr}
-                onChange={(e) => set('price_npr', e.target.value)}
+                value={form.price}
+                onChange={(e) => set('price', e.target.value)}
                 placeholder="0" />
             </div>
           </div>
 
+          {/* Prep time + Servings */}
           <div className="formGrid2">
             <div className="formGroup">
               <label>Prep Time (minutes)</label>
@@ -444,27 +459,7 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* Nutrition */}
-          <div className="formGroup">
-            <label>Nutrition (optional)</label>
-            <div className="formGrid4">
-              {[
-                { key: 'calories', label: 'Calories' },
-                { key: 'protein',  label: 'Protein (g)' },
-                { key: 'carbs',    label: 'Carbs (g)' },
-                { key: 'fats',     label: 'Fats (g)' },
-              ].map(({ key, label }) => (
-                <div className="formGroup" key={key}>
-                  <label style={{ fontSize: 11 }}>{label}</label>
-                  <input className="formInput" type="number" min="0" step="0.1"
-                    value={form[key]} onChange={(e) => set(key, e.target.value)}
-                    placeholder="0" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Dietary flags */}
+          {/* Dietary flags — FIX: added is_dairy_free */}
           <div className="formGroup">
             <label>Dietary Info</label>
             <div className="formCheckboxRow">
@@ -472,6 +467,7 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
                 { key: 'is_vegetarian', label: '🥬 Vegetarian' },
                 { key: 'is_vegan',      label: '🌱 Vegan' },
                 { key: 'is_gluten_free', label: '🌾 Gluten-Free' },
+                { key: 'is_dairy_free',  label: '🥛 Dairy-Free' },
               ].map(({ key, label }) => (
                 <label className="formCheckbox" key={key}>
                   <input type="checkbox" checked={!!form[key]}
@@ -484,18 +480,30 @@ function RecipeFormModal({ recipe, onClose, onSaved }) {
 
           {/* Ingredients */}
           <div className="formGroup">
-            <label>Ingredients <span style={{ fontWeight: 400, color: '#7a6e60', fontSize: 12 }}>(comma separated)</span></label>
+            <label>
+              Ingredients{' '}
+              <span style={{ fontWeight: 400, color: '#7a6e60', fontSize: 12 }}>
+                (comma separated)
+              </span>
+            </label>
             <textarea className="formTextarea" value={form.ingredients}
               onChange={(e) => set('ingredients', e.target.value)}
-              placeholder="Rice, Lentils, Ghee, Spices…" style={{ minHeight: 70 }} />
+              placeholder="Rice, Lentils, Ghee, Spices…"
+              style={{ minHeight: 70 }} />
           </div>
 
-          {/* Max orders */}
+          {/* Instructions */}
           <div className="formGroup">
-            <label>Max Orders per Day</label>
-            <input className="formInput" type="number" min="1" max="100"
-              value={form.max_orders_per_day}
-              onChange={(e) => set('max_orders_per_day', parseInt(e.target.value) || 10)} />
+            <label>
+              Instructions{' '}
+              <span style={{ fontWeight: 400, color: '#7a6e60', fontSize: 12 }}>
+                (one step per line)
+              </span>
+            </label>
+            <textarea className="formTextarea" value={form.instructions}
+              onChange={(e) => set('instructions', e.target.value)}
+              placeholder={"Heat oil in pan\nAdd ingredients\nServe hot"}
+              style={{ minHeight: 90 }} />
           </div>
         </div>
 
@@ -565,7 +573,8 @@ function ReviewModal({ order, reviewType, onClose, onSubmitted }) {
 
         <div className="formGroup">
           <textarea className="formTextarea"
-            value={comment} onChange={(e) => setComment(e.target.value)}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             placeholder="Share your experience… (optional)"
             style={{ minHeight: 80 }} />
         </div>
@@ -585,7 +594,7 @@ function ReviewModal({ order, reviewType, onClose, onSubmitted }) {
 // ORDER CARD
 // ════════════════════════════════════════════════════════════
 function OrderCard({ order, viewAs, onStatusUpdate, onReview }) {
-  const meta    = statusMeta[order.status] || statusMeta.pending;
+  const meta           = statusMeta[order.status] || statusMeta.pending;
   const isHomecookView = viewAs === 'homecook';
 
   const nextStatusOptions = {
@@ -606,15 +615,18 @@ function OrderCard({ order, viewAs, onStatusUpdate, onReview }) {
       <div className="orderCardBody">
         <div className="orderCardTop">
           <span className="orderCardName">{order.recipe_name}</span>
-          <span className="orderCardPrice">{formatNpr(order.total_price_npr)}</span>
+          {/* FIX: total_price (not total_price_npr) */}
+          <span className="orderCardPrice">{formatNpr(order.total_price)}</span>
         </div>
         <div className="orderCardMeta">
           <span>
-            {isHomecookView ? `👤 ${order.buyer_name}` : `👨‍🍳 ${order.cook_name}`}
+            {isHomecookView ? `👤 ${order.buyer_name}` : `👨‍🍳 ${order.homecook_name}`}
           </span>
           <span>📦 Qty: {order.quantity}</span>
           {order.pickup_date && (
-            <span>📅 {new Date(order.pickup_date).toLocaleDateString('en-NP', { month: 'short', day: 'numeric' })}</span>
+            <span>
+              📅 {new Date(order.pickup_date).toLocaleDateString('en-NP', { month: 'short', day: 'numeric' })}
+            </span>
           )}
           {order.pickup_time && <span>🕐 {order.pickup_time}</span>}
         </div>
@@ -629,7 +641,8 @@ function OrderCard({ order, viewAs, onStatusUpdate, onReview }) {
           </span>
 
           {nextOptions.map((s) => (
-            <button key={s} className={`actionBtn ${s === 'cancelled' || s === 'no_show' ? 'danger' : 'primary'}`}
+            <button key={s}
+              className={`actionBtn ${s === 'cancelled' || s === 'no_show' ? 'danger' : 'primary'}`}
               onClick={() => onStatusUpdate(order.id, s)}>
               {statusMeta[s]?.label || s}
             </button>
@@ -656,29 +669,29 @@ function OrderCard({ order, viewAs, onStatusUpdate, onReview }) {
 // MAIN MARKETPLACE COMPONENT
 // ════════════════════════════════════════════════════════════
 export default function Marketplace({ onBack }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isHomecook, setIsHomecook]   = useState(false);
-  const [activeTab, setActiveTab]     = useState('browse');
+  const [currentUser, setCurrentUser]   = useState(null);
+  const [isHomecook, setIsHomecook]     = useState(false);
+  const [activeTab, setActiveTab]       = useState('browse');
 
   // Browse state
-  const [listings, setListings]         = useState([]);
+  const [listings, setListings]               = useState([]);
   const [loadingListings, setLoadingListings] = useState(true);
-  const [search, setSearch]             = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [search, setSearch]                   = useState('');
+  const [activeFilter, setActiveFilter]       = useState('all');
+  const [selectedRecipe, setSelectedRecipe]   = useState(null);
 
   // Homecook state
-  const [myListings, setMyListings]   = useState([]);
-  const [loadingMine, setLoadingMine] = useState(false);
+  const [myListings, setMyListings]       = useState([]);
+  const [loadingMine, setLoadingMine]     = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
-  const [showAddForm, setShowAddForm]   = useState(false);
+  const [showAddForm, setShowAddForm]     = useState(false);
 
   // Orders state
-  const [myOrders, setMyOrders]               = useState([]);
-  const [homecookOrders, setHomecookOrders]   = useState([]);
-  const [loadingOrders, setLoadingOrders]     = useState(false);
-  const [reviewTarget, setReviewTarget]       = useState(null);
-  const [reviewType, setReviewType]           = useState('');
+  const [myOrders, setMyOrders]             = useState([]);
+  const [homecookOrders, setHomecookOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders]   = useState(false);
+  const [reviewTarget, setReviewTarget]     = useState(null);
+  const [reviewType, setReviewType]         = useState('');
 
   // UI state
   const [toast, setToast] = useState('');
@@ -694,7 +707,7 @@ export default function Marketplace({ onBack }) {
     if (userData) {
       const u = JSON.parse(userData);
       setCurrentUser(u);
-      setIsHomecook(u.role === 'homecook');
+      setIsHomecook(u.role === 'homecook' || u.homecook_approved === true);
     }
   }, []);
 
@@ -709,7 +722,8 @@ export default function Marketplace({ onBack }) {
       if (activeFilter === 'gluten_free') params.append('is_gluten_free', 'true');
       const query = params.toString() ? `?${params.toString()}` : '';
       const data = await apiFetch(`/marketplace/listings${query}`);
-      setListings(data.data?.recipes || []);
+      // FIX: backend returns data.data.listings (not .recipes)
+      setListings(data.data?.listings || []);
     } catch {
       setListings([]);
     } finally {
@@ -732,7 +746,8 @@ export default function Marketplace({ onBack }) {
     if (!isHomecook) return;
     setLoadingMine(true);
     try {
-      const data = await apiFetch('/homecook/my-recipes');
+      // FIX: use the correct route that matches recipeRoutes.js
+      const data = await apiFetch('/recipes/my/recipes');
       setMyListings(data.data?.recipes || []);
     } catch {
       setMyListings([]);
@@ -794,7 +809,8 @@ export default function Marketplace({ onBack }) {
   const handleDeleteListing = async (id) => {
     if (!window.confirm('Delete this listing? This cannot be undone.')) return;
     try {
-      await apiFetch(`/homecook/recipes/${id}`, { method: 'DELETE' });
+      // FIX: use /recipes/:id route
+      await apiFetch(`/recipes/${id}`, { method: 'DELETE' });
       showToast('Listing deleted');
       loadMyListings();
     } catch (err) {
@@ -811,29 +827,26 @@ export default function Marketplace({ onBack }) {
 
   // ── Filter chips ───────────────────────────────────────────
   const filters = [
-    { id: 'all',          label: 'All' },
-    { id: 'vegetarian',   label: '🥬 Veg' },
-    { id: 'vegan',        label: '🌱 Vegan' },
-    { id: 'gluten_free',  label: '🌾 GF' },
+    { id: 'all',         label: 'All' },
+    { id: 'vegetarian',  label: '🥬 Veg' },
+    { id: 'vegan',       label: '🌱 Vegan' },
+    { id: 'gluten_free', label: '🌾 GF' },
   ];
 
-  // Which tabs to show
   const tabs = [
-    { id: 'browse',      label: '🏪 Browse' },
-    { id: 'orders',      label: '📋 My Orders' },
-    ...(isHomecook ? [
-      { id: 'myListings', label: '🍳 My Listings' },
-    ] : []),
+    { id: 'browse',     label: '🏪 Browse' },
+    { id: 'orders',     label: '📋 My Orders' },
+    ...(isHomecook ? [{ id: 'myListings', label: '🍳 My Listings' }] : []),
   ];
 
-  // ── Filtered listings (client-side for cuisine filter) ─────
+  // Client-side search filter
   const displayedListings = listings.filter((r) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
       r.recipe_name?.toLowerCase().includes(q) ||
       r.description?.toLowerCase().includes(q) ||
-      r.cook_name?.toLowerCase().includes(q) ||
+      r.homecook_name?.toLowerCase().includes(q) ||
       r.cuisine_type?.toLowerCase().includes(q)
     );
   });
@@ -853,12 +866,10 @@ export default function Marketplace({ onBack }) {
           </h1>
 
           <div className="marketplaceHeaderRight">
-            {/* Role badge */}
             <div className={`headerRoleBadge ${isHomecook ? 'homecook' : 'user'}`}>
               {isHomecook ? '👨‍🍳 Homecook' : '🛒 Browsing as User'}
             </div>
 
-            {/* Tab navigation */}
             <div className="tabBtns">
               {tabs.map((t) => (
                 <button key={t.id}
@@ -947,12 +958,12 @@ export default function Marketplace({ onBack }) {
             ) : (
               displayedListings.map((recipe) => (
                 <div key={recipe.id}
-                  className={`recipeCard ${isHomecook && recipe.homecook_id === currentUser?.id ? 'myListing' : ''}`}
+                  className={`recipeCard ${isHomecook && recipe.user_id === currentUser?.id ? 'myListing' : ''}`}
                   onClick={() => setSelectedRecipe(recipe)}>
 
                   <div className="recipeCardImage">
                     {getCuisineEmoji(recipe.cuisine_type)}
-                    {isHomecook && recipe.homecook_id === currentUser?.id && (
+                    {isHomecook && recipe.user_id === currentUser?.id && (
                       <div className="myListingBadge">My Listing</div>
                     )}
                   </div>
@@ -960,19 +971,22 @@ export default function Marketplace({ onBack }) {
                   <div className="recipeCardBody">
                     <div className="recipeCardTop">
                       <span className="recipeCardName">{recipe.recipe_name}</span>
-                      <span className="recipeCardPrice">{formatNpr(recipe.price_npr)}</span>
+                      {/* FIX: use recipe.price */}
+                      <span className="recipeCardPrice">{formatNpr(recipe.price)}</span>
                     </div>
+                    {/* FIX: use homecook_name (from backend JOIN) */}
                     <div className="recipeCardCook">
-                      👨‍🍳 {recipe.cook_name || 'Homecook'}
+                      👨‍🍳 {recipe.homecook_name || 'Homecook'}
                     </div>
                     {recipe.description && (
                       <p className="recipeCardDesc">{recipe.description}</p>
                     )}
                     <div className="recipeCardTags">
-                      {recipe.is_vegetarian && <span className="recipeTag veg">Veg</span>}
-                      {recipe.is_vegan      && <span className="recipeTag vegan">Vegan</span>}
+                      {recipe.is_vegetarian  && <span className="recipeTag veg">Veg</span>}
+                      {recipe.is_vegan       && <span className="recipeTag vegan">Vegan</span>}
                       {recipe.is_gluten_free && <span className="recipeTag gf">GF</span>}
-                      {recipe.cuisine_type  && (
+                      {recipe.is_dairy_free  && <span className="recipeTag" style={{ background: '#dbeafe', color: '#1e40af' }}>DF</span>}
+                      {recipe.cuisine_type   && (
                         <span className="recipeTag cuisine">{recipe.cuisine_type}</span>
                       )}
                     </div>
@@ -1012,7 +1026,8 @@ export default function Marketplace({ onBack }) {
                 <p className="emptyStateText">
                   Add your first dish to start receiving orders from the community.
                 </p>
-                <button className="addRecipeBtn" style={{ margin: '20px auto 0', display: 'inline-flex' }}
+                <button className="addRecipeBtn"
+                  style={{ margin: '20px auto 0', display: 'inline-flex' }}
                   onClick={() => setShowAddForm(true)}>
                   ➕ Add Your First Dish
                 </button>
@@ -1028,17 +1043,18 @@ export default function Marketplace({ onBack }) {
                     <div className="recipeCardBody">
                       <div className="recipeCardTop">
                         <span className="recipeCardName">{recipe.recipe_name}</span>
-                        <span className="recipeCardPrice">{formatNpr(recipe.price_npr)}</span>
+                        {/* FIX: use recipe.price */}
+                        <span className="recipeCardPrice">{formatNpr(recipe.price)}</span>
                       </div>
                       {recipe.description && (
                         <p className="recipeCardDesc">{recipe.description}</p>
                       )}
                       <div className="recipeCardTags">
-                        {recipe.cuisine_type && (
-                          <span className="recipeTag cuisine">{recipe.cuisine_type}</span>
-                        )}
-                        {recipe.is_vegetarian && <span className="recipeTag veg">Veg</span>}
-                        {recipe.is_vegan && <span className="recipeTag vegan">Vegan</span>}
+                        {recipe.cuisine_type   && <span className="recipeTag cuisine">{recipe.cuisine_type}</span>}
+                        {recipe.is_vegetarian  && <span className="recipeTag veg">Veg</span>}
+                        {recipe.is_vegan       && <span className="recipeTag vegan">Vegan</span>}
+                        {recipe.is_gluten_free && <span className="recipeTag gf">GF</span>}
+                        {recipe.is_dairy_free  && <span className="recipeTag" style={{ background: '#dbeafe', color: '#1e40af' }}>DF</span>}
                       </div>
                       <div className="recipeCardFooter">
                         <div className="recipeRating">
@@ -1047,12 +1063,12 @@ export default function Marketplace({ onBack }) {
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button className="actionBtn"
-                            onClick={() => { setEditingRecipe(recipe); }}
+                            onClick={(e) => { e.stopPropagation(); setEditingRecipe(recipe); }}
                             style={{ fontSize: 12, padding: '6px 12px' }}>
                             ✏️ Edit
                           </button>
                           <button className="actionBtn danger"
-                            onClick={() => handleDeleteListing(recipe.id)}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteListing(recipe.id); }}
                             style={{ fontSize: 12, padding: '6px 12px' }}>
                             🗑
                           </button>

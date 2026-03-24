@@ -535,18 +535,6 @@ export const toggleHomecookMode = async () => {
   return data;
 };
 
-export const getMyRecipes = async () => {
-  const response = await fetch(`${API_URL}/homecook/my-recipes`, {
-    method: 'GET',
-    headers: {
-      ...getAuthHeader(),
-    },
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || 'Failed to get recipes');
-  return data;
-};
-
 export const addHomecookRecipe = async (recipeData) => {
   const response = await fetch(`${API_URL}/homecook/recipes`, {
     method: 'POST',
@@ -748,6 +736,25 @@ export const toggleRecipeAvailability = async (id) => {
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || 'Failed to toggle availability');
+  return data;
+};
+// ========== HOMECOOK-SPECIFIC RECIPE ENDPOINTS ==========
+ 
+// Get MY recipes as a homecook (requires auth + homecook status)
+export const getMyRecipes = async () => {
+  const response = await fetch(`${API_URL}/recipes/my/recipes`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+ 
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get recipes');
+  }
+  
   return data;
 };
 

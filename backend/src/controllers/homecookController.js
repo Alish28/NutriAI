@@ -1,6 +1,3 @@
-// backend/src/controllers/homecookController.js
-// COMPLETE WORKING VERSION - Copy this ENTIRE file
-
 const db = require('../config/database');
 
 // Apply to become homecook
@@ -16,7 +13,6 @@ exports.applyHomecook = async (req, res) => {
       });
     }
     
-    // Check if already applied
     const check = await db.query('SELECT id, status FROM homecook_applications WHERE user_id = $1', [userId]);
     
     if (check.rows.length > 0) {
@@ -41,7 +37,6 @@ exports.applyHomecook = async (req, res) => {
       certifications || null
     ]);
     
-    // Update user status
     await db.query('UPDATE users SET homecook_status = $1 WHERE id = $2', ['pending', userId]);
     
     res.status(201).json({
@@ -87,12 +82,11 @@ exports.getApplicationStatus = async (req, res) => {
   }
 };
 
-// Toggle homecook mode (only if approved)
+// Toggle homecook mode
 exports.toggleHomecookMode = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Check if approved
     const userQuery = 'SELECT role, homecook_approved, homecook_status FROM users WHERE id = $1';
     const user = await db.query(userQuery, [userId]);
     
@@ -111,7 +105,6 @@ exports.toggleHomecookMode = async (req, res) => {
       });
     }
     
-    // Toggle role between consumer and homecook
     const currentRole = user.rows[0].role;
     const newRole = currentRole === 'homecook' ? 'consumer' : 'homecook';
     
@@ -135,7 +128,7 @@ exports.toggleHomecookMode = async (req, res) => {
   }
 };
 
-// Get homecook profile (for marketplace display)
+// Get homecook profile
 exports.getHomecookProfile = async (req, res) => {
   try {
     const homecookId = req.params.id;
@@ -151,7 +144,7 @@ exports.getHomecookProfile = async (req, res) => {
         AVG(hr.average_rating) as average_rating
       FROM users u
       LEFT JOIN homecook_applications ha ON u.id = ha.user_id
-      LEFT JOIN homecook_recipes hr ON u.id = hr.homecook_id
+      LEFT JOIN homecook_recipes hr ON u.id = hr.user_id
       WHERE u.id = $1 AND u.homecook_approved = true
       GROUP BY u.id, u.full_name, u.created_at, ha.specialties, ha.experience_years
     `;
@@ -183,20 +176,12 @@ exports.getHomecookProfile = async (req, res) => {
 exports.getMyRecipes = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Verify user is homecook
-    const checkQuery = 'SELECT role FROM users WHERE id = $1';
-    const user = await db.query(checkQuery, [userId]);
-    
-    if (user.rows[0].role !== 'homecook') {
-      return res.status(403).json({
-        success: false,
-        message: 'Only homecooks can access this endpoint'
-      });
-    }
-    
-    const query = 'SELECT * FROM homecook_recipes WHERE homecook_id = $1 ORDER BY created_at DESC';
+    console.log('📥 Get my recipes - User ID:', userId);
+
+    const query = 'SELECT * FROM homecook_recipes WHERE user_id = $1 ORDER BY created_at DESC';
     const result = await db.query(query, [userId]);
+
+    console.log(`✅ Found ${result.rows.length} recipes`);
     
     res.json({
       success: true,
@@ -212,72 +197,64 @@ exports.getMyRecipes = async (req, res) => {
   }
 };
 
-// Add new recipe to marketplace
+// Add new recipe
 exports.addRecipe = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Verify user is homecook
-    const checkQuery = 'SELECT role FROM users WHERE id = $1';
-    const user = await db.query(checkQuery, [userId]);
-    
-    if (user.rows[0].role !== 'homecook') {
-      return res.status(403).json({
-        success: false,
-        message: 'Only homecooks can add recipes'
-      });
-    }
     
     const {
       recipe_name,
       description,
       cuisine_type,
-      price_npr,
-      preparation_time_minutes,
+      price,
+      prep_time_minutes,
       servings,
-      calories,
-      protein,
-      carbs,
-      fats,
-      is_vegetarian,
-      is_vegan,
-      is_gluten_free,
       ingredients,
       instructions,
-      image_url,
-      max_orders_per_day
+      is_vegan,
+      is_vegetarian,
+      is_gluten_free,
+      is_dairy_free
     } = req.body;
     
-    if (!recipe_name || !price_npr) {
+    if (!recipe_name || !description || !price) {
       return res.status(400).json({
         success: false,
-        message: 'Recipe name and price are required'
+        message: 'Recipe name, description, and price are required'
       });
     }
     
     const query = `
       INSERT INTO homecook_recipes (
-        homecook_id, recipe_name, description, cuisine_type, price_npr,
-        preparation_time_minutes, servings, calories, protein, carbs, fats,
-        is_vegetarian, is_vegan, is_gluten_free,
-        ingredients, instructions, image_url, max_orders_per_day
+        user_id, recipe_name, description, cuisine_type, price,
+        prep_time_minutes, servings, ingredients, instructions,
+        is_vegan, is_vegetarian, is_gluten_free, is_dairy_free
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
     
     const values = [
-      userId, recipe_name, description, cuisine_type, price_npr,
-      preparation_time_minutes, servings, calories, protein, carbs, fats,
-      is_vegetarian || false, is_vegan || false, is_gluten_free || false,
-      ingredients || [], instructions || [], image_url, max_orders_per_day || 10
+      userId,
+      recipe_name,
+      description,
+      cuisine_type || 'Nepali',
+      parseFloat(price),
+      parseInt(prep_time_minutes) || 30,
+      parseInt(servings) || 2,
+      ingredients || [],
+      instructions || [],
+      is_vegan || false,
+      is_vegetarian || false,
+      is_gluten_free || false,
+      is_dairy_free || false
     ];
     
     const result = await db.query(query, values);
     
     res.status(201).json({
       success: true,
-      message: 'Recipe added to marketplace successfully',
+      message: 'Recipe added successfully',
       data: { recipe: result.rows[0] }
     });
   } catch (error) {
@@ -295,28 +272,51 @@ exports.updateRecipe = async (req, res) => {
   try {
     const userId = req.user.id;
     const recipeId = req.params.id;
-    const updates = req.body;
     
-    // Build dynamic update query
-    const fields = Object.keys(updates);
-    if (fields.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'No fields to update'
-      });
-    }
-    
-    const setClause = fields.map((field, i) => `${field} = $${i + 3}`).join(', ');
-    const values = Object.values(updates);
+    const {
+      recipe_name,
+      description,
+      cuisine_type,
+      price,
+      prep_time_minutes,
+      servings,
+      ingredients,
+      instructions,
+      is_vegan,
+      is_vegetarian,
+      is_gluten_free,
+      is_dairy_free
+    } = req.body;
     
     const query = `
       UPDATE homecook_recipes 
-      SET ${setClause}, updated_at = NOW()
-      WHERE id = $1 AND homecook_id = $2
+      SET 
+        recipe_name = COALESCE($3, recipe_name),
+        description = COALESCE($4, description),
+        cuisine_type = COALESCE($5, cuisine_type),
+        price = COALESCE($6, price),
+        prep_time_minutes = COALESCE($7, prep_time_minutes),
+        servings = COALESCE($8, servings),
+        ingredients = COALESCE($9, ingredients),
+        instructions = COALESCE($10, instructions),
+        is_vegan = COALESCE($11, is_vegan),
+        is_vegetarian = COALESCE($12, is_vegetarian),
+        is_gluten_free = COALESCE($13, is_gluten_free),
+        is_dairy_free = COALESCE($14, is_dairy_free),
+        updated_at = NOW()
+      WHERE id = $1 AND user_id = $2
       RETURNING *
     `;
     
-    const result = await db.query(query, [recipeId, userId, ...values]);
+    const result = await db.query(query, [
+      recipeId, userId,
+      recipe_name, description, cuisine_type,
+      price ? parseFloat(price) : null,
+      prep_time_minutes ? parseInt(prep_time_minutes) : null,
+      servings ? parseInt(servings) : null,
+      ingredients, instructions,
+      is_vegan, is_vegetarian, is_gluten_free, is_dairy_free
+    ]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -346,7 +346,7 @@ exports.deleteRecipe = async (req, res) => {
     const userId = req.user.id;
     const recipeId = req.params.id;
     
-    const query = 'DELETE FROM homecook_recipes WHERE id = $1 AND homecook_id = $2 RETURNING id';
+    const query = 'DELETE FROM homecook_recipes WHERE id = $1 AND user_id = $2 RETURNING id';
     const result = await db.query(query, [recipeId, userId]);
     
     if (result.rows.length === 0) {
@@ -365,6 +365,43 @@ exports.deleteRecipe = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete recipe',
+      error: error.message
+    });
+  }
+};
+
+// Toggle recipe availability
+exports.toggleAvailability = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const recipeId = req.params.id;
+    
+    const query = `
+      UPDATE homecook_recipes 
+      SET is_available = NOT is_available, updated_at = NOW()
+      WHERE id = $1 AND user_id = $2
+      RETURNING *
+    `;
+    
+    const result = await db.query(query, [recipeId, userId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Recipe not found or you don\'t have permission'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: `Recipe is now ${result.rows[0].is_available ? 'available' : 'hidden'}`,
+      data: { recipe: result.rows[0] }
+    });
+  } catch (error) {
+    console.error('Toggle availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to toggle availability',
       error: error.message
     });
   }
