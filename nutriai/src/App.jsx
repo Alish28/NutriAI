@@ -13,7 +13,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [requiresOnboarding, setRequiresOnboarding] = useState(false);
   const [currentView, setCurrentView] = useState("login");
-  // currentView values: "login" | "signup" | "onboarding" | "dashboard" | "profile" | "marketplace" | "adminDashboard"
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -25,12 +24,41 @@ function App() {
   const checkAuthStatus = async () => {
     const token = localStorage.getItem("token");
 
+    // No token — go straight to login, no error needed
     if (!token) {
       setIsAuthenticated(false);
       setLoading(false);
       return;
     }
 
+    // FIX: Check if token looks valid before even calling the API
+    // JWT tokens have 3 parts separated by dots
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) {
+      console.warn('Invalid token format, clearing...');
+      clearAuth();
+      setLoading(false);
+      return;
+    }
+
+    // FIX: Check token expiry from the payload before making API call
+    try {
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        console.warn('Token expired, clearing...');
+        clearAuth();
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // Couldn't decode — clear and go to login
+      clearAuth();
+      setLoading(false);
+      return;
+    }
+
+    // Token looks valid, verify with server
     try {
       const response = await getFullProfile();
       const userData = response.data.user;
@@ -53,15 +81,22 @@ function App() {
         setCurrentView("dashboard");
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setIsAuthenticated(false);
-      setUser(null);
-      setIsAdmin(false);
+      // FIX: Only log as warning, not error — this is expected when token expires
+      console.warn("Auth check failed:", error.message);
+      clearAuth();
     } finally {
       setLoading(false);
     }
+  };
+
+  // FIX: Centralized auth clear function
+  const clearAuth = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+    setUser(null);
+    setIsAdmin(false);
+    setCurrentView("login");
   };
 
   const handleLoginSuccess = async () => {
@@ -84,30 +119,19 @@ function App() {
   };
 
   const handleUserLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsAuthenticated(false);
-    setRequiresOnboarding(false);
-    setCurrentView("login");
-    setUser(null);
-    setIsAdmin(false);
+    clearAuth();
   };
 
   // Loading screen
   if (loading) {
     return (
-      <div
-        className="app-root"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          fontSize: "18px",
-          color: "#666",
-        }}
-      >
-        Loading...
+      <div className="app-root" style={{
+        display:"flex", alignItems:"center", justifyContent:"center",
+        height:"100vh", flexDirection:"column", gap:16,
+      }}>
+        <div style={{ fontSize:48, animation:"spin 1s linear infinite" }}>🍽️</div>
+        <p style={{ fontSize:16, color:"#666", fontWeight:500 }}>Loading NutriAI…</p>
+        <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
       </div>
     );
   }
@@ -117,63 +141,41 @@ function App() {
     if (currentView === "signup") {
       return (
         <div className="app-root">
-          <Signup
-            onBackToLogin={() => setCurrentView("login")}
-            onSignedUp={handleSignupSuccess}
-          />
+          <Signup onBackToLogin={() => setCurrentView("login")} onSignedUp={handleSignupSuccess}/>
         </div>
       );
     }
     return (
       <div className="app-root">
-        <Login
-          onLogin={handleLoginSuccess}
-          onGoToSignup={() => setCurrentView("signup")}
-        />
+        <Login onLogin={handleLoginSuccess} onGoToSignup={() => setCurrentView("signup")}/>
       </div>
     );
   }
 
-  // Admin dashboard
   if (isAdmin && currentView === "adminDashboard") {
-    return (
-      <div className="app-root">
-        <AdminDashboard onLogout={handleUserLogout} />
-      </div>
-    );
+    return <div className="app-root"><AdminDashboard onLogout={handleUserLogout}/></div>;
   }
 
-  // Onboarding (regular users only)
   if (requiresOnboarding && currentView === "onboarding") {
-    return (
-      <div className="app-root">
-        <Onboarding onComplete={handleOnboardingComplete} />
-      </div>
-    );
+    return <div className="app-root"><Onboarding onComplete={handleOnboardingComplete}/></div>;
   }
 
-  // Profile page
   if (currentView === "profile") {
     return (
       <div className="app-root">
-        <Profile
-          onBack={() => setCurrentView("dashboard")}
-          onLogout={handleUserLogout}
-        />
+        <Profile onBack={() => setCurrentView("dashboard")} onLogout={handleUserLogout}/>
       </div>
     );
   }
 
-  // Marketplace page
   if (currentView === "marketplace") {
     return (
       <div className="app-root">
-        <Marketplace onBack={() => setCurrentView("dashboard")} />
+        <Marketplace onBack={() => setCurrentView("dashboard")}/>
       </div>
     );
   }
 
-  // Dashboard (default for regular users)
   return (
     <div className="app-root">
       <Dashboard
