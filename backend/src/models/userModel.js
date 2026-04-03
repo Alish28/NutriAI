@@ -25,11 +25,11 @@ class User {
     return result.rows[0];
   }
 
-  // Get full profile with all fields
+  // Get full profile with all fields including location
   static async getFullProfile(id) {
     const query = `
       SELECT 
-        id, email, full_name, role, 
+        id, email, full_name, role,
         age, gender, weight, height, activity_level,
         health_goals, dietary_preferences, allergies,
         preferred_cuisines, prioritize_local,
@@ -38,7 +38,10 @@ class User {
         preferred_serving_size, marketplace_access,
         personalization_strength, nutrition_focus, ai_auto_adjust,
         email_notifications, sms_notifications, data_sharing,
-        profile_image_url, onboarding_completed, created_at, updated_at
+        profile_image_url, onboarding_completed,
+        homecook_status, homecook_approved,
+        pickup_lat, pickup_lng, pickup_address,
+        created_at, updated_at
       FROM users 
       WHERE id = $1
     `;
@@ -60,17 +63,12 @@ class User {
 
   // Helper function to safely handle array fields
   static prepareArrayValue(value) {
-    // If it's already an array, return it
     if (Array.isArray(value)) {
       return value.length > 0 ? value : null;
     }
-    
-    // If it's an empty string or null/undefined, return null
     if (value === '' || value === null || value === undefined) {
       return null;
     }
-    
-    // If it's a string, try to parse it or return null
     if (typeof value === 'string') {
       try {
         const parsed = JSON.parse(value);
@@ -79,7 +77,6 @@ class User {
         return null;
       }
     }
-    
     return null;
   }
 
@@ -94,7 +91,9 @@ class User {
       'preferred_serving_size', 'marketplace_access',
       'personalization_strength', 'nutrition_focus', 'ai_auto_adjust',
       'email_notifications', 'sms_notifications', 'data_sharing',
-      'profile_image_url', 'onboarding_completed'
+      'profile_image_url', 'onboarding_completed',
+      // ── Location fields for homecook pickup ──
+      'pickup_lat', 'pickup_lng', 'pickup_address',
     ];
 
     const arrayFields = [
@@ -108,7 +107,6 @@ class User {
 
     Object.keys(profileData).forEach(key => {
       if (allowedFields.includes(key) && profileData[key] !== undefined) {
-        // Special handling for array fields
         if (arrayFields.includes(key)) {
           const arrayValue = this.prepareArrayValue(profileData[key]);
           updates.push(`${key} = $${paramCount}`);
@@ -136,13 +134,8 @@ class User {
     `;
 
     const result = await pool.query(query, values);
-    
-    // Remove password_hash from response
     const user = result.rows[0];
-    if (user) {
-      delete user.password_hash;
-    }
-    
+    if (user) delete user.password_hash;
     return user;
   }
 

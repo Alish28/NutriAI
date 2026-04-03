@@ -11,6 +11,7 @@ import PantryTracker from "../components/pantryTracker.jsx";
 import HomecookApplication from "../components/homecookApplications.jsx";
 import HomecookDashboard from "../homecook/homecookDashboard.jsx";
 import AdminDashboard from "../admin/adminDashboard.jsx";
+import AIChatbot from "../components/aiChatbot.jsx";
 
 export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -22,7 +23,6 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isHomecookMode, setIsHomecookMode] = useState(false);
 
-  // Load user from localStorage and fetch full profile
   useEffect(() => {
     const loadUserData = async () => {
       const userData = localStorage.getItem("user");
@@ -50,12 +50,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
   const getInitials = (name) => {
     if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
   const getGreeting = () => {
@@ -64,6 +59,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   };
+
   const handleChefButtonClick = () => {
     if (user?.homecook_approved) {
       setIsHomecookMode(true);
@@ -83,117 +79,72 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
   return (
     <div className="dashboard-page">
-      {/* Navigation Sidebar */}
+
+      {/* ── Navigation Sidebar ── */}
       <aside className={`nav-sidebar ${isNavSidebarOpen ? "open" : ""}`}>
         <div className="nav-sidebar-header">
           <h3>Menu</h3>
-          <button
-            className="nav-close-btn"
-            onClick={() => setIsNavSidebarOpen(false)}
-          >
-            ✕
-          </button>
+          <button className="nav-close-btn" onClick={() => setIsNavSidebarOpen(false)}>✕</button>
         </div>
-
         <nav className="nav-sidebar-content">
-          <button
-            className="nav-item"
-            onClick={() => {
-              setIsMealSidebarOpen(true);
-              setIsNavSidebarOpen(false);
-            }}
-          >
+
+          <button className="nav-item" onClick={() => { setIsMealSidebarOpen(true); setIsNavSidebarOpen(false); }}>
             <span className="nav-icon">🍽️</span>
             <span>Add Meal</span>
           </button>
 
-          <button
-            className="nav-item"
-            onClick={() => {
-              onOpenProfile();
-              setIsNavSidebarOpen(false);
-            }}
-          >
-            <span className="nav-icon">⚙️</span>
-            <span>Settings</span>
+          <button className="nav-item" onClick={() => { onOpenProfile(); setIsNavSidebarOpen(false); }}>
+            <span className="nav-icon">👤</span>
+            <span>My Profile</span>
           </button>
 
-          {/* Marketplace — now active, was disabled before */}
-          <button
-            className="nav-item"
-            onClick={() => {
-              setIsNavSidebarOpen(false);
-              if (onOpenMarketplace) onOpenMarketplace();
-            }}
-          >
+          <button className="nav-item" onClick={() => { setIsNavSidebarOpen(false); if (onOpenMarketplace) onOpenMarketplace(); }}>
             <span className="nav-icon">🏪</span>
             <span>Marketplace</span>
           </button>
 
-          {/* Homecook section in sidebar */}
           {user?.homecook_approved && (
             <>
-              <div className="nav-divider"></div>
+              <div className="nav-divider" />
               <div className="nav-section-title">Homecook</div>
-              <button
-                className="nav-item"
-                onClick={() => {
-                  setIsHomecookMode(true);
-                  setIsNavSidebarOpen(false);
-                }}
-              >
+              <button className="nav-item" onClick={() => { setIsHomecookMode(true); setIsNavSidebarOpen(false); }}>
                 <span className="nav-icon">👨‍🍳</span>
-                <span>My Homecook Dashboard</span>
+                <span>Homecook Dashboard</span>
               </button>
             </>
           )}
 
-          <div className="nav-divider"></div>
+          {user?.role === "admin" && (
+            <>
+              <div className="nav-divider" />
+              <div className="nav-section-title">Admin</div>
+              <button className="nav-item" onClick={() => { setShowAdminPanel(true); setIsNavSidebarOpen(false); }}>
+                <span className="nav-icon">⚡</span>
+                <span>Admin Panel</span>
+              </button>
+            </>
+          )}
+
+          <div className="nav-divider" />
           <div className="nav-section-title">Coming Soon</div>
-
-          <button className="nav-item disabled">
-            <span className="nav-icon">📅</span>
-            <span>Meal Planner</span>
-          </button>
-
-          <button className="nav-item disabled">
-            <span className="nav-icon">🔍</span>
-            <span>Recipe Explorer</span>
-          </button>
-
-          <button className="nav-item disabled">
-            <span className="nav-icon">📦</span>
-            <span>Pantry Tracker</span>
-          </button>
-
-          <button className="nav-item disabled">
-            <span className="nav-icon">💬</span>
-            <span>AI Assistant</span>
-          </button>
+          <button className="nav-item disabled"><span className="nav-icon">📅</span><span>Meal Planner</span></button>
+          <button className="nav-item disabled"><span className="nav-icon">🔍</span><span>Recipe Explorer</span></button>
         </nav>
       </aside>
 
       {/* Sidebar overlay */}
       {isNavSidebarOpen && (
-        <div
-          className="nav-sidebar-overlay"
-          onClick={() => setIsNavSidebarOpen(false)}
-        ></div>
+        <div className="nav-sidebar-overlay" onClick={() => setIsNavSidebarOpen(false)} />
       )}
 
-      {/* Top navigation */}
+      {/* ── Top Header ── */}
       <header className="dash-header">
         <div className="dash-header-left">
-          <button
-            className="hamburger-btn"
-            onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)}
-            title="Menu"
-          >
-            <span className="hamburger-line"></span>
-            <span className="hamburger-line"></span>
-            <span className="hamburger-line"></span>
+          <button className="hamburger-btn" onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)} title="Menu">
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
           </button>
-
           <div className="dash-logo">
             <span className="logo-mark">🍽</span>
             <span className="logo-text">NutriAI</span>
@@ -205,14 +156,10 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         </div>
 
         <div className="dash-header-right">
-          <button
-            className="icon-btn add-meal-btn"
-            onClick={() => setIsMealSidebarOpen(true)}
-          >
+          <button className="icon-btn add-meal-btn" onClick={() => setIsMealSidebarOpen(true)}>
             ➕ Add Meal
           </button>
 
-          {/* Marketplace button */}
           <button
             className="icon-btn"
             onClick={() => onOpenMarketplace && onOpenMarketplace()}
@@ -222,15 +169,10 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             🏪 Marketplace
           </button>
 
-          {/* Chef button — checks approval status */}
           <button
             className="icon-btn"
             onClick={handleChefButtonClick}
-            title={
-              user?.homecook_approved
-                ? "Open Homecook Dashboard"
-                : "Become a Homecook"
-            }
+            title={user?.homecook_approved ? "Homecook Dashboard" : "Become a Homecook"}
             style={{
               background: user?.homecook_approved ? "#dcfce7" : "#fff7e9",
               color: user?.homecook_approved ? "#15803d" : "#eea641",
@@ -239,8 +181,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             👨‍🍳
           </button>
 
-          {/* Admin only */}
-          {user && user.role === "admin" && (
+          {user?.role === "admin" && (
             <button
               className="icon-btn"
               onClick={() => setShowAdminPanel(true)}
@@ -251,9 +192,6 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             </button>
           )}
 
-          <button className="icon-btn">🔔</button>
-          <button className="icon-btn">⚙️</button>
-
           <button
             className="avatar-btn"
             onClick={onOpenProfile}
@@ -262,137 +200,50 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             {user ? getInitials(user.full_name) : "U"}
           </button>
 
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       </header>
 
-      {/* Welcome Banner */}
+      {/* ── Welcome Banner ── */}
       {user && (
         <div className="welcome-banner">
           <div className="welcome-content">
-            <h2>
-              {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
-            </h2>
+            <h2>{getGreeting()}, {user.full_name.split(" ")[0]}! 👋</h2>
             {user.homecook_approved && (
               <span className="homecook-badge">✨ Approved Homecook</span>
             )}
           </div>
           {userProfile && (
             <div className="welcome-stats">
-              {userProfile.health_goals &&
-                userProfile.health_goals.length > 0 && (
-                  <span className="stat-badge">
-                    🎯 Goals: {userProfile.health_goals.join(", ")}
-                  </span>
-                )}
-              {userProfile.dietary_preferences &&
-                userProfile.dietary_preferences.length > 0 && (
-                  <span className="stat-badge">
-                    🥗 {userProfile.dietary_preferences.join(", ")}
-                  </span>
-                )}
+              {userProfile.health_goals?.length > 0 && (
+                <span className="stat-badge">🎯 {userProfile.health_goals.join(", ")}</span>
+              )}
+              {userProfile.dietary_preferences?.length > 0 && (
+                <span className="stat-badge">🥗 {userProfile.dietary_preferences.join(", ")}</span>
+              )}
+              {userProfile.activity_level && (
+                <span className="stat-badge">🏃 {userProfile.activity_level}</span>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* Main scrollable content */}
+      {/* ── Main Content ── */}
       <main className="dash-main">
-        {/* Left column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+
+        {/* Left column — nutrition + AI recommendations */}
+        <div className="dash-left-col">
           <NutritionSummary />
           <AIRecommendations />
-
-          {/* Meal Plan Card */}
-          <section className="card meal-plan-card">
-            <h2 className="card-title">Personalized Meal Plan</h2>
-
-            <div className="todays-meals">
-              <h3>Today's Meals</h3>
-              <p>
-                <strong>Breakfast:</strong> Oatmeal with berries
-              </p>
-              <p>
-                <strong>Lunch:</strong> Quinoa salad
-              </p>
-              <p>
-                <strong>Dinner:</strong> Baked salmon with roasted vegetables
-              </p>
-            </div>
-
-            <div className="weekly-overview">
-              <h3>Weekly Overview</h3>
-              <div className="weekly-table">
-                <div className="weekly-row weekly-row-head">
-                  <span>Day</span>
-                  <span>Breakfast</span>
-                  <span>Lunch</span>
-                  <span>Dinner</span>
-                </div>
-                {[
-                  [
-                    "Monday",
-                    "Oatmeal with berries",
-                    "Quinoa salad",
-                    "Baked salmon with roasted vegetables",
-                  ],
-                  [
-                    "Tuesday",
-                    "Scrambled eggs",
-                    "Lentil soup",
-                    "Chicken stir-fry with brown rice",
-                  ],
-                  [
-                    "Wednesday",
-                    "Yogurt parfait",
-                    "Tuna sandwich",
-                    "Vegetarian lasagna",
-                  ],
-                  [
-                    "Thursday",
-                    "Smoothie bowl",
-                    "Chicken Caesar wrap",
-                    "Beef stew with sweet potatoes",
-                  ],
-                  [
-                    "Friday",
-                    "Whole wheat toast",
-                    "Leftover lasagna",
-                    "Homemade pizza with whole wheat crust",
-                  ],
-                  [
-                    "Saturday",
-                    "Pancakes with fruit",
-                    "Sushi rolls",
-                    "Grilled chicken with corn on the cob",
-                  ],
-                  [
-                    "Sunday",
-                    "Avocado toast",
-                    "Spinach and feta omelet",
-                    "Roasted chicken with rosemary potatoes",
-                  ],
-                ].map(([day, b, l, d]) => (
-                  <div className="weekly-row" key={day}>
-                    <span>{day}</span>
-                    <span>{b}</span>
-                    <span>{l}</span>
-                    <span>{d}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
         </div>
 
-        {/* Right column */}
-        <aside>
+        {/* Right column — pantry */}
+        <div className="dash-right-col">
           <PantryTracker />
-        </aside>
+        </div>
 
-        {/* Analytics Section - Full Width */}
+        {/* Full-width analytics row */}
         <section className="analytics-section">
           <div className="analytics-grid">
             <WeeklyChart />
@@ -401,215 +252,60 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
           </div>
         </section>
 
-        {/* Bottom grid */}
-        <section className="bottom-grid">
-          <div className="card">
-            <h2 className="card-title">Recipe Recommendations</h2>
-            <div className="card-grid">
-              <RecipeCard
-                title="Spicy Tofu Stir-fry"
-                desc="A quick and flavorful vegetarian dish."
-                img="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Classic Chicken Curry"
-                desc="A comforting aromatic curry."
-                img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Veggie Pasta Primavera"
-                desc="Light and fresh pasta."
-                img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeCard
-                title="Hearty Beef Stew"
-                desc="Slow-cooked to perfection."
-                img="https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=600&q=80"
-              />
-            </div>
-          </div>
-
-          <div className="card">
-            <h2 className="card-title">Cultural &amp; Nepali Recipes</h2>
-            <div className="card-column">
-              <RecipeRow
-                title="Authentic Dal Bhat"
-                desc="The staple meal of Nepal."
-                img="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80"
-              />
-              <RecipeRow
-                title="Steamed Momos"
-                desc="Nepali dumplings with chutney."
-                img="https://images.unsplash.com/photo-1600628421055-4bb3afe8f96e?auto=format&fit=crop&w=600&q=80"
-              />
-            </div>
-          </div>
-
-          <div className="card">
-            <h2 className="card-title">Budget-Friendly Suggestions</h2>
-            <ul className="tips-list">
-              <li>Plan meals around seasonal produce.</li>
-              <li>Use versatile ingredients.</li>
-              <li>Batch cook and reuse leftovers.</li>
-              <li>Track expiry dates.</li>
-              <li>Grow herbs at home.</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="card marketplace-card">
-          <h2 className="card-title">Homecooked Meal Marketplace</h2>
-          <div className="card-grid marketplace-grid">
-            <MarketplaceCard
-              title="Homemade Chicken Biryani"
-              cook="Aisha's Kitchen"
-              price="Rs. 650"
-              img="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Vegan Lentil Lasagna"
-              cook="Green Goodness"
-              price="Rs. 550"
-              img="https://images.unsplash.com/photo-1604908176997-1251884b08a3?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Palak Paneer & Naan"
-              cook="Chef Rahul"
-              price="Rs. 500"
-              img="https://images.unsplash.com/photo-1625944229409-2c7020e4e0aa?auto=format&fit=crop&w=600&q=80"
-            />
-            <MarketplaceCard
-              title="Lemon Herb Grilled Fish"
-              cook="Ocean Delights"
-              price="Rs. 700"
-              img="https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=600&q=80"
-            />
-          </div>
-        </section>
-
+        {/* Footer */}
         <footer className="dash-footer">
           <span>© 2025 NutriAI. All rights reserved.</span>
         </footer>
+
       </main>
 
-      {/* Homecook Application Modal */}
+      {/* ── Homecook Application Modal ── */}
       {showHomecookApp && (
         <div
           className="modal-overlay"
           onClick={() => setShowHomecookApp(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
+          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "90%",
-              maxWidth: "900px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              background: "#fff",
-              borderRadius: "18px",
-            }}
+            style={{ width:"90%", maxWidth:"900px", maxHeight:"90vh", overflowY:"auto", background:"#fff", borderRadius:"18px" }}
           >
             <HomecookApplication
               onClose={() => setShowHomecookApp(false)}
               onGoToDashboard={() => {
                 setShowHomecookApp(false);
-                if (user?.homecook_approved) {
-                  setIsHomecookMode(true);
-                }
+                if (user?.homecook_approved) setIsHomecookMode(true);
               }}
             />
           </div>
         </div>
       )}
 
-      {/* Admin Panel Modal */}
+      {/* ── Admin Panel Modal ── */}
       {showAdminPanel && (
         <div
           className="modal-overlay"
           onClick={() => setShowAdminPanel(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
+          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "95%",
-              maxWidth: "1200px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              background: "#fff",
-              borderRadius: "18px",
-            }}
+            style={{ width:"95%", maxWidth:"1200px", maxHeight:"90vh", overflowY:"auto", background:"#fff", borderRadius:"18px" }}
           >
             <AdminDashboard onClose={() => setShowAdminPanel(false)} />
           </div>
         </div>
       )}
 
+      {/* ── Meal Sidebar ── */}
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
       />
-    </div>
-  );
-}
 
-/* ── Helper components ── */
-function RecipeCard({ title, desc, img }) {
-  return (
-    <div className="recipe-card">
-      <img src={img} alt={title} />
-      <div className="recipe-body">
-        <h4>{title}</h4>
-        <p>{desc}</p>
-      </div>
-    </div>
-  );
-}
+      {/* ── Global AI Chatbot ── available on every page via dashboard wrapper */}
+      <AIChatbot />
 
-function RecipeRow({ title, desc, img }) {
-  return (
-    <div className="recipe-row">
-      <img src={img} alt={title} />
-      <div className="recipe-row-body">
-        <h4>{title}</h4>
-        <p>{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-function MarketplaceCard({ title, cook, price, img }) {
-  return (
-    <div className="market-card">
-      <img src={img} alt={title} />
-      <div className="market-body">
-        <h4>{title}</h4>
-        <p className="market-cook">Cook: {cook}</p>
-        <p className="market-price">{price}</p>
-      </div>
     </div>
   );
 }

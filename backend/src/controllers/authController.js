@@ -46,7 +46,7 @@ exports.register = async (req, res) => {
           email: newUser.email,
           full_name: newUser.full_name,
           role: newUser.role,
-          onboarding_completed: false, // FIXED: Explicitly set to false
+          onboarding_completed: false,
           created_at: newUser.created_at
         },
         token

@@ -80,12 +80,34 @@ class AIRecommendationEngine {
     
     const result = await db.query(query, [userId]);
     const profile = result.rows[0];
+
+    // Handle missing profile row entirely (user deleted or not found)
+    if (!profile) {
+      return {
+        health_goals: [],
+        dietary_preferences: [],
+        allergies: [],
+        preferred_cuisines: [],
+        daily_budget: null,
+        weekly_budget: null,
+        nutrition_goals: { calories: 2000, protein: 150, carbs: 250, fats: 65 }
+      };
+    }
+
+    // FIX: Set array defaults BEFORE calling calculateNutritionGoals
+    // because calculateNutritionGoals reads profile.health_goals
+    // and it would be null for users who haven't completed onboarding
+    profile.health_goals        = profile.health_goals        || [];
+    profile.dietary_preferences = profile.dietary_preferences || [];
+    profile.allergies           = profile.allergies           || [];
+    profile.preferred_cuisines  = profile.preferred_cuisines  || [];
     
     // Calculate daily nutrition goals (BMR + TDEE)
-    if (profile && profile.age && profile.weight && profile.height) {
+    // Only run if the user filled in their physical profile
+    if (profile.age && profile.weight && profile.height && profile.gender) {
       profile.nutrition_goals = this.calculateNutritionGoals(profile);
     } else {
-      // Default goals if profile incomplete
+      // Default goals for users who skipped onboarding or have incomplete profile
       profile.nutrition_goals = {
         calories: 2000,
         protein: 150,
@@ -94,12 +116,6 @@ class AIRecommendationEngine {
       };
     }
     
-    // Parse arrays (PostgreSQL returns as arrays already, but handle nulls)
-    profile.health_goals = profile.health_goals || [];
-    profile.dietary_preferences = profile.dietary_preferences || [];
-    profile.allergies = profile.allergies || [];
-    profile.preferred_cuisines = profile.preferred_cuisines || [];
-    
     return profile;
   }
 
@@ -107,7 +123,7 @@ class AIRecommendationEngine {
    * Calculate nutrition goals using Mifflin-St Jeor equation
    */
   static calculateNutritionGoals(profile) {
-    // BMR calculation
+    // BMR calculation (Mifflin-St Jeor equation)
     const bmr = profile.gender === 'Male'
       ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
       : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
@@ -123,18 +139,22 @@ class AIRecommendationEngine {
     
     const multiplier = activityMultipliers[profile.activity_level] || 1.2;
     let calories = Math.round(bmr * multiplier);
+
+    // FIX: Always guarantee health_goals is an array before calling .includes()
+    // This is the defensive layer — even if called with a null profile.health_goals
+    const healthGoals = Array.isArray(profile.health_goals) ? profile.health_goals : [];
     
-    // Adjust for health goals
-    if (profile.health_goals.includes('Weight Management')) {
-      calories -= 300; // Deficit for weight loss
-    } else if (profile.health_goals.includes('Muscle Gain')) {
-      calories += 300; // Surplus for muscle gain
+    // Adjust calories for health goals
+    if (healthGoals.includes('Weight Management')) {
+      calories -= 300; // Calorie deficit for weight loss
+    } else if (healthGoals.includes('Muscle Gain')) {
+      calories += 300; // Calorie surplus for muscle gain
     }
     
-    // Calculate macros
-    const proteinPercent = profile.health_goals.includes('Muscle Gain') ? 0.35 : 0.30;
-    const fatPercent = profile.health_goals.includes('Weight Management') ? 0.25 : 0.30;
-    const carbPercent = 1 - proteinPercent - fatPercent;
+    // Calculate macro splits
+    const proteinPercent = healthGoals.includes('Muscle Gain') ? 0.35 : 0.30;
+    const fatPercent     = healthGoals.includes('Weight Management') ? 0.25 : 0.30;
+    const carbPercent    = 1 - proteinPercent - fatPercent;
     
     return {
       calories,
