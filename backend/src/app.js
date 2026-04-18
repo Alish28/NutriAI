@@ -12,7 +12,7 @@ const homecookRoutes   = require('./routes/homeCookRoutes');
 const adminRoutes      = require('./routes/adminRoutes');
 const recipeRoutes     = require('./routes/recipeRoutes');
 const marketplaceRoutes = require('./routes/marketplaceRoutes');
-const chatRoutes       = require('./routes/chatRoutes'); // NEW
+const chatRoutes       = require('./routes/chatRoutes');
 
 const app = express();
 

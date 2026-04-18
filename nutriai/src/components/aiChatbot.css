@@ -1,350 +1,210 @@
-/* src/components/AIChatbot.css */
+// src/components/AIChatbot.jsx
+// Global AI chat widget — powered by Llama (via Ollama on your backend).
+// Calls POST /api/chat on your Express server.
+// No CORS issues. No API key needed. Completely free.
 
-/* ── Floating Action Button ── */
-.chatFab {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  height: 52px;
-  min-width: 52px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: none;
-  background: #eea641;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 6px 24px rgba(238, 166, 65, 0.5);
-  z-index: 9000;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+import { useState, useEffect, useRef } from 'react';
+import './AIChatbot.css';
 
-.chatFab:hover {
-  background: #d99536;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(238, 166, 65, 0.6);
-}
+const API_URL = 'http://localhost:5000/api';
 
-.chatFab.chatFabOpen {
-  background: #1a1208;
-  width: 52px;
-  padding: 0;
-  justify-content: center;
-  box-shadow: 0 6px 24px rgba(26, 18, 8, 0.4);
-}
+const getAuthHeader = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
-.chatFabIcon { font-size: 20px; line-height: 1; }
-.chatFabLabel { font-size: 14px; font-weight: 700; white-space: nowrap; }
+export default function AIChatbot() {
+  const [open, setOpen]         = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: '👋 Hi! I\'m your NutriAI assistant powered by Llama AI.\n\nI can help you with:\n• 🍽️ Meal ideas & recipes\n• 📊 Nutrition questions\n• 🏪 Marketplace help\n• 🥗 Dietary advice\n• 🥫 Using up pantry items\n\nWhat can I help you with today?'
+    }
+  ]);
+  const [input, setInput]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const bottomRef               = useRef(null);
+  const inputRef                = useRef(null);
 
-/* ── Chat Panel ── */
-.chatPanel {
-  position: fixed;
-  bottom: 92px;
-  right: 28px;
-  width: 380px;
-  height: 540px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(26, 18, 8, 0.18), 0 0 0 1px rgba(26,18,8,0.06);
-  z-index: 8999;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: chatPanelIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    }
+  }, [messages, open]);
 
-@keyframes chatPanelIn {
-  from { transform: translateY(20px) scale(0.95); opacity: 0; }
-  to   { transform: translateY(0)    scale(1);    opacity: 1; }
-}
+  // Focus input when panel opens
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [open]);
 
-/* ── Header ── */
-.chatHeader {
-  padding: 14px 16px;
-  background: linear-gradient(135deg, #1a1208 0%, #3d2a10 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
+  const sendMessage = async () => {
+    const text = input.trim();
+    if (!text || loading) return;
 
-.chatHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    setInput('');
+    setError('');
 
-.chatAvatar {
-  width: 40px;
-  height: 40px;
-  background: #eea641;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
+    const newMessages = [...messages, { role: 'user', content: text }];
+    setMessages(newMessages);
+    setLoading(true);
 
-.chatHeaderInfo { display: flex; flex-direction: column; gap: 2px; }
-.chatName { font-size: 15px; font-weight: 700; color: #fff; }
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
-.chatOnline {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: #5dbb8a;
-  font-weight: 600;
-}
+      const data = await res.json();
 
-.chatOnlineDot {
-  width: 7px;
-  height: 7px;
-  background: #5dbb8a;
-  border-radius: 50%;
-  animation: chatPulse 2s ease-in-out infinite;
-}
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Request failed');
+      }
 
-@keyframes chatPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
-}
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (err) {
+      setError('⚠️ ' + (err.message || 'Could not reach the AI. Please try again.'));
+      // Restore user message so they can retry
+      setMessages(prev => prev.slice(0, -1));
+      setInput(text);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-.chatHeaderActions { display: flex; gap: 6px; align-items: center; }
+  const handleKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
-.chatClearBtn,
-.chatCloseBtn {
-  background: rgba(255,255,255,0.12);
-  border: none;
-  color: #fff;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
+  const clearChat = () => {
+    setMessages([{
+      role: 'assistant',
+      content: '👋 Chat cleared! How can I help you?'
+    }]);
+    setError('');
+  };
 
-.chatClearBtn:hover,
-.chatCloseBtn:hover { background: rgba(255,255,255,0.22); }
+  const formatText = (text) =>
+    text.split('\n').map((line, i, arr) => (
+      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+    ));
 
-/* ── Messages ── */
-.chatMessages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: #f7f4f0;
-  scroll-behavior: smooth;
-}
+  // Quick suggestion chips shown on fresh chat
+  const suggestions = [
+    '🥗 Suggest a healthy lunch',
+    '🔥 How many calories in dal bhat?',
+    '🏪 How does ordering work?',
+    '🌱 What vegan meals can I make?',
+    '🥫 Recipe using rice and lentils',
+  ];
 
-.chatMessages::-webkit-scrollbar { width: 4px; }
-.chatMessages::-webkit-scrollbar-track { background: transparent; }
-.chatMessages::-webkit-scrollbar-thumb { background: #d4c9bc; border-radius: 4px; }
+  return (
+    <>
+      {/* Floating Action Button */}
+      <button
+        className={`chatFab ${open ? 'chatFabOpen' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        title={open ? 'Close AI Assistant' : 'Ask AI (powered by Llama)'}
+      >
+        <span className="chatFabIcon">{open ? '✕' : '🤖'}</span>
+        {!open && <span className="chatFabLabel">Ask AI</span>}
+      </button>
 
-.chatMsg {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  animation: msgIn 0.2s ease;
-}
+      {/* Chat Panel */}
+      {open && (
+        <div className="chatPanel">
 
-@keyframes msgIn {
-  from { transform: translateY(6px); opacity: 0; }
-  to   { transform: translateY(0);   opacity: 1; }
-}
+          {/* Header */}
+          <div className="chatHeader">
+            <div className="chatHeaderLeft">
+              <div className="chatAvatar">🤖</div>
+              <div className="chatHeaderInfo">
+                <div className="chatName">NutriAI Assistant</div>
+                <div className="chatOnline">
+                  <span className="chatOnlineDot" />
+                  Llama AI · Local
+                </div>
+              </div>
+            </div>
+            <div className="chatHeaderActions">
+              <button className="chatClearBtn" onClick={clearChat} title="Clear chat">🗑️</button>
+              <button className="chatCloseBtn" onClick={() => setOpen(false)} title="Close">✕</button>
+            </div>
+          </div>
 
-.chatMsg--user { flex-direction: row-reverse; }
+          {/* Messages */}
+          <div className="chatMessages">
+            {messages.map((m, i) => (
+              <div key={i} className={`chatMsg chatMsg--${m.role}`}>
+                {m.role === 'assistant' && <div className="chatMsgAvatar">🤖</div>}
+                <div className="chatMsgBubble">{formatText(m.content)}</div>
+                {m.role === 'user' && <div className="chatMsgAvatar chatMsgAvatarUser">👤</div>}
+              </div>
+            ))}
 
-.chatMsgAvatar {
-  width: 28px;
-  height: 28px;
-  background: #fff7e9;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-  border: 1px solid #e8e0d5;
-}
+            {/* Typing indicator */}
+            {loading && (
+              <div className="chatMsg chatMsg--assistant">
+                <div className="chatMsgAvatar">🤖</div>
+                <div className="chatMsgBubble chatTyping">
+                  <span /><span /><span />
+                </div>
+              </div>
+            )}
 
-.chatMsgAvatarUser {
-  background: #eea641;
-  border-color: #eea641;
-}
+            {/* Error */}
+            {error && <div className="chatError">{error}</div>}
 
-.chatMsgBubble {
-  max-width: 76%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 13.5px;
-  line-height: 1.6;
-  word-break: break-word;
-}
+            <div ref={bottomRef} />
+          </div>
 
-.chatMsg--assistant .chatMsgBubble {
-  background: #ffffff;
-  color: #1a1208;
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 8px rgba(26,18,8,0.06);
-}
+          {/* Suggestion chips — only shown on fresh chat */}
+          {messages.length === 1 && (
+            <div className="chatSuggestions">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  className="chatSuggestionChip"
+                  onClick={() => { setInput(s); inputRef.current?.focus(); }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
 
-.chatMsg--user .chatMsgBubble {
-  background: #eea641;
-  color: #ffffff;
-  border-bottom-right-radius: 4px;
-}
-
-/* Typing indicator */
-.chatTyping {
-  display: flex !important;
-  gap: 5px;
-  align-items: center;
-  padding: 12px 16px !important;
-}
-
-.chatTyping span {
-  width: 7px;
-  height: 7px;
-  background: #7a6e60;
-  border-radius: 50%;
-  animation: chatBounce 1.2s infinite;
-  display: block;
-}
-
-.chatTyping span:nth-child(2) { animation-delay: 0.2s; }
-.chatTyping span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes chatBounce {
-  0%, 80%, 100% { transform: translateY(0);   opacity: 0.4; }
-  40%            { transform: translateY(-7px); opacity: 1; }
-}
-
-/* Error */
-.chatError {
-  background: #fdf0ef;
-  border-left: 3px solid #c0392b;
-  color: #c0392b;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 10px 14px;
-  border-radius: 8px;
-}
-
-/* ── Suggested Prompts ── */
-.chatSuggestions {
-  padding: 8px 12px 4px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  border-top: 1px solid #e8e0d5;
-  background: #fff;
-  flex-shrink: 0;
-}
-
-.chatSuggestionChip {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1.5px solid #e8e0d5;
-  background: #f7f4f0;
-  color: #3d2a10;
-  font-size: 11.5px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.chatSuggestionChip:hover {
-  border-color: #eea641;
-  background: #fff7e9;
-  color: #d99536;
-}
-
-/* ── Input Area ── */
-.chatInputArea {
-  padding: 10px 12px;
-  border-top: 1px solid #e8e0d5;
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  background: #ffffff;
-  flex-shrink: 0;
-}
-
-.chatInput {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1.5px solid #e8e0d5;
-  font-family: inherit;
-  font-size: 13.5px;
-  color: #1a1208;
-  background: #f7f4f0;
-  outline: none;
-  resize: none;
-  max-height: 90px;
-  line-height: 1.5;
-  transition: border-color 0.2s;
-}
-
-.chatInput:focus { border-color: #eea641; background: #fff; }
-.chatInput::placeholder { color: #7a6e60; }
-.chatInput:disabled { opacity: 0.6; }
-
-.chatSendBtn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background: #eea641;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.chatSendBtn:hover:not(:disabled) { background: #d99536; transform: scale(1.05); }
-.chatSendBtn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-
-/* Footer hint */
-.chatFooter {
-  text-align: center;
-  padding: 4px 0 8px;
-  font-size: 10.5px;
-  color: #b5a89a;
-  background: #fff;
-  flex-shrink: 0;
-}
-
-/* ── Responsive ── */
-@media (max-width: 480px) {
-  .chatPanel {
-    width: calc(100vw - 24px);
-    right: 12px;
-    bottom: 80px;
-    height: 70vh;
-  }
-
-  .chatFab {
-    right: 16px;
-    bottom: 16px;
-  }
+          {/* Input */}
+          <div className="chatInputArea">
+            <textarea
+              ref={inputRef}
+              className="chatInput"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Ask about food, nutrition, recipes…"
+              rows={1}
+              disabled={loading}
+            />
+            <button
+              className="chatSendBtn"
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              title="Send (Enter)"
+            >
+              {loading ? '⏳' : '➤'}
+            </button>
+          </div>
+          <div className="chatFooter">Enter to send · Shift+Enter for new line</div>
+        </div>
+      )}
+    </>
+  );
 }
