@@ -1,8 +1,3 @@
-// src/components/AIChatbot.jsx
-// Global AI chat widget — powered by Llama (via Ollama on your backend).
-// Calls POST /api/chat on your Express server.
-// No CORS issues. No API key needed. Completely free.
-
 import { useState, useEffect, useRef } from 'react';
 import './AIChatbot.css';
 
@@ -18,7 +13,7 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '👋 Hi! I\'m your NutriAI assistant powered by Llama AI.\n\nI can help you with:\n• 🍽️ Meal ideas & recipes\n• 📊 Nutrition questions\n• 🏪 Marketplace help\n• 🥗 Dietary advice\n• 🥫 Using up pantry items\n\nWhat can I help you with today?'
+      content: '👋 Hi! I\'m your NutriAI assistant.\n\nI can help you with:\n• 🍽️ Finding dishes & meal ideas\n• 📊 Nutrition & calorie questions\n• 🏪 Marketplace & ordering help\n• 🥗 Dietary advice\n\nWhat can I help you with today?'
     }
   ]);
   const [input, setInput]       = useState('');
@@ -27,7 +22,7 @@ export default function AIChatbot() {
   const bottomRef               = useRef(null);
   const inputRef                = useRef(null);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom whenever messages change or panel opens
   useEffect(() => {
     if (open) {
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
@@ -57,7 +52,9 @@ export default function AIChatbot() {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
         },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({
+          messages: newMessages,
+        }),
       });
 
       const data = await res.json();
@@ -68,10 +65,10 @@ export default function AIChatbot() {
 
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (err) {
-      setError('⚠️ ' + (err.message || 'Could not reach the AI. Please try again.'));
-      // Restore user message so they can retry
+      setError('⚠️ Could not reach the AI. Please try again.');
+      // Remove the user message that failed so they can retry
       setMessages(prev => prev.slice(0, -1));
-      setInput(text);
+      setInput(text); // restore input
     } finally {
       setLoading(false);
     }
@@ -92,19 +89,15 @@ export default function AIChatbot() {
     setError('');
   };
 
-  const formatText = (text) =>
-    text.split('\n').map((line, i, arr) => (
-      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+  // Format message text — convert newlines and basic markdown
+  const formatText = (text) => {
+    return text.split('\n').map((line, i) => (
+      <span key={i}>
+        {line}
+        {i < text.split('\n').length - 1 && <br />}
+      </span>
     ));
-
-  // Quick suggestion chips shown on fresh chat
-  const suggestions = [
-    '🥗 Suggest a healthy lunch',
-    '🔥 How many calories in dal bhat?',
-    '🏪 How does ordering work?',
-    '🌱 What vegan meals can I make?',
-    '🥫 Recipe using rice and lentils',
-  ];
+  };
 
   return (
     <>
@@ -112,7 +105,7 @@ export default function AIChatbot() {
       <button
         className={`chatFab ${open ? 'chatFabOpen' : ''}`}
         onClick={() => setOpen(o => !o)}
-        title={open ? 'Close AI Assistant' : 'Ask AI (powered by Llama)'}
+        title={open ? 'Close AI Assistant' : 'Open AI Assistant'}
       >
         <span className="chatFabIcon">{open ? '✕' : '🤖'}</span>
         {!open && <span className="chatFabLabel">Ask AI</span>}
@@ -121,7 +114,6 @@ export default function AIChatbot() {
       {/* Chat Panel */}
       {open && (
         <div className="chatPanel">
-
           {/* Header */}
           <div className="chatHeader">
             <div className="chatHeaderLeft">
@@ -130,13 +122,17 @@ export default function AIChatbot() {
                 <div className="chatName">NutriAI Assistant</div>
                 <div className="chatOnline">
                   <span className="chatOnlineDot" />
-                  Llama AI · Local
+                  Online
                 </div>
               </div>
             </div>
             <div className="chatHeaderActions">
-              <button className="chatClearBtn" onClick={clearChat} title="Clear chat">🗑️</button>
-              <button className="chatCloseBtn" onClick={() => setOpen(false)} title="Close">✕</button>
+              <button className="chatClearBtn" onClick={clearChat} title="Clear chat">
+                🗑️
+              </button>
+              <button className="chatCloseBtn" onClick={() => setOpen(false)} title="Close">
+                ✕
+              </button>
             </div>
           </div>
 
@@ -144,9 +140,15 @@ export default function AIChatbot() {
           <div className="chatMessages">
             {messages.map((m, i) => (
               <div key={i} className={`chatMsg chatMsg--${m.role}`}>
-                {m.role === 'assistant' && <div className="chatMsgAvatar">🤖</div>}
-                <div className="chatMsgBubble">{formatText(m.content)}</div>
-                {m.role === 'user' && <div className="chatMsgAvatar chatMsgAvatarUser">👤</div>}
+                {m.role === 'assistant' && (
+                  <div className="chatMsgAvatar">🤖</div>
+                )}
+                <div className="chatMsgBubble">
+                  {formatText(m.content)}
+                </div>
+                {m.role === 'user' && (
+                  <div className="chatMsgAvatar chatMsgAvatarUser">👤</div>
+                )}
               </div>
             ))}
 
@@ -160,16 +162,23 @@ export default function AIChatbot() {
               </div>
             )}
 
-            {/* Error */}
-            {error && <div className="chatError">{error}</div>}
+            {/* Error message */}
+            {error && (
+              <div className="chatError">{error}</div>
+            )}
 
             <div ref={bottomRef} />
           </div>
 
-          {/* Suggestion chips — only shown on fresh chat */}
+          {/* Suggested prompts — shown when only 1 message (the welcome) */}
           {messages.length === 1 && (
             <div className="chatSuggestions">
-              {suggestions.map((s, i) => (
+              {[
+                '🥗 Suggest a healthy lunch',
+                '🔥 How many calories in dal bhat?',
+                '🏪 How does ordering work?',
+                '🌱 What vegan options are available?',
+              ].map((s, i) => (
                 <button
                   key={i}
                   className="chatSuggestionChip"
@@ -181,7 +190,7 @@ export default function AIChatbot() {
             </div>
           )}
 
-          {/* Input */}
+          {/* Input Area */}
           <div className="chatInputArea">
             <textarea
               ref={inputRef}
@@ -189,7 +198,7 @@ export default function AIChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Ask about food, nutrition, recipes…"
+              placeholder="Ask anything about food, nutrition, orders…"
               rows={1}
               disabled={loading}
             />
@@ -202,7 +211,7 @@ export default function AIChatbot() {
               {loading ? '⏳' : '➤'}
             </button>
           </div>
-          <div className="chatFooter">Enter to send · Shift+Enter for new line</div>
+          <div className="chatFooter">Press Enter to send · Shift+Enter for new line</div>
         </div>
       )}
     </>

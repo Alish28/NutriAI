@@ -6,6 +6,7 @@ import {
   deleteRecipe,
   toggleRecipeAvailability
 } from '../services/api';
+import AIChatbot from '../components/aiChatbot.jsx';
 import './homecookDashboard.css';
 
 export default function HomecookDashboard({ user, onSwitchToConsumer }) {
@@ -519,6 +520,7 @@ export default function HomecookDashboard({ user, onSwitchToConsumer }) {
           </div>
         </div>
       )}
+      <AIChatbot />
     </div>
   );
 }

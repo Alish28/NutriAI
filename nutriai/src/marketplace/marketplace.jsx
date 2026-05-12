@@ -1,7 +1,6 @@
 // src/marketplace/marketplace.jsx
 import { useState, useEffect, useCallback, useRef } from 'react';
 import './marketplace.css';
-import AIChatbot from '../components/AIChatbot.jsx'; // ← uses backend/Ollama, no CORS
 
 // ─── API helpers ─────────────────────────────────────────────
 const API_URL = 'http://localhost:5000/api';
@@ -62,6 +61,7 @@ const Toast = ({ message }) => <div className="successToast">✓ {message}</div>
 
 // ════════════════════════════════════════════════════════════
 // LEAFLET MAP — used both for viewing (buyers) and setting location (homecooks)
+// Uses free OpenStreetMap — no API key needed
 // ════════════════════════════════════════════════════════════
 function loadLeaflet() {
   return new Promise((resolve) => {
@@ -84,6 +84,8 @@ function HomecookMap({ homecookName, lat, lng, address }) {
   const [loading, setLoading] = useState(true);
   const [resolvedCoords, setResolvedCoords] = useState(null);
 
+  // If we already have lat/lng saved, use them directly.
+  // Otherwise geocode the address string.
   useEffect(() => {
     const resolve = async () => {
       if (lat && lng) {
@@ -146,12 +148,15 @@ function HomecookMap({ homecookName, lat, lng, address }) {
 
 // ════════════════════════════════════════════════════════════
 // HOMECOOK LOCATION MANAGER
+// Separate component for homecooks to set/update their location.
+// Asks for geolocation permission, lets them drag a pin,
+// and saves lat/lng + address to their profile.
 // ════════════════════════════════════════════════════════════
 function HomecookLocationManager({ currentUser, onLocationSaved }) {
   const mapRef      = useRef(null);
   const mapInst     = useRef(null);
   const markerRef   = useRef(null);
-  const [status, setStatus]       = useState('idle');
+  const [status, setStatus]       = useState('idle'); // idle | requesting | granted | denied | saving | saved
   const [coords, setCoords]       = useState(
     currentUser?.pickup_lat && currentUser?.pickup_lng
       ? { lat: parseFloat(currentUser.pickup_lat), lng: parseFloat(currentUser.pickup_lng) }
@@ -162,8 +167,12 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
   const [saving, setSaving]       = useState(false);
   const [saved, setSaved]         = useState(false);
 
+  // Request GPS from browser
   const requestLocation = () => {
-    if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
     setStatus('requesting');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -175,12 +184,14 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
       (err) => {
         console.warn('Geolocation denied:', err.message);
         setStatus('denied');
+        // Fall back to Kathmandu if denied
         setCoords({ lat: 27.7172, lng: 85.3240 });
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
+  // Reverse geocode to get human-readable address
   const reverseGeocode = async (lat, lng) => {
     try {
       const res = await fetch(
@@ -197,15 +208,18 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
     }
   };
 
+  // Init/update map when coords change
   useEffect(() => {
     if (!coords || !mapRef.current) return;
     loadLeaflet().then((L) => {
       if (!mapInst.current) {
+        // Create map
         const map = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: false })
           .setView([coords.lat, coords.lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+
         const icon = L.divIcon({
           html: `<div style="background:#eea641;width:38px;height:38px;border-radius:50% 50% 50% 0;
                  transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.3);
@@ -213,22 +227,29 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
                  <span style="transform:rotate(45deg);font-size:18px;">📍</span></div>`,
           className: '', iconSize: [38, 38], iconAnchor: [19, 38],
         });
+
         const marker = L.marker([coords.lat, coords.lng], { icon, draggable: true }).addTo(map);
         marker.bindPopup('Drag me to adjust your pickup location').openPopup();
+
+        // When homecook drags the pin, update coords + reverse geocode
         marker.on('dragend', (e) => {
           const { lat, lng } = e.target.getLatLng();
           setCoords({ lat, lng });
           reverseGeocode(lat, lng);
         });
+
+        // Click on map to move marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
           marker.setLatLng([lat, lng]);
           setCoords({ lat, lng });
           reverseGeocode(lat, lng);
         });
+
         mapInst.current = map;
         markerRef.current = marker;
       } else {
+        // Just update existing map view
         mapInst.current.setView([coords.lat, coords.lng], 15);
         markerRef.current?.setLatLng([coords.lat, coords.lng]);
       }
@@ -250,9 +271,10 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
           pickup_address: editAddress || address,
         }),
       });
+      // Also update localStorage user
       const stored = JSON.parse(localStorage.getItem('user') || '{}');
-      stored.pickup_lat = coords.lat;
-      stored.pickup_lng = coords.lng;
+      stored.pickup_lat     = coords.lat;
+      stored.pickup_lng     = coords.lng;
       stored.pickup_address = editAddress || address;
       localStorage.setItem('user', JSON.stringify(stored));
       setSaved(true);
@@ -273,6 +295,8 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
           Set where customers should come to pick up their orders. You can drag the pin to adjust exactly.
         </p>
       </div>
+
+      {/* Permission / GPS request area */}
       {!coords && (
         <div className="locationPermissionBox">
           <div className="locationPermissionIcon">🗺️</div>
@@ -293,6 +317,8 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
           )}
         </div>
       )}
+
+      {/* Map — shown once we have coords */}
       {coords && (
         <>
           <div className="locationMapWrapper">
@@ -301,6 +327,8 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
             </div>
             <div ref={mapRef} className="locationLeafletMap"/>
           </div>
+
+          {/* Address field */}
           <div className="locationAddressRow">
             <div className="locationAddressGroup">
               <label>Pickup Address / Description</label>
@@ -315,6 +343,7 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
               </span>
             </div>
           </div>
+
           <div className="locationActions">
             <button className="locationResetBtn" onClick={() => { setCoords(null); setStatus('idle'); if (mapInst.current) { mapInst.current.remove(); mapInst.current = null; } }}>
               🔄 Reset Location
@@ -326,6 +355,121 @@ function HomecookLocationManager({ currentUser, onLocationSaved }) {
         </>
       )}
     </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+// AI CHATBOT WIDGET
+// Floating chat button + panel powered by Ollama via backend
+// ════════════════════════════════════════════════════════════
+function AIChatbot({ currentUser }) {
+  const [open, setOpen]         = useState(false);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: '👋 Hi! I\'m your NutriAI assistant. I can help you find dishes, understand nutrition, or answer questions about the marketplace. What would you like to know?' }
+  ]);
+  const [input, setInput]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const bottomRef               = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, open]);
+
+  const sendMessage = async () => {
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput('');
+    setError('');
+
+    const newMessages = [...messages, { role: 'user', content: text }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (err) {
+      setError('⚠️ Could not reach the AI. Please try again.');
+      setMessages(prev => prev.slice(0, -1));
+      setInput(text);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  return (
+    <>
+      {/* Floating button */}
+      <button className={`chatbotFab ${open ? 'chatbotFabOpen' : ''}`} onClick={() => setOpen(o => !o)} title="AI Assistant">
+        {open ? '✕' : '🤖'}
+      </button>
+
+      {/* Chat panel */}
+      {open && (
+        <div className="chatbotPanel">
+          <div className="chatbotHeader">
+            <div className="chatbotHeaderLeft">
+              <div className="chatbotAvatar">🤖</div>
+              <div>
+                <div className="chatbotName">NutriAI Assistant</div>
+                <div className="chatbotStatus">● Online</div>
+              </div>
+            </div>
+            <button className="chatbotClose" onClick={() => setOpen(false)}>✕</button>
+          </div>
+
+          <div className="chatbotMessages">
+            {messages.map((m, i) => (
+              <div key={i} className={`chatbotMsg ${m.role}`}>
+                {m.role === 'assistant' && <div className="chatbotMsgAvatar">🤖</div>}
+                <div className="chatbotMsgBubble">{m.content}</div>
+              </div>
+            ))}
+            {loading && (
+              <div className="chatbotMsg assistant">
+                <div className="chatbotMsgAvatar">🤖</div>
+                <div className="chatbotMsgBubble chatbotTyping">
+                  <span/><span/><span/>
+                </div>
+              </div>
+            )}
+            {error && (
+              <div style={{ padding:'8px 12px', background:'#fdf0ef', borderLeft:'3px solid #c0392b',
+                color:'#c0392b', fontSize:'12px', fontWeight:600, borderRadius:'8px', margin:'4px 0' }}>
+                {error}
+              </div>
+            )}
+            <div ref={bottomRef}/>
+          </div>
+
+          <div className="chatbotInputArea">
+            <textarea
+              className="chatbotInput"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Ask about dishes, nutrition, orders…"
+              rows={1}
+              disabled={loading}
+            />
+            <button className="chatbotSend" onClick={sendMessage} disabled={loading || !input.trim()}>
+              {loading ? '⏳' : '➤'}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -396,7 +540,10 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
             </span>
             <span className="modalPrice">{formatNpr(recipe.price)}</span>
           </div>
+
           {recipe.description && <p className="modalDesc">{recipe.description}</p>}
+
+          {/* Dietary tags */}
           <div className="modalDietTags">
             {recipe.is_vegetarian  && <span className="recipeTag veg">🥬 Vegetarian</span>}
             {recipe.is_vegan       && <span className="recipeTag vegan">🌱 Vegan</span>}
@@ -406,6 +553,8 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
             {recipe.prep_time_minutes && <span className="recipeTag" style={{ background:'#f5f5f5',color:'#555' }}>⏱ {recipe.prep_time_minutes} min</span>}
             {recipe.servings && <span className="recipeTag" style={{ background:'#f5f5f5',color:'#555' }}>🍽 {recipe.servings} serving{recipe.servings>1?'s':''}</span>}
           </div>
+
+          {/* Ingredients */}
           {recipe.ingredients?.length > 0 && (
             <div className="modalSection">
               <div className="modalSectionTitle">Ingredients</div>
@@ -414,6 +563,8 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
               </div>
             </div>
           )}
+
+          {/* Map toggle — shows saved homecook location */}
           <div className="modalSection">
             <button className="mapToggleBtn" onClick={() => setShowMap(v => !v)}>
               {showMap ? '🗺️ Hide Map' : '📍 Show Pickup Location on Map'}
@@ -427,6 +578,8 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
               />
             )}
           </div>
+
+          {/* Reviews */}
           <div className="modalSection">
             <div className="modalSectionTitle">Reviews</div>
             {loadingReviews ? (
@@ -447,6 +600,8 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
               </div>
             )}
           </div>
+
+          {/* Order Form */}
           {!isOwnListing && (
             <div className="orderForm">
               {orderSuccess ? (
@@ -496,6 +651,7 @@ function RecipeDetailModal({ recipe, currentUser, onClose, onOrderPlaced, isHome
               )}
             </div>
           )}
+
           {isOwnListing && (
             <div style={{ textAlign:'center', padding:'16px', background:'#e8f5ee',
               borderRadius:12, color:'#2d7a4f', fontSize:14, fontWeight:600 }}>
@@ -761,20 +917,24 @@ export default function Marketplace({ onBack }) {
   const [currentUser, setCurrentUser]   = useState(null);
   const [isHomecook, setIsHomecook]     = useState(false);
   const [activeTab, setActiveTab]       = useState('browse');
+
   const [listings, setListings]               = useState([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch]                   = useState('');
   const [activeFilter, setActiveFilter]       = useState('all');
   const [selectedRecipe, setSelectedRecipe]   = useState(null);
+
   const [myListings, setMyListings]       = useState([]);
   const [loadingMine, setLoadingMine]     = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showAddForm, setShowAddForm]     = useState(false);
+
   const [myOrders, setMyOrders]             = useState([]);
   const [homecookOrders, setHomecookOrders] = useState([]);
   const [loadingOrders, setLoadingOrders]   = useState(false);
   const [reviewTarget, setReviewTarget]     = useState(null);
   const [reviewType, setReviewType]         = useState('');
+
   const [toast, setToast] = useState('');
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
@@ -876,7 +1036,7 @@ export default function Marketplace({ onBack }) {
     { id:'orders',     label:'📋 My Orders' },
     ...(isHomecook ? [
       { id:'myListings', label:'🍳 My Listings' },
-      { id:'myLocation', label:'📍 My Location' },
+      { id:'myLocation', label:'📍 My Location' },  // NEW TAB for homecooks
     ] : []),
   ];
 
@@ -912,7 +1072,7 @@ export default function Marketplace({ onBack }) {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* Hero — only on browse tab */}
       {activeTab === 'browse' && (
         <div className={`marketplaceHero ${isHomecook ? 'homecookHero' : ''}`}>
           <div className="heroContent">
@@ -957,7 +1117,7 @@ export default function Marketplace({ onBack }) {
       {/* Main content */}
       <main className="marketplaceMain">
 
-        {/* BROWSE TAB */}
+        {/* ── BROWSE TAB ── */}
         {activeTab === 'browse' && (
           <div className="listingsGrid">
             {loadingListings ? <SkeletonGrid/>
@@ -1007,7 +1167,7 @@ export default function Marketplace({ onBack }) {
           </div>
         )}
 
-        {/* MY LISTINGS TAB */}
+        {/* ── MY LISTINGS TAB ── */}
         {activeTab === 'myListings' && isHomecook && (
           <div className="homecookSection">
             <div className="homecookSectionHeader">
@@ -1065,7 +1225,7 @@ export default function Marketplace({ onBack }) {
           </div>
         )}
 
-        {/* MY LOCATION TAB */}
+        {/* ── MY LOCATION TAB (homecook only) ── */}
         {activeTab === 'myLocation' && isHomecook && (
           <HomecookLocationManager
             currentUser={currentUser}
@@ -1076,7 +1236,7 @@ export default function Marketplace({ onBack }) {
           />
         )}
 
-        {/* ORDERS TAB */}
+        {/* ── ORDERS TAB ── */}
         {activeTab === 'orders' && (
           <>
             {loadingOrders ? <p style={{ color:'#7a6e60', textAlign:'center', padding:40 }}>Loading orders…</p> : (
@@ -1148,8 +1308,8 @@ export default function Marketplace({ onBack }) {
           onClose={() => setReviewTarget(null)} onSubmitted={handleReviewSubmitted}/>
       )}
 
-      {/* ✅ Shared AIChatbot — calls /api/chat backend, works with Ollama/Llama, no CORS */}
-      <AIChatbot />
+      {/* AI Chatbot — always visible */}
+      <AIChatbot currentUser={currentUser}/>
 
       {toast && <Toast message={toast}/>}
     </div>

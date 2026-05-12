@@ -7,6 +7,7 @@ import {
   deleteAccount,
   logout
 } from "../services/api";
+import AIChatbot from "../components/aiChatbot.jsx";
 import "./profile.css";
 
 export default function Profile({ onBack, onLogout }) {
@@ -730,6 +731,7 @@ export default function Profile({ onBack, onLogout }) {
           </div>
         </div>
       )}
+      <AIChatbot />
     </div>
   );
 }
