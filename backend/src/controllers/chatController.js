@@ -1,59 +1,84 @@
-const http = require('http');
+const https = require('https');
 
-const OLLAMA_HOST = process.env.OLLAMA_HOST || 'localhost';
-const OLLAMA_PORT = process.env.OLLAMA_PORT || 11434;
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = 'llama-3.1-8b-instant'; // Free, fast, no card needed
 
-function callOllama(messages, systemPrompt) {
+/**
+ * Call Groq API
+ * Groq uses the OpenAI-compatible format which is simple:
+ * - system, user, assistant roles all work
+ * - Same format as OpenAI so easy to understand
+ */
+function callGroq(messages, systemPrompt) {
   return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      model: OLLAMA_MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map(m => ({ role: m.role, content: m.content }))
-      ],
+
+    // Build messages array with system prompt first
+    const groqMessages = [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        content: m.content
+      }))
+    ];
+
+    const requestBody = JSON.stringify({
+      model: GROQ_MODEL,
+      messages: groqMessages,
+      max_tokens: 300,
+      temperature: 0.7,
+      top_p: 0.9,
       stream: false
     });
 
     const options = {
-      hostname: OLLAMA_HOST,
-      port: OLLAMA_PORT,
-      path: '/api/chat',
+      hostname: 'api.groq.com',
+      path: '/openai/v1/chat/completions',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Length': Buffer.byteLength(requestBody)
       }
     };
 
-    const req = http.request(options, (res) => {
+    const req = https.request(options, (res) => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          const reply = parsed.message?.content || 'Sorry, I could not generate a response.';
-          resolve(reply);
+
+          // Handle Groq API errors
+          if (parsed.error) {
+            reject(new Error(`Groq API error: ${parsed.error.message}`));
+            return;
+          }
+
+          // Extract reply from OpenAI-compatible response format
+          const reply = parsed?.choices?.[0]?.message?.content;
+
+          if (!reply) {
+            resolve('Sorry, I could not generate a response. Please try again.');
+            return;
+          }
+
+          resolve(reply.trim());
         } catch (e) {
-          reject(new Error('Failed to parse Ollama response: ' + e.message));
+          reject(new Error('Failed to parse Groq response: ' + e.message));
         }
       });
     });
 
     req.on('error', (err) => {
-      if (err.code === 'ECONNREFUSED') {
-        reject(new Error('Ollama is not running. Please start it with: ollama serve'));
-      } else {
-        reject(err);
-      }
+      reject(new Error('Failed to connect to Groq API: ' + err.message));
     });
 
-    req.setTimeout(60000, () => {
+    req.setTimeout(30000, () => {
       req.destroy();
-      reject(new Error('Ollama request timed out after 60 seconds'));
+      reject(new Error('Groq request timed out after 30 seconds'));
     });
 
-    req.write(body);
+    req.write(requestBody);
     req.end();
   });
 }
@@ -69,50 +94,73 @@ exports.chat = async (req, res) => {
       });
     }
 
-    const systemPrompt = `You are NutriAI Assistant, a helpful AI built into the NutriAI app.
+    // Check API key is configured
+    if (!GROQ_API_KEY) {
+      console.error('❌ GROQ_API_KEY is not set in environment variables');
+      return res.status(503).json({
+        success: false,
+        message: 'AI assistant is not configured. Please contact support.'
+      });
+    }
 
-IMPORTANT IDENTITY RULES — follow these no matter what the user asks:
-- Your name is "NutriAI Assistant"
-- You run locally on the user's device using Ollama and the llama3.2 model
-- You are NOT Claude, NOT ChatGPT, NOT Gemini, and NOT an Anthropic product
-- If anyone asks who made you or what AI you are, say: "I'm NutriAI Assistant, powered by Ollama running llama3.2 locally on this device."
-- Never claim to be any other AI product or company
+    const systemPrompt = `You are NutriAI Assistant, a helpful AI built into the NutriAI app — a food tracking and homecook marketplace app based in Nepal.
 
-YOUR JOB — help users with:
-- Finding dishes that match their dietary needs (vegetarian, vegan, gluten-free, etc.)
-- Understanding nutrition, calories, macros, and healthy eating
-- Navigating the NutriAI homecook marketplace
-- Questions about ordering, pickup, and reviews
-- Cooking tips, recipe suggestions, and meal planning
-- Pantry management and reducing food waste
+STRICT RULES — follow these no matter what:
+1. You ONLY answer questions about: food, recipes, nutrition, calories, macros, meal planning, dietary advice, ingredients, cooking tips, pantry management, and the NutriAI app features (marketplace, ordering, homecooks, meal logging).
+2. If the user asks anything NOT related to food, nutrition, or the NutriAI app, politely decline and redirect them. Say: "I'm only able to help with food and nutrition topics. Is there something food-related I can help you with?"
+3. NEVER discuss politics, news, coding, relationships, finance, or any non-food topic.
+4. Your name is "NutriAI Assistant". Do NOT say you are Llama, Groq, or any other AI. If asked, say: "I'm NutriAI Assistant, your personal food and nutrition guide."
 
-CONTEXT:
-- The app is NutriAI, based in Nepal
+APP CONTEXT:
+- NutriAI is a meal tracking and homecook marketplace app based in Nepal
+- Users can log daily meals: breakfast, lunch, dinner, snacks
+- Users track nutrition: calories, protein, carbs, fats
+- There is a Homecook Marketplace where approved home chefs sell homemade meals
+- All marketplace orders are pickup only — no delivery
 - Prices are in NPR (Nepali Rupees)
-- Users can order homemade meals from local homecooks (pickup only, no delivery)
+- The app helps users meet nutrition goals: weight management, muscle gain, heart health, etc.
+- Users have a pantry tracker to manage ingredients and expiry dates
+
+TOPICS YOU CAN HELP WITH:
+- Calories and nutrition info for Nepali and international dishes (dal bhat, momos, etc.)
+- Meal suggestions based on dietary needs (vegetarian, vegan, gluten-free, etc.)
+- How to use NutriAI app features (logging meals, marketplace, pantry tracker)
+- Healthy eating tips and meal planning
+- Recipe suggestions and cooking advice
+- Understanding macros (protein, carbs, fats)
+- Managing pantry items and reducing food waste
+- Questions about ordering from homecooks on the marketplace
 
 STYLE:
-- Be concise, friendly, and helpful
+- Be friendly, warm, and concise
 - Use emojis naturally but not excessively
-- Keep responses under 150 words unless a detailed answer is genuinely needed`;
+- Keep responses under 150 words unless a detailed recipe is genuinely needed
+- Use simple language, not overly technical`;
 
-    console.log(`🤖 Calling Ollama (${OLLAMA_MODEL}) with ${messages.length} messages`);
+    console.log(`🤖 Calling Groq (${GROQ_MODEL}) with ${messages.length} messages`);
 
-    const reply = await callOllama(messages, systemPrompt);
+    const reply = await callGroq(messages, systemPrompt);
 
-    console.log('Ollama response received');
+    console.log('✅ Groq response received');
     res.json({ success: true, reply });
 
   } catch (error) {
     console.error('❌ Chat controller error:', error.message);
 
-    const isOllamaDown = error.message.includes('Ollama is not running');
+    let userMessage = 'Failed to get AI response. Please try again.';
+
+    if (error.message.includes('invalid_api_key') || error.message.includes('API key')) {
+      userMessage = 'AI assistant configuration error. Please contact support.';
+    } else if (error.message.includes('timed out')) {
+      userMessage = 'AI assistant is taking too long. Please try again.';
+    } else if (error.message.includes('rate_limit') || error.message.includes('quota')) {
+      userMessage = 'AI assistant is busy right now. Please try again in a moment.';
+    }
+
     res.status(503).json({
       success: false,
-      message: isOllamaDown
-        ? 'AI assistant is currently offline. Please ensure Ollama is running.'
-        : 'Failed to get AI response. Please try again.',
-      error: error.message
+      message: userMessage,
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

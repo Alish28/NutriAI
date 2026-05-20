@@ -1,210 +1,411 @@
-// src/components/AIChatbot.jsx
-// Global AI chat widget — powered by Llama (via Ollama on your backend).
-// Calls POST /api/chat on your Express server.
-// No CORS issues. No API key needed. Completely free.
+/* ─── Floating Action Button ─────────────────────────────── */
+.chatFab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #eea641;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(238, 166, 65, 0.45);
+  z-index: 9999;
+  transition: all 0.3s ease;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+}
 
-import { useState, useEffect, useRef } from 'react';
-import './AIChatbot.css';
+.chatFab:hover {
+  background: #d99536;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(238, 166, 65, 0.55);
+}
 
-const API_URL = 'http://localhost:5000/api';
+.chatFabOpen {
+  background: #374151;
+  box-shadow: 0 6px 24px rgba(55, 65, 81, 0.35);
+  padding: 12px 16px;
+}
 
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+.chatFabOpen:hover {
+  background: #1f2937;
+}
 
-export default function AIChatbot() {
-  const [open, setOpen]         = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: '👋 Hi! I\'m your NutriAI assistant powered by Llama AI.\n\nI can help you with:\n• 🍽️ Meal ideas & recipes\n• 📊 Nutrition questions\n• 🏪 Marketplace help\n• 🥗 Dietary advice\n• 🥫 Using up pantry items\n\nWhat can I help you with today?'
-    }
-  ]);
-  const [input, setInput]       = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
-  const bottomRef               = useRef(null);
-  const inputRef                = useRef(null);
+.chatFabIcon {
+  font-size: 18px;
+  line-height: 1;
+}
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-    }
-  }, [messages, open]);
+.chatFabLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
 
-  // Focus input when panel opens
-  useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [open]);
+/* ─── Chat Panel ─────────────────────────────────────────── */
+.chatPanel {
+  position: fixed;
+  bottom: 90px;
+  right: 28px;
+  width: 370px;
+  height: 520px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  animation: chatSlideUp 0.25s ease;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+}
 
-  const sendMessage = async () => {
-    const text = input.trim();
-    if (!text || loading) return;
+@keyframes chatSlideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
-    setInput('');
-    setError('');
+/* ─── Header ─────────────────────────────────────────────── */
+.chatHeader {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    const newMessages = [...messages, { role: 'user', content: text }];
-    setMessages(newMessages);
-    setLoading(true);
+.chatHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    try {
-      const res = await fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify({ messages: newMessages }),
-      });
+.chatAvatar {
+  width: 36px;
+  height: 36px;
+  background: #eea641;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
 
-      const data = await res.json();
+.chatHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Request failed');
-      }
+.chatName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch (err) {
-      setError('⚠️ ' + (err.message || 'Could not reach the AI. Please try again.'));
-      // Restore user message so they can retry
-      setMessages(prev => prev.slice(0, -1));
-      setInput(text);
-    } finally {
-      setLoading(false);
-    }
-  };
+.chatOnline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+}
 
-  const handleKey = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+.chatOnlineDot {
+  width: 7px;
+  height: 7px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
 
-  const clearChat = () => {
-    setMessages([{
-      role: 'assistant',
-      content: '👋 Chat cleared! How can I help you?'
-    }]);
-    setError('');
-  };
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
 
-  const formatText = (text) =>
-    text.split('\n').map((line, i, arr) => (
-      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-    ));
+.chatHeaderActions {
+  display: flex;
+  gap: 6px;
+}
 
-  // Quick suggestion chips shown on fresh chat
-  const suggestions = [
-    '🥗 Suggest a healthy lunch',
-    '🔥 How many calories in dal bhat?',
-    '🏪 How does ordering work?',
-    '🌱 What vegan meals can I make?',
-    '🥫 Recipe using rice and lentils',
-  ];
+.chatClearBtn,
+.chatCloseBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
 
-  return (
-    <>
-      {/* Floating Action Button */}
-      <button
-        className={`chatFab ${open ? 'chatFabOpen' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        title={open ? 'Close AI Assistant' : 'Ask AI (powered by Llama)'}
-      >
-        <span className="chatFabIcon">{open ? '✕' : '🤖'}</span>
-        {!open && <span className="chatFabLabel">Ask AI</span>}
-      </button>
+.chatClearBtn:hover,
+.chatCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
-      {/* Chat Panel */}
-      {open && (
-        <div className="chatPanel">
+/* ─── Messages Area ──────────────────────────────────────── */
+.chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f9fafb;
+}
 
-          {/* Header */}
-          <div className="chatHeader">
-            <div className="chatHeaderLeft">
-              <div className="chatAvatar">🤖</div>
-              <div className="chatHeaderInfo">
-                <div className="chatName">NutriAI Assistant</div>
-                <div className="chatOnline">
-                  <span className="chatOnlineDot" />
-                  Llama AI · Local
-                </div>
-              </div>
-            </div>
-            <div className="chatHeaderActions">
-              <button className="chatClearBtn" onClick={clearChat} title="Clear chat">🗑️</button>
-              <button className="chatCloseBtn" onClick={() => setOpen(false)} title="Close">✕</button>
-            </div>
-          </div>
+.chatMessages::-webkit-scrollbar {
+  width: 4px;
+}
 
-          {/* Messages */}
-          <div className="chatMessages">
-            {messages.map((m, i) => (
-              <div key={i} className={`chatMsg chatMsg--${m.role}`}>
-                {m.role === 'assistant' && <div className="chatMsgAvatar">🤖</div>}
-                <div className="chatMsgBubble">{formatText(m.content)}</div>
-                {m.role === 'user' && <div className="chatMsgAvatar chatMsgAvatarUser">👤</div>}
-              </div>
-            ))}
+.chatMessages::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-            {/* Typing indicator */}
-            {loading && (
-              <div className="chatMsg chatMsg--assistant">
-                <div className="chatMsgAvatar">🤖</div>
-                <div className="chatMsgBubble chatTyping">
-                  <span /><span /><span />
-                </div>
-              </div>
-            )}
+.chatMessages::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
 
-            {/* Error */}
-            {error && <div className="chatError">{error}</div>}
+/* ─── Message Bubbles ────────────────────────────────────── */
+.chatMsg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: msgFadeIn 0.2s ease;
+}
 
-            <div ref={bottomRef} />
-          </div>
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-          {/* Suggestion chips — only shown on fresh chat */}
-          {messages.length === 1 && (
-            <div className="chatSuggestions">
-              {suggestions.map((s, i) => (
-                <button
-                  key={i}
-                  className="chatSuggestionChip"
-                  onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
+.chatMsg--user {
+  flex-direction: row-reverse;
+}
 
-          {/* Input */}
-          <div className="chatInputArea">
-            <textarea
-              ref={inputRef}
-              className="chatInput"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Ask about food, nutrition, recipes…"
-              rows={1}
-              disabled={loading}
-            />
-            <button
-              className="chatSendBtn"
-              onClick={sendMessage}
-              disabled={loading || !input.trim()}
-              title="Send (Enter)"
-            >
-              {loading ? '⏳' : '➤'}
-            </button>
-          </div>
-          <div className="chatFooter">Enter to send · Shift+Enter for new line</div>
-        </div>
-      )}
-    </>
-  );
+.chatMsgAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chatMsgAvatarUser {
+  background: #eea641;
+}
+
+.chatMsgBubble {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chatMsg--assistant .chatMsgBubble {
+  background: #ffffff;
+  color: #111827;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.chatMsg--user .chatMsgBubble {
+  background: #eea641;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+/* ─── Typing Indicator ───────────────────────────────────── */
+.chatTyping {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 12px 16px !important;
+  min-width: 60px;
+}
+
+.chatTyping span {
+  width: 7px;
+  height: 7px;
+  background: #9ca3af;
+  border-radius: 50%;
+  display: block;
+  animation: typingBounce 1.2s infinite;
+}
+
+.chatTyping span:nth-child(2) { animation-delay: 0.2s; }
+.chatTyping span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0);    opacity: 0.4; }
+  40%            { transform: translateY(-7px); opacity: 1; }
+}
+
+/* ─── Error Message ──────────────────────────────────────── */
+.chatError {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 0 4px;
+}
+
+/* ─── Suggestion Chips ───────────────────────────────────── */
+.chatSuggestions {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.chatSuggestionChip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.chatSuggestionChip:hover {
+  background: #fff7e9;
+  border-color: #eea641;
+  color: #92400e;
+}
+
+/* ─── Input Area ─────────────────────────────────────────── */
+.chatInputArea {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.chatInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: #111827;
+  background: #f9fafb;
+  outline: none;
+  resize: none;
+  max-height: 80px;
+  line-height: 1.4;
+  transition: border-color 0.2s ease;
+}
+
+.chatInput:focus {
+  border-color: #eea641;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(238, 166, 65, 0.1);
+}
+
+.chatInput::placeholder {
+  color: #9ca3af;
+}
+
+.chatInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chatSendBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: #eea641;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.chatSendBtn:hover:not(:disabled) {
+  background: #d99536;
+  transform: scale(1.05);
+}
+
+.chatSendBtn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.chatFooter {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+  padding: 5px 12px 8px 12px;
+  background: #ffffff;
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .chatPanel {
+    width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 80px;
+    height: 70vh;
+    max-height: 520px;
+  }
+
+  .chatFab {
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 14px;
+  }
 }

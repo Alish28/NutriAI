@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import './AIChatbot.css';
+import './aiChatbot.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
@@ -13,7 +13,7 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '👋 Hi! I\'m your NutriAI assistant.\n\nI can help you with:\n• 🍽️ Finding dishes & meal ideas\n• 📊 Nutrition & calorie questions\n• 🏪 Marketplace & ordering help\n• 🥗 Dietary advice\n\nWhat can I help you with today?'
+      content: '👋 Hi! I\'m your NutriAI assistant.\n\nI can help you with:\n• 🍽️ Meal ideas & dish suggestions\n• 🔥 Calories & nutrition questions\n• 🏪 Marketplace & ordering help\n• 🥗 Dietary & healthy eating advice\n• 🥫 Pantry & ingredient tips\n\nWhat can I help you with today?'
     }
   ]);
   const [input, setInput]       = useState('');
@@ -52,9 +52,7 @@ export default function AIChatbot() {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
         },
-        body: JSON.stringify({
-          messages: newMessages,
-        }),
+        body: JSON.stringify({ messages: newMessages }),
       });
 
       const data = await res.json();
@@ -66,9 +64,9 @@ export default function AIChatbot() {
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (err) {
       setError('⚠️ Could not reach the AI. Please try again.');
-      // Remove the user message that failed so they can retry
+      // Restore user message so they can retry
       setMessages(prev => prev.slice(0, -1));
-      setInput(text); // restore input
+      setInput(text);
     } finally {
       setLoading(false);
     }
@@ -84,36 +82,45 @@ export default function AIChatbot() {
   const clearChat = () => {
     setMessages([{
       role: 'assistant',
-      content: '👋 Chat cleared! How can I help you?'
+      content: '👋 Chat cleared! Ask me anything about food or nutrition.'
     }]);
     setError('');
   };
 
-  // Format message text — convert newlines and basic markdown
+  // Convert newlines to <br> elements for display
   const formatText = (text) => {
-    return text.split('\n').map((line, i) => (
+    return text.split('\n').map((line, i, arr) => (
       <span key={i}>
         {line}
-        {i < text.split('\n').length - 1 && <br />}
+        {i < arr.length - 1 && <br />}
       </span>
     ));
   };
 
+  const suggestions = [
+    '🥗 Suggest a healthy lunch',
+    '🔥 Calories in dal bhat?',
+    '🏪 How does ordering work?',
+    '🌱 What vegan options exist?',
+  ];
+
   return (
     <>
-      {/* Floating Action Button */}
+      {/* ── Floating Action Button ── */}
       <button
         className={`chatFab ${open ? 'chatFabOpen' : ''}`}
         onClick={() => setOpen(o => !o)}
-        title={open ? 'Close AI Assistant' : 'Open AI Assistant'}
+        title={open ? 'Close AI Assistant' : 'Ask AI about food & nutrition'}
+        aria-label="Toggle AI chat assistant"
       >
         <span className="chatFabIcon">{open ? '✕' : '🤖'}</span>
         {!open && <span className="chatFabLabel">Ask AI</span>}
       </button>
 
-      {/* Chat Panel */}
+      {/* ── Chat Panel ── */}
       {open && (
-        <div className="chatPanel">
+        <div className="chatPanel" role="dialog" aria-label="NutriAI Chat Assistant">
+
           {/* Header */}
           <div className="chatHeader">
             <div className="chatHeaderLeft">
@@ -122,67 +129,76 @@ export default function AIChatbot() {
                 <div className="chatName">NutriAI Assistant</div>
                 <div className="chatOnline">
                   <span className="chatOnlineDot" />
-                  Online
+                  Online · Food & Nutrition AI
                 </div>
               </div>
             </div>
             <div className="chatHeaderActions">
-              <button className="chatClearBtn" onClick={clearChat} title="Clear chat">
+              <button
+                className="chatClearBtn"
+                onClick={clearChat}
+                title="Clear conversation"
+                aria-label="Clear chat"
+              >
                 🗑️
               </button>
-              <button className="chatCloseBtn" onClick={() => setOpen(false)} title="Close">
+              <button
+                className="chatCloseBtn"
+                onClick={() => setOpen(false)}
+                title="Close"
+                aria-label="Close chat"
+              >
                 ✕
               </button>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="chatMessages">
+          <div className="chatMessages" role="log" aria-live="polite">
             {messages.map((m, i) => (
               <div key={i} className={`chatMsg chatMsg--${m.role}`}>
                 {m.role === 'assistant' && (
-                  <div className="chatMsgAvatar">🤖</div>
+                  <div className="chatMsgAvatar" aria-hidden="true">🤖</div>
                 )}
                 <div className="chatMsgBubble">
                   {formatText(m.content)}
                 </div>
                 {m.role === 'user' && (
-                  <div className="chatMsgAvatar chatMsgAvatarUser">👤</div>
+                  <div className="chatMsgAvatar chatMsgAvatarUser" aria-hidden="true">👤</div>
                 )}
               </div>
             ))}
 
-            {/* Typing indicator */}
+            {/* Typing indicator while waiting for response */}
             {loading && (
               <div className="chatMsg chatMsg--assistant">
-                <div className="chatMsgAvatar">🤖</div>
-                <div className="chatMsgBubble chatTyping">
+                <div className="chatMsgAvatar" aria-hidden="true">🤖</div>
+                <div className="chatMsgBubble chatTyping" aria-label="AI is typing">
                   <span /><span /><span />
                 </div>
               </div>
             )}
 
-            {/* Error message */}
+            {/* Error display */}
             {error && (
-              <div className="chatError">{error}</div>
+              <div className="chatError" role="alert">{error}</div>
             )}
 
+            {/* Scroll anchor */}
             <div ref={bottomRef} />
           </div>
 
-          {/* Suggested prompts — shown when only 1 message (the welcome) */}
+          {/* Quick suggestion chips — only shown on fresh chat */}
           {messages.length === 1 && (
-            <div className="chatSuggestions">
-              {[
-                '🥗 Suggest a healthy lunch',
-                '🔥 How many calories in dal bhat?',
-                '🏪 How does ordering work?',
-                '🌱 What vegan options are available?',
-              ].map((s, i) => (
+            <div className="chatSuggestions" role="toolbar" aria-label="Suggested questions">
+              {suggestions.map((s, i) => (
                 <button
                   key={i}
                   className="chatSuggestionChip"
-                  onClick={() => { setInput(s); inputRef.current?.focus(); }}
+                  onClick={() => {
+                    setInput(s);
+                    inputRef.current?.focus();
+                  }}
                 >
                   {s}
                 </button>
@@ -198,20 +214,25 @@ export default function AIChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Ask anything about food, nutrition, orders…"
+              placeholder="Ask about food, nutrition, recipes…"
               rows={1}
               disabled={loading}
+              aria-label="Type your message"
             />
             <button
               className="chatSendBtn"
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              title="Send (Enter)"
+              title="Send message (Enter)"
+              aria-label="Send message"
             >
               {loading ? '⏳' : '➤'}
             </button>
           </div>
-          <div className="chatFooter">Press Enter to send · Shift+Enter for new line</div>
+
+          <div className="chatFooter">
+            Enter to send · Shift+Enter for new line
+          </div>
         </div>
       )}
     </>
