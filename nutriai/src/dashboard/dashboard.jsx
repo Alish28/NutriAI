@@ -12,6 +12,7 @@ import HomecookApplication from "../components/homecookApplications.jsx";
 import HomecookDashboard from "../homecook/homecookDashboard.jsx";
 import AdminDashboard from "../admin/adminDashboard.jsx";
 import AIChatbot from "../components/aiChatbot.jsx";
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -191,7 +192,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
               ⚡
             </button>
           )}
-
+          <ThemeToggle />
           <button
             className="avatar-btn"
             onClick={onOpenProfile}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login as loginAPI } from "../services/api";
 import "./login.css";
+import ThemeToggle from '../components/themeToggle.jsx';
 
 export default function Login({ onLogin, onGoToSignup }) {
   const [email, setEmail] = useState("");
@@ -46,9 +47,10 @@ export default function Login({ onLogin, onGoToSignup }) {
         </div>
       </div>
 
-      <div className="auth-right">
+      <div className="auth-right" style={{ position: 'relative' }}>
         <div className="auth-card">
           <h2 className="auth-heading">Welcome back</h2>
+          <ThemeToggle />
           <p className="auth-subtext">
             Log in to view your personalized NutriAI dashboard.
           </p>

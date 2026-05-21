@@ -1,6 +1,7 @@
 // src/marketplace/marketplace.jsx
 import { useState, useEffect, useCallback, useRef } from 'react';
 import './marketplace.css';
+import ThemeToggle from '../components/themeToggle.jsx';
 
 // ─── API helpers ─────────────────────────────────────────────
 const API_URL = 'http://localhost:5000/api';
@@ -1067,6 +1068,7 @@ export default function Marketplace({ onBack }) {
                   onClick={() => setActiveTab(t.id)}>{t.label}</button>
               ))}
             </div>
+            <ThemeToggle style={{ marginRight: 4 }} />
             <button className="backBtn" onClick={onBack}>← Dashboard</button>
           </div>
         </div>

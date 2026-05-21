@@ -1,0 +1,393 @@
+/* dashboard */
+[data-theme="dark"] .dashboard-page { background: var(--nut-bg-page); color: var(--nut-text-primary); }
+[data-theme="dark"] .dash-header { background: var(--nut-bg-surface); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .logo-text { color: var(--nut-text-primary); }
+[data-theme="dark"] .hamburger-line { background: var(--nut-text-secondary); }
+[data-theme="dark"] .dash-search input { background: var(--nut-bg-surface-3); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .dash-search input::placeholder { color: var(--nut-text-hint); }
+[data-theme="dark"] .icon-btn, [data-theme="dark"] .avatar-btn { background: var(--nut-bg-surface-3); color: var(--nut-text-primary); }
+[data-theme="dark"] .icon-btn:hover, [data-theme="dark"] .avatar-btn:hover { background: var(--nut-border); }
+[data-theme="dark"] .logout-btn { background: var(--nut-red-bg); color: var(--nut-red-text); }
+[data-theme="dark"] .welcome-banner { background: var(--nut-bg-surface); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .welcome-content h2 { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-badge { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); border-color: var(--nut-border); }
+[data-theme="dark"] .dash-footer { color: var(--nut-text-muted); border-top-color: var(--nut-border); }
+[data-theme="dark"] .nav-sidebar { background: var(--nut-bg-surface); box-shadow: 2px 0 12px rgba(0,0,0,0.4); }
+[data-theme="dark"] .nav-sidebar-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .nav-sidebar-header h3, [data-theme="dark"] .nav-item { color: var(--nut-text-primary); }
+[data-theme="dark"] .nav-item:hover:not(.disabled) { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .nav-section-title { color: var(--nut-text-muted); }
+[data-theme="dark"] .nav-divider { background: var(--nut-border); }
+
+/* login + signup */
+[data-theme="dark"] .auth-right { background: var(--nut-auth-right-bg); }
+[data-theme="dark"] .auth-heading, [data-theme="dark"] .auth-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .auth-subtext, [data-theme="dark"] .auth-footer { color: var(--nut-text-secondary); }
+[data-theme="dark"] .input-group label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .input-pill input { background: var(--nut-auth-input-bg) !important; border-color: var(--nut-border); color: var(--nut-auth-input-color) !important; -webkit-text-fill-color: var(--nut-auth-input-color) !important; }
+[data-theme="dark"] .input-pill input:focus { border-color: var(--nut-border-focus); }
+[data-theme="dark"] .input-pill input::placeholder { color: var(--nut-text-hint) !important; }
+[data-theme="dark"] .eye { color: var(--nut-text-secondary); }
+
+/* NutritionSummary */
+[data-theme="dark"] .nutrition-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .nutrition-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .meals-count { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .meals-text { color: var(--nut-text-primary); }
+[data-theme="dark"] .nutrition-item.status-excellent { background: rgba(74,222,128,0.06); border-color: var(--nut-green); }
+[data-theme="dark"] .nutrition-item.status-over { background: rgba(248,113,113,0.06); border-color: var(--nut-red); }
+[data-theme="dark"] .nutrition-item.status-under { background: rgba(96,165,250,0.06); border-color: var(--nut-blue); }
+[data-theme="dark"] .nutrition-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .nutrition-value { color: var(--nut-text-primary); }
+[data-theme="dark"] .nutrition-percentage { color: var(--nut-text-muted); }
+[data-theme="dark"] .progress-bar { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .goals-banner.success { background: rgba(74,222,128,0.06); border-left-color: var(--nut-green); }
+[data-theme="dark"] .goals-banner.warning { background: rgba(251,191,36,0.06); border-left-color: var(--nut-yellow); }
+[data-theme="dark"] .banner-text strong { color: var(--nut-text-primary); }
+[data-theme="dark"] .banner-text p { color: var(--nut-text-secondary); }
+[data-theme="dark"] .empty-nutrition { color: var(--nut-text-muted); }
+[data-theme="dark"] .insights-section { border-top-color: var(--nut-border); }
+[data-theme="dark"] .insights-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .insight-item { background: rgba(251,191,36,0.06); border-left-color: var(--nut-yellow); color: var(--nut-yellow); }
+[data-theme="dark"] .todays-meals-list { border-top-color: var(--nut-border); }
+[data-theme="dark"] .todays-meals-list h4 { color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-mini-card { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .meal-mini-card:hover { background: var(--nut-border); }
+[data-theme="dark"] .meal-mini-name { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-mini-type { color: var(--nut-text-muted); }
+
+/* WeeklyChart */
+[data-theme="dark"] .weekly-chart-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .chart-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .metric-btn { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .metric-btn:hover { background: var(--nut-border); }
+[data-theme="dark"] .metric-btn.active { background: var(--nut-bg-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+[data-theme="dark"] .custom-tooltip { background: var(--nut-bg-surface); border-color: var(--nut-border); }
+[data-theme="dark"] .tooltip-label { color: var(--nut-text-primary); }
+[data-theme="dark"] .tooltip-meals { color: var(--nut-text-muted); }
+[data-theme="dark"] .chart-summary { border-top-color: var(--nut-border); }
+[data-theme="dark"] .summary-label { color: var(--nut-text-muted); }
+[data-theme="dark"] .summary-value { color: var(--nut-text-primary); }
+
+/* StreakTracker */
+[data-theme="dark"] .streak-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .streak-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .streak-main { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .streak-number { color: var(--nut-text-primary); }
+[data-theme="dark"] .streak-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .streak-message { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .streak-message p { color: var(--nut-text-secondary); }
+[data-theme="dark"] .progress-bar-container { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .progress-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .progress-percentage { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-item { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .stat-value { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-label { color: var(--nut-text-muted); }
+[data-theme="dark"] .milestone-section { border-top-color: var(--nut-border); }
+[data-theme="dark"] .milestone-section h4 { color: var(--nut-text-primary); }
+[data-theme="dark"] .milestone-badge { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .milestone-badge.unlocked { background: rgba(238,166,65,0.1); border-color: var(--nut-accent); }
+[data-theme="dark"] .badge-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .milestone-badge.unlocked .badge-label { color: var(--nut-text-primary); }
+
+/* WeeklyAverages */
+[data-theme="dark"] .weekly-avg-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .avg-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .days-logged-badge { background: var(--nut-green-bg); color: var(--nut-green-text); }
+[data-theme="dark"] .avg-item { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .avg-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .avg-divider { color: var(--nut-border-strong); }
+[data-theme="dark"] .avg-goal { color: var(--nut-text-muted); }
+[data-theme="dark"] .avg-progress-bar { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .avg-percentage { color: var(--nut-text-secondary); }
+[data-theme="dark"] .avg-tip { background: rgba(251,191,36,0.06); border-left-color: var(--nut-yellow); }
+[data-theme="dark"] .avg-tip p { color: var(--nut-yellow); }
+[data-theme="dark"] .avg-success { background: rgba(74,222,128,0.06); border-left-color: var(--nut-green); }
+[data-theme="dark"] .avg-success p { color: var(--nut-green); }
+
+/* AIRecommendations */
+[data-theme="dark"] .ai-recommendations-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .ai-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .ai-subtitle { color: var(--nut-text-muted); }
+[data-theme="dark"] .ai-meal-type-btn { background: var(--nut-bg-surface-3); border-color: var(--nut-border); }
+[data-theme="dark"] .ai-meal-type-btn:hover { border-color: var(--nut-accent); }
+[data-theme="dark"] .ai-meal-type-btn.active { background: rgba(238,166,65,0.1); border-color: var(--nut-accent); }
+[data-theme="dark"] .meal-type-label { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-type-time { color: var(--nut-text-muted); }
+[data-theme="dark"] .ai-recommendation-card { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .ai-recommendation-card:hover { border-color: var(--nut-accent); }
+[data-theme="dark"] .ai-rank-badge { background: rgba(238,166,65,0.1); border-color: var(--nut-accent); }
+[data-theme="dark"] .rank-text { color: var(--nut-text-primary); }
+[data-theme="dark"] .ai-meal-name { color: var(--nut-text-primary); }
+[data-theme="dark"] .ai-meal-description { color: var(--nut-text-secondary); }
+[data-theme="dark"] .meta-tag { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .ai-nutrition-summary { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .ai-explanation { background: rgba(251,191,36,0.06); border-left-color: var(--nut-yellow); }
+[data-theme="dark"] .explanation-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .explanation-text { color: var(--nut-yellow); }
+[data-theme="dark"] .dietary-tag { background: rgba(74,222,128,0.1); color: var(--nut-green); }
+[data-theme="dark"] .ai-btn-reject { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .ai-footer { border-top-color: var(--nut-border); }
+[data-theme="dark"] .ai-footer-text { color: var(--nut-text-muted); }
+[data-theme="dark"] .ai-success-banner { background: rgba(74,222,128,0.08); color: var(--nut-green); }
+
+/* PantryTracker */
+[data-theme="dark"] .pantry-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .pantry-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-box { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .stat-box.stat-fresh { background: var(--nut-green-bg); }
+[data-theme="dark"] .stat-box.stat-expiring { background: var(--nut-yellow-bg); }
+[data-theme="dark"] .stat-box.stat-expired { background: var(--nut-red-bg); }
+[data-theme="dark"] .filter-btn { background: var(--nut-bg-surface); border-color: var(--nut-border); color: var(--nut-text-secondary); }
+[data-theme="dark"] .filter-btn.active { background: var(--nut-accent); border-color: var(--nut-accent); color: #fff; }
+[data-theme="dark"] .pantry-table thead { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .pantry-table th { color: var(--nut-text-secondary); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .pantry-table td { color: var(--nut-text-primary); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .pantry-table tbody tr:hover { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .item-category { color: var(--nut-text-muted); }
+[data-theme="dark"] .modal-content { background: var(--nut-bg-surface); }
+[data-theme="dark"] .modal-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .modal-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .form-group label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .form-group input, [data-theme="dark"] .form-group select, [data-theme="dark"] .form-group textarea { background: var(--nut-bg-input); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .btn-secondary { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+
+/* MealTimeline */
+[data-theme="dark"] .meal-timeline-card { background: var(--nut-bg-surface); box-shadow: var(--nut-shadow-md); }
+[data-theme="dark"] .timeline-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .timeline-stats { color: var(--nut-text-secondary); }
+[data-theme="dark"] .timeline-content { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .timeline-item:hover .timeline-content { background: var(--nut-bg-surface-3); border-color: var(--nut-accent); }
+[data-theme="dark"] .placeholder-text { color: var(--nut-text-muted); }
+[data-theme="dark"] .meal-time { color: var(--nut-accent); }
+[data-theme="dark"] .meal-type-label { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-name { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-description { color: var(--nut-text-secondary); }
+[data-theme="dark"] .macro-value { color: var(--nut-text-primary); }
+[data-theme="dark"] .macro-label { color: var(--nut-text-muted); }
+[data-theme="dark"] .timeline-footer { border-top-color: var(--nut-border); }
+[data-theme="dark"] .timeline-refresh-btn { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+
+/* MealSidebar */
+[data-theme="dark"] .meal-sidebar { background: var(--nut-bg-surface); }
+[data-theme="dark"] .meal-sidebar-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .meal-sidebar-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-sidebar-close { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-date-section label, [data-theme="dark"] .meal-type-section label, [data-theme="dark"] .meal-input-group label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-date-input, [data-theme="dark"] .meal-input, [data-theme="dark"] .meal-textarea, [data-theme="dark"] .nutrition-input-small { background: var(--nut-bg-input); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-type-btn { background: var(--nut-bg-surface-2); border-color: var(--nut-border); color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-type-btn:hover { border-color: var(--nut-accent); }
+[data-theme="dark"] .meal-card { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .meal-card-type { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-card-name { color: var(--nut-text-secondary); }
+[data-theme="dark"] .meal-card-nutrition span { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .added-meals-section { border-top-color: var(--nut-border); }
+[data-theme="dark"] .added-meals-section h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .meal-sidebar-footer { background: var(--nut-bg-surface-2); border-top-color: var(--nut-border); }
+[data-theme="dark"] .meal-btn-cancel { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .error-message { background: var(--nut-red-bg); color: var(--nut-red-text); }
+
+/* SmartInsights */
+[data-theme="dark"] .smart-insights-card { background: var(--nut-bg-surface); border-color: var(--nut-border); }
+[data-theme="dark"] .insights-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .insight-success { background: rgba(74,222,128,0.06); }
+[data-theme="dark"] .insight-warning { background: rgba(251,191,36,0.06); }
+[data-theme="dark"] .insight-info { background: rgba(96,165,250,0.06); }
+[data-theme="dark"] .insight-message { color: var(--nut-text-primary); }
+[data-theme="dark"] .insight-action { color: var(--nut-text-secondary); }
+[data-theme="dark"] .insights-footer { border-top-color: var(--nut-border); }
+[data-theme="dark"] .insights-footer p { color: var(--nut-text-muted); }
+
+/* QuickStats */
+[data-theme="dark"] .stat-card { box-shadow: var(--nut-shadow-sm); }
+[data-theme="dark"] .stat-card-purple { background: rgba(144,97,247,0.08); border-color: rgba(144,97,247,0.25); }
+[data-theme="dark"] .stat-card-orange { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.25); }
+[data-theme="dark"] .stat-card-green { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); }
+[data-theme="dark"] .stat-card-red { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.25); }
+[data-theme="dark"] .stat-card-blue { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.25); }
+[data-theme="dark"] .stat-card-yellow { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); }
+[data-theme="dark"] .stat-label { color: var(--nut-text-secondary); }
+[data-theme="dark"] .stat-value { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-sublabel { color: var(--nut-text-muted); }
+
+/* HomecookDashboard */
+[data-theme="dark"] .homecook-dashboard { background: var(--nut-bg-page); }
+[data-theme="dark"] .homecook-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .homecook-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .homecook-subtitle { color: var(--nut-text-secondary); }
+[data-theme="dark"] .btn-switch-mode { background: var(--nut-bg-surface); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .recipes-container { background: var(--nut-bg-surface); }
+[data-theme="dark"] .recipes-header h2 { color: var(--nut-text-primary); }
+[data-theme="dark"] .recipe-card { background: var(--nut-bg-surface); border-color: var(--nut-border); }
+[data-theme="dark"] .recipe-card:hover { border-color: var(--nut-accent); }
+[data-theme="dark"] .recipe-name { color: var(--nut-text-primary); }
+[data-theme="dark"] .recipe-description { color: var(--nut-text-secondary); }
+[data-theme="dark"] .meta-item { color: var(--nut-text-secondary); }
+[data-theme="dark"] .recipe-price { background: var(--nut-accent-light); border-color: var(--nut-accent); }
+[data-theme="dark"] .tag-vegan, [data-theme="dark"] .tag-vegetarian { background: var(--nut-green-bg); color: var(--nut-green-text); }
+[data-theme="dark"] .tag-gluten { background: var(--nut-yellow-bg); color: var(--nut-yellow-text); }
+[data-theme="dark"] .tag-dairy { background: var(--nut-blue-bg); color: var(--nut-blue-text); }
+[data-theme="dark"] .recipe-actions { border-top-color: var(--nut-border); }
+[data-theme="dark"] .btn-edit { background: var(--nut-blue-bg); color: var(--nut-blue-text); }
+[data-theme="dark"] .btn-delete { background: var(--nut-red-bg); color: var(--nut-red-text); }
+[data-theme="dark"] .created-date { color: var(--nut-text-muted); }
+[data-theme="dark"] .recipe-form-overlay { background: var(--nut-bg-overlay); }
+[data-theme="dark"] .recipe-form-modal { background: var(--nut-bg-surface); }
+[data-theme="dark"] .form-header { background: var(--nut-bg-surface); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .form-header h2 { color: var(--nut-text-primary); }
+[data-theme="dark"] .section-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .form-group input, [data-theme="dark"] .form-group select, [data-theme="dark"] .form-group textarea { background: var(--nut-bg-input); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .checkbox-label { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .checkbox-label span { color: var(--nut-text-secondary); }
+[data-theme="dark"] .form-actions { border-top-color: var(--nut-border); }
+[data-theme="dark"] .btn-cancel { background: var(--nut-bg-surface); border-color: var(--nut-border); color: var(--nut-text-secondary); }
+[data-theme="dark"] .empty-state h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .empty-state p { color: var(--nut-text-secondary); }
+[data-theme="dark"] .recipe-footer { border-top-color: var(--nut-border); }
+
+/* AdminDashboard */
+[data-theme="dark"] .admin-dashboard { background: var(--nut-bg-page); }
+[data-theme="dark"] .admin-nav { background: var(--nut-bg-surface); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .nav-btn { color: var(--nut-text-secondary); }
+[data-theme="dark"] .nav-btn:hover { background: var(--nut-bg-surface-3); color: var(--nut-text-primary); }
+[data-theme="dark"] .admin-main { background: var(--nut-bg-page); }
+[data-theme="dark"] .view-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .view-subtitle { color: var(--nut-text-secondary); }
+[data-theme="dark"] .stat-card.blue { border-left-color: var(--nut-blue); background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-card.orange { border-left-color: #fb923c; background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-card.yellow { border-left-color: var(--nut-yellow); background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-card.green { border-left-color: var(--nut-green); background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-card.purple { border-left-color: var(--nut-purple); background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-card.pink { border-left-color: #ec4899; background: var(--nut-bg-surface); }
+[data-theme="dark"] .stat-icon { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .stat-content h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .stat-content p { color: var(--nut-text-secondary); }
+[data-theme="dark"] .quick-actions-section, [data-theme="dark"] .recent-activity-section { background: var(--nut-bg-surface); }
+[data-theme="dark"] .action-card { background: var(--nut-bg-surface-2); border-color: var(--nut-border); }
+[data-theme="dark"] .action-card:hover { background: var(--nut-bg-surface); border-color: var(--nut-blue); }
+[data-theme="dark"] .action-text { color: var(--nut-text-primary); }
+[data-theme="dark"] .action-desc { color: var(--nut-text-secondary); }
+[data-theme="dark"] .activity-item { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .activity-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .activity-subtitle { color: var(--nut-text-secondary); }
+[data-theme="dark"] .activity-date { color: var(--nut-text-muted); }
+[data-theme="dark"] .empty-state-card { background: var(--nut-bg-surface); }
+[data-theme="dark"] .empty-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .empty-subtitle { color: var(--nut-text-secondary); }
+[data-theme="dark"] .application-card { background: var(--nut-bg-surface); }
+[data-theme="dark"] .app-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .app-user-info h4 { color: var(--nut-text-primary); }
+[data-theme="dark"] .app-user-info p { color: var(--nut-text-secondary); }
+[data-theme="dark"] .app-section { color: var(--nut-text-secondary); }
+[data-theme="dark"] .app-section strong { color: var(--nut-text-primary); }
+[data-theme="dark"] .app-actions { border-top-color: var(--nut-border); }
+[data-theme="dark"] .reject-form textarea { background: var(--nut-bg-input); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .users-table-container { background: var(--nut-bg-surface); }
+[data-theme="dark"] .users-table thead { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .users-table th { color: var(--nut-text-secondary); }
+[data-theme="dark"] .users-table td { color: var(--nut-text-primary); border-top-color: var(--nut-border); }
+[data-theme="dark"] .users-table tbody tr:hover { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .role-badge.role-consumer { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .role-badge.role-homecook { background: var(--nut-yellow-bg); color: var(--nut-yellow-text); }
+[data-theme="dark"] .role-badge.role-admin { background: var(--nut-blue-bg); color: var(--nut-blue-text); }
+[data-theme="dark"] .status-badge.pending { background: var(--nut-yellow-bg); color: var(--nut-yellow-text); }
+[data-theme="dark"] .status-badge.approved { background: var(--nut-green-bg); color: var(--nut-green-text); }
+[data-theme="dark"] .view-all-btn { border-color: var(--nut-border-strong); color: var(--nut-blue); }
+[data-theme="dark"] .error-banner { background: var(--nut-red-bg); color: var(--nut-red-text); }
+
+/* Profile */
+[data-theme="dark"] .profile-page { background: var(--nut-bg-page); }
+[data-theme="dark"] .profile-header { background: var(--nut-bg-surface); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .profile-title { color: var(--nut-text-primary); }
+[data-theme="dark"] .p-card { background: var(--nut-bg-surface); }
+[data-theme="dark"] .p-card-header { border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .p-card-header h3 { color: var(--nut-text-primary); }
+[data-theme="dark"] .muted { color: var(--nut-text-muted); }
+[data-theme="dark"] .field label, [data-theme="dark"] .field > span { color: var(--nut-text-secondary); }
+[data-theme="dark"] .field input, [data-theme="dark"] .field select { background: var(--nut-bg-input); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .field input:focus, [data-theme="dark"] .field select:focus { border-color: var(--nut-green); }
+[data-theme="dark"] .pill { background: var(--nut-bg-surface-3); color: var(--nut-text-secondary); }
+[data-theme="dark"] .pill-toggle:hover { border-color: var(--nut-green); color: var(--nut-green); }
+[data-theme="dark"] .pill-toggle.pill-selected { background: var(--nut-green); color: #fff; border-color: var(--nut-green); }
+[data-theme="dark"] .switch-row { color: var(--nut-text-primary); border-bottom-color: var(--nut-border); }
+[data-theme="dark"] .slider { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .section-subtitle { color: var(--nut-text-muted); }
+[data-theme="dark"] .alert-success { background: rgba(74,222,128,0.06); color: var(--nut-green); border-color: rgba(74,222,128,0.2); }
+[data-theme="dark"] .alert-error { background: var(--nut-red-bg); color: var(--nut-red-text); border-color: rgba(248,113,113,0.2); }
+[data-theme="dark"] .btn-outline { background: var(--nut-bg-surface-3); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .profile-overview strong { color: var(--nut-text-primary); }
+
+/* AIChatbot */
+[data-theme="dark"] .chatPanel { background: var(--nut-chat-bg); border-color: var(--nut-border); }
+[data-theme="dark"] .chatMessages { background: var(--nut-bg-page); }
+[data-theme="dark"] .chatMsg--assistant .chatMsgBubble { background: var(--nut-chat-msg-bg); color: var(--nut-text-primary); }
+[data-theme="dark"] .chatInputArea { background: var(--nut-bg-surface); border-top-color: var(--nut-border); }
+[data-theme="dark"] .chatInput { background: var(--nut-bg-surface-3); border-color: var(--nut-border); color: var(--nut-text-primary); }
+[data-theme="dark"] .chatInput::placeholder { color: var(--nut-text-hint); }
+[data-theme="dark"] .chatFooter { color: var(--nut-text-muted); background: var(--nut-bg-surface); }
+[data-theme="dark"] .chatSuggestionChip { background: var(--nut-bg-surface-3); border-color: var(--nut-border); color: var(--nut-text-secondary); }
+[data-theme="dark"] .chatError { background: var(--nut-red-bg); color: var(--nut-red-text); }
+
+/* Marketplace */
+[data-theme="dark"] .marketplacePage { background: var(--nut-mp-bg); }
+[data-theme="dark"] .marketplaceHeader { background: var(--nut-mp-card); border-bottom-color: var(--nut-mp-border); }
+[data-theme="dark"] .marketplaceLogo, [data-theme="dark"] .marketplaceHeaderTitle { color: var(--nut-mp-text); }
+[data-theme="dark"] .filterBar { background: var(--nut-mp-card); border-bottom-color: var(--nut-mp-border); }
+[data-theme="dark"] .searchBox { background: var(--nut-mp-bg); border-color: var(--nut-mp-border); }
+[data-theme="dark"] .searchBox input { color: var(--nut-mp-text); }
+[data-theme="dark"] .searchBox input::placeholder { color: var(--nut-mp-muted); }
+[data-theme="dark"] .resultsCount { color: var(--nut-mp-muted); }
+[data-theme="dark"] .filterChip { border-color: var(--nut-mp-border); color: var(--nut-mp-muted); }
+[data-theme="dark"] .recipeCard { background: var(--nut-mp-card); border-color: transparent; }
+[data-theme="dark"] .recipeCard:hover { border-color: var(--nut-accent); }
+[data-theme="dark"] .recipeCardImage { background: rgba(238,166,65,0.06); }
+[data-theme="dark"] .recipeCardName { color: var(--nut-mp-text); }
+[data-theme="dark"] .recipeCardCook, [data-theme="dark"] .recipeCardDesc { color: var(--nut-mp-muted); }
+[data-theme="dark"] .tabBtns { background: var(--nut-bg-surface-3); }
+[data-theme="dark"] .tabBtn { color: var(--nut-mp-muted); }
+[data-theme="dark"] .tabBtn.active { background: var(--nut-mp-card); color: var(--nut-mp-text); }
+[data-theme="dark"] .backBtn { border-color: var(--nut-mp-border); color: var(--nut-mp-muted); }
+[data-theme="dark"] .modalContent, [data-theme="dark"] .recipeFormModal, [data-theme="dark"] .reviewModal { background: var(--nut-mp-card); }
+[data-theme="dark"] .modalRecipeName, [data-theme="dark"] .recipeFormTitle, [data-theme="dark"] .reviewModalTitle { color: var(--nut-mp-text); }
+[data-theme="dark"] .modalDesc { background: var(--nut-bg-surface-2); color: var(--nut-mp-muted); }
+[data-theme="dark"] .modalCookName { color: var(--nut-mp-muted); }
+[data-theme="dark"] .modalNutritionItem { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .modalNutritionValue { color: var(--nut-mp-text); }
+[data-theme="dark"] .modalNutritionLabel, [data-theme="dark"] .modalSectionTitle { color: var(--nut-mp-muted); }
+[data-theme="dark"] .ingredientPill { background: var(--nut-bg-surface-2); border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .reviewItem { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .reviewerName { color: var(--nut-mp-text); }
+[data-theme="dark"] .reviewComment { color: var(--nut-mp-muted); }
+[data-theme="dark"] .orderInput { background: var(--nut-bg-input); border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .orderTotal { background: var(--nut-accent-light); }
+[data-theme="dark"] .orderTotalLabel { color: var(--nut-mp-text); }
+[data-theme="dark"] .formInput, [data-theme="dark"] .formTextarea, [data-theme="dark"] .formSelect { background: var(--nut-bg-input); border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .formGroup label { color: var(--nut-mp-text); }
+[data-theme="dark"] .recipeFormHeader { background: var(--nut-mp-card); border-bottom-color: var(--nut-mp-border); }
+[data-theme="dark"] .recipeFormFooter { border-top-color: var(--nut-mp-border); }
+[data-theme="dark"] .cancelFormBtn { border-color: var(--nut-mp-border); color: var(--nut-mp-muted); }
+[data-theme="dark"] .orderCard { background: var(--nut-mp-card); border-color: var(--nut-mp-border); }
+[data-theme="dark"] .orderCardIcon { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] .orderCardName { color: var(--nut-mp-text); }
+[data-theme="dark"] .orderCardMeta { color: var(--nut-mp-muted); }
+[data-theme="dark"] .actionBtn { border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .homecookSectionTitle, [data-theme="dark"] .emptyStateTitle { color: var(--nut-mp-text); }
+[data-theme="dark"] .emptyStateText { color: var(--nut-mp-muted); }
+[data-theme="dark"] .skeletonImage, [data-theme="dark"] .skeletonLine { background: linear-gradient(90deg, var(--nut-bg-surface-2) 25%, var(--nut-bg-surface-3) 50%, var(--nut-bg-surface-2) 75%) !important; }
+[data-theme="dark"] .chatbotPanel { background: var(--nut-mp-card); border-color: var(--nut-mp-border); }
+[data-theme="dark"] .chatbotMessages { background: var(--nut-bg-page); }
+[data-theme="dark"] .chatbotMsg.assistant .chatbotMsgBubble { background: var(--nut-bg-surface-2); color: var(--nut-mp-text); }
+[data-theme="dark"] .chatbotInputArea { background: var(--nut-mp-card); border-top-color: var(--nut-mp-border); }
+[data-theme="dark"] .chatbotInput { background: var(--nut-bg-surface-2); border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .locationPermissionBox { background: var(--nut-mp-card); border-color: var(--nut-mp-border); }
+[data-theme="dark"] .locationPermissionBox h4 { color: var(--nut-mp-text); }
+[data-theme="dark"] .locationPermissionBox p { color: var(--nut-mp-muted); }
+[data-theme="dark"] .locationAddressRow { background: var(--nut-mp-card); }
+[data-theme="dark"] .locationAddressGroup label { color: var(--nut-mp-text); }
+[data-theme="dark"] .locationAddressInput { background: var(--nut-bg-input); border-color: var(--nut-mp-border); color: var(--nut-mp-text); }
+[data-theme="dark"] .locationManagerTitle { color: var(--nut-mp-text); }
+[data-theme="dark"] .locationManagerSubtitle { color: var(--nut-mp-muted); }
+[data-theme="dark"] .mapWrapper { border-color: var(--nut-mp-border); }
+[data-theme="dark"] .mapLabel { background: var(--nut-bg-surface-2); color: var(--nut-mp-text); border-bottom-color: var(--nut-mp-border); }
+[data-theme="dark"] .mapNote { background: rgba(251,191,36,0.06); color: var(--nut-yellow); }
+[data-theme="dark"] .locationResetBtn { border-color: var(--nut-mp-border); color: var(--nut-mp-muted); }

@@ -1,0 +1,113 @@
+:root {
+  --nut-bg-page: #f6f6f6;
+  --nut-bg-surface: #ffffff;
+  --nut-bg-surface-2: #fafafa;
+  --nut-bg-surface-3: #f3f4f6;
+  --nut-bg-input: #ffffff;
+  --nut-bg-overlay: rgba(0, 0, 0, 0.5);
+  --nut-text-primary: #111111;
+  --nut-text-secondary: #555555;
+  --nut-text-muted: #777777;
+  --nut-text-hint: #999999;
+  --nut-text-on-accent: #ffffff;
+  --nut-border: #e5e5e5;
+  --nut-border-strong: #cccccc;
+  --nut-border-focus: #eea641;
+  --nut-accent: #eea641;
+  --nut-accent-dark: #d99536;
+  --nut-accent-light: #fff7e9;
+  --nut-accent-shadow: rgba(238, 166, 65, 0.3);
+  --nut-green: #22c55e;
+  --nut-green-dark: #16a34a;
+  --nut-green-bg: #d1fae5;
+  --nut-green-text: #065f46;
+  --nut-red: #dc2626;
+  --nut-red-dark: #b91c1c;
+  --nut-red-bg: #fee2e2;
+  --nut-red-text: #991b1b;
+  --nut-blue: #0369a1;
+  --nut-blue-dark: #0284c7;
+  --nut-blue-bg: #dbeafe;
+  --nut-blue-text: #1e40af;
+  --nut-yellow: #ca8a04;
+  --nut-yellow-bg: #fef3c7;
+  --nut-yellow-text: #92400e;
+  --nut-purple: #9333ea;
+  --nut-purple-bg: #f3e8ff;
+  --nut-purple-text: #6b21a8;
+  --nut-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --nut-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --nut-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --nut-auth-right-bg: #fafafa;
+  --nut-auth-input-bg: #ffffff;
+  --nut-auth-input-color: #111111;
+  --nut-mp-bg: #f7f4f0;
+  --nut-mp-card: #ffffff;
+  --nut-mp-text: #1a1208;
+  --nut-mp-muted: #7a6e60;
+  --nut-mp-border: #e8e0d5;
+  --nut-chat-bg: #ffffff;
+  --nut-chat-msg-bg: #f9f9f9;
+}
+
+[data-theme="dark"] {
+  --nut-bg-page: #0f0f10;
+  --nut-bg-surface: #1a1a1c;
+  --nut-bg-surface-2: #1f1f22;
+  --nut-bg-surface-3: #242427;
+  --nut-bg-input: #242427;
+  --nut-bg-overlay: rgba(0, 0, 0, 0.75);
+  --nut-text-primary: #f0f0f0;
+  --nut-text-secondary: #a0a0a8;
+  --nut-text-muted: #787880;
+  --nut-text-hint: #606068;
+  --nut-text-on-accent: #ffffff;
+  --nut-border: #2e2e32;
+  --nut-border-strong: #3f3f45;
+  --nut-border-focus: #eea641;
+  --nut-accent: #eea641;
+  --nut-accent-dark: #d99536;
+  --nut-accent-light: #2a1f08;
+  --nut-accent-shadow: rgba(238, 166, 65, 0.2);
+  --nut-green: #4ade80;
+  --nut-green-dark: #22c55e;
+  --nut-green-bg: #0a2e1a;
+  --nut-green-text: #4ade80;
+  --nut-red: #f87171;
+  --nut-red-dark: #ef4444;
+  --nut-red-bg: #2d0f0f;
+  --nut-red-text: #f87171;
+  --nut-blue: #60a5fa;
+  --nut-blue-dark: #3b82f6;
+  --nut-blue-bg: #0f1e30;
+  --nut-blue-text: #60a5fa;
+  --nut-yellow: #fbbf24;
+  --nut-yellow-bg: #27200a;
+  --nut-yellow-text: #fbbf24;
+  --nut-purple: #c084fc;
+  --nut-purple-bg: #1e0a30;
+  --nut-purple-text: #c084fc;
+  --nut-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --nut-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --nut-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --nut-auth-right-bg: #141416;
+  --nut-auth-input-bg: #242427;
+  --nut-auth-input-color: #f0f0f0;
+  --nut-mp-bg: #111113;
+  --nut-mp-card: #1a1a1c;
+  --nut-mp-text: #f0f0f0;
+  --nut-mp-muted: #8a8a96;
+  --nut-mp-border: #2e2e32;
+  --nut-chat-bg: #1a1a1c;
+  --nut-chat-msg-bg: #242427;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--nut-bg-surface-2); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--nut-border-strong); border-radius: 4px; }
+[data-theme="dark"] .recharts-default-tooltip { background: var(--nut-bg-surface) !important; border-color: var(--nut-border) !important; color: var(--nut-text-primary) !important; }
+[data-theme="dark"] .recharts-cartesian-grid line { stroke: var(--nut-border); }
+[data-theme="dark"] .recharts-text { fill: var(--nut-text-secondary) !important; }
+[data-theme="dark"] .leaflet-popup-content-wrapper { background: var(--nut-bg-surface); color: var(--nut-text-primary); }
+[data-theme="dark"] .leaflet-popup-tip { background: var(--nut-bg-surface); }
+[data-theme="dark"] input[type="date"], [data-theme="dark"] input[type="time"], [data-theme="dark"] input[type="number"], [data-theme="dark"] select { color-scheme: dark; }
+[data-theme="dark"] .modal-overlay { background: var(--nut-bg-overlay) !important; }

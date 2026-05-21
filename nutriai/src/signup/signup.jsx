@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { register as registerAPI } from "../services/api";
 import "./signup.css";
+import ThemeToggle from '../components/themeToggle.jsx';
 
 export default function Signup({ onBackToLogin, onSignedUp }) {
   const [form, setForm] = useState({
@@ -72,7 +73,10 @@ export default function Signup({ onBackToLogin, onSignedUp }) {
         </div>
       </div>
 
-      <div className="auth-right">
+      <div className="auth-right" style={{ position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
+          <ThemeToggle />
+        </div>
         <div className="auth-card signup-card">
           <h2 className="auth-heading center">Welcome to NutriAI!</h2>
           <h3 className="auth-title">Create your NutriAI account</h3>

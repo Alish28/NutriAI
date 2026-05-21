@@ -11,6 +11,7 @@ import {
   logout
 } from '../services/api';
 import './adminDashboard.css';
+import ThemeToggle from '../components/themeToggle.jsx';
 
 export default function AdminDashboard({ onLogout }) {
   const [activeView, setActiveView] = useState('overview');
@@ -130,6 +131,7 @@ export default function AdminDashboard({ onLogout }) {
           )}
         </div>
         <div className="admin-header-right">
+          <ThemeToggle style={{ background: 'rgba(255,255,255,0.2)' }} />
           {/* IMPROVED REFRESH BUTTON */}
           <button 
             className={`refresh-btn-icon ${refreshing ? 'spinning' : ''}`}
