@@ -161,15 +161,15 @@ export default function PantryTracker() {
           </div>
           <div className="stat-box stat-fresh">
             <span className="stat-label">Fresh</span>
-            <span className="stat-value">{stats.fresh || 0}</span>
+            <span className="stat-value">{stats.fresh_items || 0}</span>
           </div>
           <div className="stat-box stat-expiring">
             <span className="stat-label">Expiring</span>
-            <span className="stat-value">{stats.expiring || 0}</span>
+            <span className="stat-value">{stats.expiring_soon || 0}</span>
           </div>
           <div className="stat-box stat-expired">
             <span className="stat-label">Expired</span>
-            <span className="stat-value">{stats.expired || 0}</span>
+            <span className="stat-value">{stats.expired_items || 0}</span>
           </div>
         </div>
       )}
@@ -298,22 +298,41 @@ export default function PantryTracker() {
                   </select>
                 </div>
 
-                {/* ADDED: Purchase Date */}
+                {/* Purchase Date */}
                 <div className="form-group">
                   <label>Purchase Date</label>
                   <input
                     type="date"
                     value={formData.purchase_date}
-                    onChange={(e) => setFormData({...formData, purchase_date: e.target.value})}
+                    max={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => {
+                      const newPurchaseDate = e.target.value;
+                      // Clear expiry date if it's now before the new purchase date
+                      const updatedExpiry = formData.expiry_date && formData.expiry_date < newPurchaseDate
+                        ? ''
+                        : formData.expiry_date;
+                      setFormData({...formData, purchase_date: newPurchaseDate, expiry_date: updatedExpiry});
+                    }}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Expiry Date</label>
+                  <label>
+                    Expiry Date
+                    {!formData.purchase_date && (
+                      <span style={{ fontSize: '11px', color: '#f59e0b', marginLeft: '6px', fontWeight: 500 }}>
+                        (set purchase date first)
+                      </span>
+                    )}
+                  </label>
                   <input
                     type="date"
                     value={formData.expiry_date}
+                    min={formData.purchase_date || ''}
+                    disabled={!formData.purchase_date}
                     onChange={(e) => setFormData({...formData, expiry_date: e.target.value})}
+                    style={!formData.purchase_date ? { opacity: 0.45, cursor: 'not-allowed' } : {}}
+                    title={!formData.purchase_date ? 'Please set a purchase date first' : ''}
                   />
                 </div>
 

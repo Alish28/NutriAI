@@ -347,21 +347,15 @@ body, .app-root { height: 100%; }
 
 .dash-right-col {
   min-width: 0;
-  /* Stick to top as user scrolls */
-  position: sticky;
-  top: 0;
-  max-height: calc(100vh - 160px);
-  overflow-y: auto;
+  align-self: start;
+  /* Removed sticky — it caused PantryTracker to visually overlap analytics section */
 }
-
-/* Scrollbar for right col */
-.dash-right-col::-webkit-scrollbar { width: 4px; }
-.dash-right-col::-webkit-scrollbar-track { background: transparent; }
-.dash-right-col::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
 /* Analytics section spans full width */
 .analytics-section {
   grid-column: 1 / -1;
+  position: relative;
+  z-index: 1;
 }
 
 .analytics-grid {
