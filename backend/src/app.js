@@ -18,18 +18,35 @@ const app = express();
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  'https://nutri-ai-o4p4.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+
+    let hostname = '';
+    try {
+      hostname = new URL(origin).hostname;
+    } catch (error) {
+      return callback(null, false);
+    }
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      hostname.endsWith('.vercel.app');
+
+    return callback(null, isAllowed);
   },
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
