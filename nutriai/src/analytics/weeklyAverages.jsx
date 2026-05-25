@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getWeeklyAverages } from '../services/api';
-import './WeeklyAverages.css';
+import './weeklyAverages.css';
 
 export default function WeeklyAverages() {
   const [data, setData] = useState(null);

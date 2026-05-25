@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getMealsByDate } from '../services/api';
-import './MealTimeline.css';
+import './mealTimeline.css';
 
 export default function MealTimeline() {
   const [meals, setMeals] = useState([]);

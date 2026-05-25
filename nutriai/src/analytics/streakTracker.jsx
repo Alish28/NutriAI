@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getStreak } from '../services/api';
-import './StreakTracker.css';
+import './streakTracker.css';
 
 export default function StreakTracker() {
   const [streakData, setStreakData] = useState(null);

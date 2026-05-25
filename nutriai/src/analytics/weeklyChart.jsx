@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getWeeklyTrends } from '../services/api';
-import './WeeklyChart.css';
+import './weeklyChart.css';
 
 export default function WeeklyChart() {
   const [trends, setTrends] = useState([]);

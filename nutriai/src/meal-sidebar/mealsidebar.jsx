@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createMeal, getMealsByDate, deleteMeal } from "../services/api";
-import "./mealSidebar.css";
+import "./mealsidebar.css";
 
 export default function MealSidebar({ isOpen, onClose }) {
   const [date, setDate] = useState("");
