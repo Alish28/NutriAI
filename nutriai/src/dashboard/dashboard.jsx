@@ -12,7 +12,6 @@ import HomecookApplication from "../components/homecookApplications.jsx";
 import HomecookDashboard from "../homecook/homecookDashboard.jsx";
 import AdminDashboard from "../admin/adminDashboard.jsx";
 import AIChatbot from "../components/aiChatbot.jsx";
-import ThemeToggle from '../components/ThemeToggle.jsx';
 
 export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
@@ -23,6 +22,15 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
   const [showHomecookApp, setShowHomecookApp] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isHomecookMode, setIsHomecookMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("nutriai-theme") === "dark";
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+    localStorage.setItem("nutriai-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -126,14 +134,18 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             </>
           )}
 
+          {/* Dark mode toggle in sidebar */}
           <div className="nav-divider" />
-          <div className="nav-section-title">Coming Soon</div>
-          <button className="nav-item disabled"><span className="nav-icon">📅</span><span>Meal Planner</span></button>
-          <button className="nav-item disabled"><span className="nav-icon">🔍</span><span>Recipe Explorer</span></button>
+          <button
+            className="nav-item"
+            onClick={() => setDarkMode((d) => !d)}
+          >
+            <span className="nav-icon">{darkMode ? "☀️" : "🌙"}</span>
+            <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
+          </button>
         </nav>
       </aside>
 
-      {/* Sidebar overlay */}
       {isNavSidebarOpen && (
         <div className="nav-sidebar-overlay" onClick={() => setIsNavSidebarOpen(false)} />
       )}
@@ -165,34 +177,38 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             className="icon-btn"
             onClick={() => onOpenMarketplace && onOpenMarketplace()}
             title="Marketplace"
-            style={{ background: "#fff7e9", color: "#eea641" }}
           >
             🏪 Marketplace
           </button>
 
           <button
-            className="icon-btn"
+            className="icon-btn chef-btn"
             onClick={handleChefButtonClick}
             title={user?.homecook_approved ? "Homecook Dashboard" : "Become a Homecook"}
-            style={{
-              background: user?.homecook_approved ? "#dcfce7" : "#fff7e9",
-              color: user?.homecook_approved ? "#15803d" : "#eea641",
-            }}
+            data-approved={user?.homecook_approved ? "true" : "false"}
           >
             👨‍🍳
           </button>
 
           {user?.role === "admin" && (
             <button
-              className="icon-btn"
+              className="icon-btn admin-btn"
               onClick={() => setShowAdminPanel(true)}
               title="Admin Panel"
-              style={{ background: "#e0f2fe", color: "#0369a1" }}
             >
               ⚡
             </button>
           )}
-          <ThemeToggle />
+
+          {/* Dark mode toggle */}
+          <button
+            className="icon-btn dark-toggle-btn"
+            onClick={() => setDarkMode((d) => !d)}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
           <button
             className="avatar-btn"
             onClick={onOpenProfile}
@@ -233,25 +249,27 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
       {/* ── Main Content ── */}
       <main className="dash-main">
 
-        {/* Left column — nutrition + AI recommendations */}
-        <div className="dash-left-col">
-          <NutritionSummary />
+        {/* Row 1: Nutrition + Pantry side by side */}
+        <div className="dash-row-top">
+          <div className="dash-nutrition-col">
+            <NutritionSummary />
+          </div>
+          <div className="dash-pantry-col">
+            <PantryTracker />
+          </div>
+        </div>
+
+        {/* Row 2: AI Recommendations full width */}
+        <div className="dash-ai-row">
           <AIRecommendations />
         </div>
 
-        {/* Right column — pantry */}
-        <div className="dash-right-col">
-          <PantryTracker />
+        {/* Row 3: Analytics — 3 equal columns filling full width */}
+        <div className="dash-analytics-row">
+          <WeeklyChart />
+          <StreakTracker />
+          <WeeklyAverages />
         </div>
-
-        {/* Full-width analytics row */}
-        <section className="analytics-section">
-          <div className="analytics-grid">
-            <WeeklyChart />
-            <StreakTracker />
-            <WeeklyAverages />
-          </div>
-        </section>
 
         {/* Footer */}
         <footer className="dash-footer">
@@ -269,7 +287,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ width:"90%", maxWidth:"900px", maxHeight:"90vh", overflowY:"auto", background:"#fff", borderRadius:"18px" }}
+            style={{ width:"90%", maxWidth:"900px", maxHeight:"90vh", overflowY:"auto", background:"var(--dm-card)", borderRadius:"18px" }}
           >
             <HomecookApplication
               onClose={() => setShowHomecookApp(false)}
@@ -291,22 +309,19 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ width:"95%", maxWidth:"1200px", maxHeight:"90vh", overflowY:"auto", background:"#fff", borderRadius:"18px" }}
+            style={{ width:"95%", maxWidth:"1200px", maxHeight:"90vh", overflowY:"auto", background:"var(--dm-card)", borderRadius:"18px" }}
           >
             <AdminDashboard onClose={() => setShowAdminPanel(false)} />
           </div>
         </div>
       )}
 
-      {/* ── Meal Sidebar ── */}
       <MealSidebar
         isOpen={isMealSidebarOpen}
         onClose={() => setIsMealSidebarOpen(false)}
       />
 
-      {/* ── Global AI Chatbot ── available on every page via dashboard wrapper */}
       <AIChatbot />
-
     </div>
   );
 }

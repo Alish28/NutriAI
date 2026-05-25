@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getMeals, getNutritionSummary, getStreak } from '../services/api';
-import './QuickStats.css';
+import './quickStats.css';
 
 export default function QuickStats() {
   const [stats, setStats] = useState({

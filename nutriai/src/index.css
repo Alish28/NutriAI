@@ -20,10 +20,30 @@ body,
 body {
   background: var(--nut-bg-page);
   color: var(--nut-text-primary);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  font-family: var(--nut-font-family);
+  font-size: var(--nut-font-base);
+  line-height: var(--nut-line-normal);
+  font-weight: var(--nut-weight-regular);
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-#root {
-  display: block;
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: 0;
+  line-height: var(--nut-line-tight);
+  font-weight: var(--nut-weight-bold);
 }

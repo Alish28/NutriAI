@@ -6,6 +6,16 @@
 const AIRecommendationEngine = require('../services/aiRecommendationEngine');
 const db = require('../config/database');
 
+const addDays = (date, days) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next.toISOString().split('T')[0];
+};
+
+const getDayName = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', { weekday: 'long' });
+};
+
 // GET /api/ai/recommendations
 // Get AI meal recommendations for user
 exports.getRecommendations = async (req, res) => {
@@ -207,6 +217,93 @@ exports.getInsights = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate insights'
+    });
+  }
+};
+
+// GET /api/ai/weekly-plan
+// Generates 7 days x breakfast/lunch/dinner/snack using the same explainable engine.
+exports.getWeeklyMealPlan = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const startDate = req.query.start_date || new Date().toISOString().split('T')[0];
+    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+    const days = [];
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalEstimatedCost = 0;
+
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const date = addDays(startDate, dayIndex);
+      const meals = [];
+
+      for (let mealIndex = 0; mealIndex < mealTypes.length; mealIndex++) {
+        const mealType = mealTypes[mealIndex];
+        const recommendations = await AIRecommendationEngine.getRecommendations(userId, mealType, date);
+
+        if (recommendations.length > 0) {
+          // Rotate through top results so the week does not repeat the same meal every day.
+          const selected = recommendations[(dayIndex + mealIndex) % recommendations.length];
+          meals.push({
+            meal_type: mealType,
+            meal_template_id: selected.id,
+            meal_name: selected.meal_name,
+            description: selected.description,
+            calories: Number(selected.calories || 0),
+            protein: Number(selected.protein || 0),
+            carbs: Number(selected.carbs || 0),
+            fats: Number(selected.fats || 0),
+            cuisine_type: selected.cuisine_type,
+            estimated_cost: selected.estimated_cost ? Number(selected.estimated_cost) : null,
+            confidence_score: selected.confidence_score,
+            reason: selected.reason
+          });
+
+          totalCalories += Number(selected.calories || 0);
+          totalProtein += Number(selected.protein || 0);
+          totalEstimatedCost += Number(selected.estimated_cost || 0);
+        } else {
+          meals.push({
+            meal_type: mealType,
+            meal_name: 'No suitable meal found',
+            reason: 'Add more meal templates for this meal type.'
+          });
+        }
+      }
+
+      days.push({
+        date,
+        day_name: getDayName(date),
+        meals,
+        daily_totals: {
+          calories: meals.reduce((sum, meal) => sum + Number(meal.calories || 0), 0),
+          protein: meals.reduce((sum, meal) => sum + Number(meal.protein || 0), 0),
+          estimated_cost: meals.reduce((sum, meal) => sum + Number(meal.estimated_cost || 0), 0)
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        start_date: startDate,
+        days,
+        summary: {
+          total_days: days.length,
+          total_meals: days.reduce((sum, day) => sum + day.meals.length, 0),
+          average_daily_calories: Math.round(totalCalories / 7),
+          average_daily_protein: Math.round(totalProtein / 7),
+          estimated_weekly_cost: Math.round(totalEstimatedCost)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error generating weekly meal plan:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate weekly meal plan',
+      error: error.message
     });
   }
 };

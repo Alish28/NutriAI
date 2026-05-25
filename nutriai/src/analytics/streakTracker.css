@@ -81,7 +81,7 @@
 
 .streak-number {
   font-size: 56px;
-  font-weight: 800;
+  font-weight: var(--nut-weight-bold);
   color: #111;
   line-height: 1;
   margin-bottom: 8px;

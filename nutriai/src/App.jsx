@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getFullProfile } from "./services/api";
 import Login from "./login/login.jsx";
 import Signup from "./signup/signup.jsx";
-import Onboarding from "./onboarding/Onboarding.jsx";
+import Onboarding from "./onboarding/onboarding.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Profile from "./profile/profile.jsx";
 import AdminDashboard from "./admin/adminDashboard.jsx";

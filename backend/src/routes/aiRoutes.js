@@ -9,6 +9,10 @@ router.use(protect);
 // Get AI meal recommendations
 router.get('/recommendations', aiController.getRecommendations);
 
+// GET /api/ai/weekly-plan
+// Generate a simple 7-day meal plan using the existing recommendation engine
+router.get('/weekly-plan', aiController.getWeeklyMealPlan);
+
 // POST /api/ai/feedback
 // Submit feedback on recommendation (accepted/rejected)
 router.post('/feedback', aiController.submitFeedback);

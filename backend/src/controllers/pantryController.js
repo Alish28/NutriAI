@@ -1,6 +1,30 @@
 // backend/src/controllers/pantryController.js
 const db = require('../config/database');
 
+const normalize = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const daysUntil = (dateValue) => {
+  if (!dateValue) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateValue);
+  target.setHours(0, 0, 0, 0);
+  return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+};
+
+const computedStatus = (expiryDate) => {
+  const days = daysUntil(expiryDate);
+  if (days === null) return 'fresh';
+  if (days < 0) return 'expired';
+  if (days <= 3) return 'expiring_soon';
+  return 'fresh';
+};
+
 // Get all pantry items for user
 exports.getPantryItems = async (req, res) => {
   try {
@@ -58,6 +82,111 @@ exports.getExpiringSoon = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch expiring items',
+      error: error.message
+    });
+  }
+};
+
+// Get in-app expiry reminders and pantry-based recipe suggestions
+exports.getFoodWasteSuggestions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const pantryQuery = `
+      SELECT
+        *,
+        (expiry_date::date - CURRENT_DATE) as days_until_expiry
+      FROM pantry_items
+      WHERE user_id = $1
+      ORDER BY expiry_date ASC NULLS LAST, created_at DESC
+    `;
+
+    const pantryResult = await db.query(pantryQuery, [userId]);
+    const pantryItems = pantryResult.rows.map((item) => ({
+      ...item,
+      days_until_expiry: item.days_until_expiry === null ? null : Number(item.days_until_expiry),
+      computed_status: computedStatus(item.expiry_date)
+    }));
+
+    const expiringItems = pantryItems
+      .filter((item) => item.expiry_date && item.days_until_expiry <= 7)
+      .sort((a, b) => a.days_until_expiry - b.days_until_expiry);
+
+    const usableItems = pantryItems
+      .filter((item) => item.computed_status !== 'expired')
+      .map((item) => normalize(item.item_name))
+      .filter(Boolean);
+
+    const priorityItems = expiringItems
+      .filter((item) => item.computed_status !== 'expired')
+      .map((item) => normalize(item.item_name))
+      .filter(Boolean);
+
+    const templateResult = await db.query(`
+      SELECT
+        id, meal_name, meal_type, description, calories, protein, carbs, fats,
+        cuisine_type, dietary_tags, estimated_cost, prep_time_minutes, ingredients
+      FROM meal_templates
+      WHERE active = true
+      ORDER BY popularity_score DESC, meal_name ASC
+    `);
+
+    const suggestions = templateResult.rows
+      .map((meal) => {
+        const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : [];
+        const normalizedIngredients = ingredients.map(normalize);
+
+        const matchedIngredients = normalizedIngredients.filter((ingredient) =>
+          usableItems.some((item) => ingredient.includes(item) || item.includes(ingredient))
+        );
+
+        const expiringMatches = normalizedIngredients.filter((ingredient) =>
+          priorityItems.some((item) => ingredient.includes(item) || item.includes(ingredient))
+        );
+
+        const score = matchedIngredients.length + expiringMatches.length * 2;
+
+        return {
+          id: meal.id,
+          meal_name: meal.meal_name,
+          meal_type: meal.meal_type,
+          description: meal.description,
+          calories: meal.calories,
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fats: meal.fats,
+          cuisine_type: meal.cuisine_type,
+          dietary_tags: meal.dietary_tags,
+          estimated_cost: meal.estimated_cost,
+          prep_time_minutes: meal.prep_time_minutes,
+          matched_ingredients: [...new Set(matchedIngredients)],
+          expiring_matches: [...new Set(expiringMatches)],
+          match_score: score,
+          reason: expiringMatches.length > 0
+            ? `Uses ${expiringMatches.length} ingredient(s) that should be used soon.`
+            : `Matches ${matchedIngredients.length} pantry ingredient(s).`
+        };
+      })
+      .filter((meal) => meal.match_score > 0)
+      .sort((a, b) => b.match_score - a.match_score)
+      .slice(0, 5);
+
+    res.json({
+      success: true,
+      data: {
+        expiring_items: expiringItems.slice(0, 8),
+        suggestions,
+        pantry_item_count: pantryItems.length,
+        message: expiringItems.length > 0
+          ? `${expiringItems.length} pantry item(s) need attention this week.`
+          : 'No pantry items are expiring soon.'
+      }
+    });
+  } catch (error) {
+    console.error('Error generating food waste suggestions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate food waste suggestions',
       error: error.message
     });
   }

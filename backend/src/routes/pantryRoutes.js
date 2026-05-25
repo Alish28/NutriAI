@@ -12,6 +12,9 @@ router.get('/', pantryController.getPantryItems);
 // Get items expiring soon
 router.get('/expiring-soon', pantryController.getExpiringSoon);
 
+// Get expiring items and recipe-style suggestions based on pantry ingredients
+router.get('/food-waste-suggestions', pantryController.getFoodWasteSuggestions);
+
 // Get pantry statistics
 router.get('/stats', pantryController.getPantryStats);
 

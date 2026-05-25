@@ -1,50 +1,111 @@
 const db = require('../config/database');
 
+const normalizeNepalPhone = (phone) => {
+  if (!phone) return null;
+  return String(phone).replace(/\s|-/g, '');
+};
+
+const isValidNepalPhone = (phone) => {
+  return /^(\+977)?9[78]\d{8}$/.test(phone);
+};
+
 // Apply to become homecook
 exports.applyHomecook = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { application_text, specialties, experience_years, sample_dishes, certifications } = req.body;
-    
-    if (!application_text) {
+
+    const {
+      application_text,
+      specialties,
+      experience_years,
+      sample_dishes,
+      certifications,
+      phone_number
+    } = req.body;
+
+    if (!application_text || !application_text.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Application text is required'
       });
     }
-    
-    const check = await db.query('SELECT id, status FROM homecook_applications WHERE user_id = $1', [userId]);
-    
+
+    const cleanedPhone = normalizeNepalPhone(phone_number);
+
+    if (!cleanedPhone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required for homecook applications'
+      });
+    }
+
+    if (!isValidNepalPhone(cleanedPhone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid Nepali mobile number'
+      });
+    }
+
+    const check = await db.query(
+      'SELECT id, status FROM homecook_applications WHERE user_id = $1',
+      [userId]
+    );
+
     if (check.rows.length > 0) {
       return res.status(400).json({
         success: false,
         message: `You have already applied. Status: ${check.rows[0].status}`
       });
     }
-    
+
+    await db.query('BEGIN');
+
     const query = `
-      INSERT INTO homecook_applications (user_id, application_text, specialties, experience_years, sample_dishes, certifications)
+      INSERT INTO homecook_applications (
+        user_id,
+        application_text,
+        specialties,
+        experience_years,
+        sample_dishes,
+        certifications
+      )
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    
+
     const result = await db.query(query, [
-      userId, 
-      application_text, 
-      specialties || [], 
-      experience_years || 0, 
+      userId,
+      application_text.trim(),
+      specialties || [],
+      parseInt(experience_years) || 0,
       sample_dishes || [],
       certifications || null
     ]);
-    
-    await db.query('UPDATE users SET homecook_status = $1 WHERE id = $2', ['pending', userId]);
-    
+
+    await db.query(
+      `
+      UPDATE users
+      SET
+        homecook_status = $1,
+        phone_number = $2,
+        phone_verified = false,
+        phone_verified_at = NULL,
+        phone_verified_by = NULL,
+        updated_at = NOW()
+      WHERE id = $3
+      `,
+      ['pending', cleanedPhone, userId]
+    );
+
+    await db.query('COMMIT');
+
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       data: { application: result.rows[0] }
     });
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error('Apply homecook error:', error);
     res.status(500).json({
       success: false,
@@ -58,16 +119,22 @@ exports.applyHomecook = async (req, res) => {
 exports.getApplicationStatus = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     const query = `
-      SELECT ha.*, u.full_name as reviewer_name
+      SELECT
+        ha.*,
+        applicant.phone_number,
+        applicant.phone_verified,
+        applicant.phone_verified_at,
+        reviewer.full_name as reviewer_name
       FROM homecook_applications ha
-      LEFT JOIN users u ON ha.reviewed_by = u.id
+      JOIN users applicant ON ha.user_id = applicant.id
+      LEFT JOIN users reviewer ON ha.reviewed_by = reviewer.id
       WHERE ha.user_id = $1
     `;
-    
+
     const result = await db.query(query, [userId]);
-    
+
     res.json({
       success: true,
       data: { application: result.rows[0] || null }
@@ -86,17 +153,21 @@ exports.getApplicationStatus = async (req, res) => {
 exports.toggleHomecookMode = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    const userQuery = 'SELECT role, homecook_approved, homecook_status FROM users WHERE id = $1';
+
+    const userQuery = `
+      SELECT role, homecook_approved, homecook_status, phone_verified
+      FROM users
+      WHERE id = $1
+    `;
     const user = await db.query(userQuery, [userId]);
-    
+
     if (!user.rows[0]) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     if (!user.rows[0].homecook_approved) {
       return res.status(403).json({
         success: false,
@@ -104,18 +175,21 @@ exports.toggleHomecookMode = async (req, res) => {
         current_status: user.rows[0].homecook_status
       });
     }
-    
+
     const currentRole = user.rows[0].role;
     const newRole = currentRole === 'homecook' ? 'consumer' : 'homecook';
-    
-    await db.query('UPDATE users SET role = $1 WHERE id = $2', [newRole, userId]);
-    
+
+    await db.query('UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2', [
+      newRole,
+      userId
+    ]);
+
     res.json({
       success: true,
       message: `Switched to ${newRole} mode`,
-      data: { 
+      data: {
         previous_role: currentRole,
-        new_role: newRole 
+        new_role: newRole
       }
     });
   } catch (error) {
@@ -132,32 +206,31 @@ exports.toggleHomecookMode = async (req, res) => {
 exports.getHomecookProfile = async (req, res) => {
   try {
     const homecookId = req.params.id;
-    
+
     const query = `
-      SELECT 
+      SELECT
         u.id,
         u.full_name,
         u.created_at as member_since,
         ha.specialties,
         ha.experience_years,
-        COUNT(hr.id) as total_recipes,
-        AVG(hr.average_rating) as average_rating
+        COUNT(hr.id) as total_recipes
       FROM users u
       LEFT JOIN homecook_applications ha ON u.id = ha.user_id
       LEFT JOIN homecook_recipes hr ON u.id = hr.user_id
       WHERE u.id = $1 AND u.homecook_approved = true
       GROUP BY u.id, u.full_name, u.created_at, ha.specialties, ha.experience_years
     `;
-    
+
     const result = await db.query(query, [homecookId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Homecook not found'
       });
     }
-    
+
     res.json({
       success: true,
       data: { homecook: result.rows[0] }
@@ -176,13 +249,10 @@ exports.getHomecookProfile = async (req, res) => {
 exports.getMyRecipes = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log('📥 Get my recipes - User ID:', userId);
 
     const query = 'SELECT * FROM homecook_recipes WHERE user_id = $1 ORDER BY created_at DESC';
     const result = await db.query(query, [userId]);
 
-    console.log(`✅ Found ${result.rows.length} recipes`);
-    
     res.json({
       success: true,
       data: { recipes: result.rows }
@@ -201,7 +271,7 @@ exports.getMyRecipes = async (req, res) => {
 exports.addRecipe = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     const {
       recipe_name,
       description,
@@ -216,14 +286,14 @@ exports.addRecipe = async (req, res) => {
       is_gluten_free,
       is_dairy_free
     } = req.body;
-    
+
     if (!recipe_name || !description || !price) {
       return res.status(400).json({
         success: false,
         message: 'Recipe name, description, and price are required'
       });
     }
-    
+
     const query = `
       INSERT INTO homecook_recipes (
         user_id, recipe_name, description, cuisine_type, price,
@@ -233,7 +303,7 @@ exports.addRecipe = async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
-    
+
     const values = [
       userId,
       recipe_name,
@@ -249,9 +319,9 @@ exports.addRecipe = async (req, res) => {
       is_gluten_free || false,
       is_dairy_free || false
     ];
-    
+
     const result = await db.query(query, values);
-    
+
     res.status(201).json({
       success: true,
       message: 'Recipe added successfully',
@@ -272,7 +342,7 @@ exports.updateRecipe = async (req, res) => {
   try {
     const userId = req.user.id;
     const recipeId = req.params.id;
-    
+
     const {
       recipe_name,
       description,
@@ -287,10 +357,10 @@ exports.updateRecipe = async (req, res) => {
       is_gluten_free,
       is_dairy_free
     } = req.body;
-    
+
     const query = `
-      UPDATE homecook_recipes 
-      SET 
+      UPDATE homecook_recipes
+      SET
         recipe_name = COALESCE($3, recipe_name),
         description = COALESCE($4, description),
         cuisine_type = COALESCE($5, cuisine_type),
@@ -307,24 +377,31 @@ exports.updateRecipe = async (req, res) => {
       WHERE id = $1 AND user_id = $2
       RETURNING *
     `;
-    
+
     const result = await db.query(query, [
-      recipeId, userId,
-      recipe_name, description, cuisine_type,
+      recipeId,
+      userId,
+      recipe_name,
+      description,
+      cuisine_type,
       price ? parseFloat(price) : null,
       prep_time_minutes ? parseInt(prep_time_minutes) : null,
       servings ? parseInt(servings) : null,
-      ingredients, instructions,
-      is_vegan, is_vegetarian, is_gluten_free, is_dairy_free
+      ingredients,
+      instructions,
+      is_vegan,
+      is_vegetarian,
+      is_gluten_free,
+      is_dairy_free
     ]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Recipe not found or you don\'t have permission'
+        message: 'Recipe not found or you do not have permission'
       });
     }
-    
+
     res.json({
       success: true,
       message: 'Recipe updated successfully',
@@ -345,17 +422,17 @@ exports.deleteRecipe = async (req, res) => {
   try {
     const userId = req.user.id;
     const recipeId = req.params.id;
-    
+
     const query = 'DELETE FROM homecook_recipes WHERE id = $1 AND user_id = $2 RETURNING id';
     const result = await db.query(query, [recipeId, userId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Recipe not found or you don\'t have permission'
+        message: 'Recipe not found or you do not have permission'
       });
     }
-    
+
     res.json({
       success: true,
       message: 'Recipe deleted successfully'
@@ -375,23 +452,23 @@ exports.toggleAvailability = async (req, res) => {
   try {
     const userId = req.user.id;
     const recipeId = req.params.id;
-    
+
     const query = `
-      UPDATE homecook_recipes 
+      UPDATE homecook_recipes
       SET is_available = NOT is_available, updated_at = NOW()
       WHERE id = $1 AND user_id = $2
       RETURNING *
     `;
-    
+
     const result = await db.query(query, [recipeId, userId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Recipe not found or you don\'t have permission'
+        message: 'Recipe not found or you do not have permission'
       });
     }
-    
+
     res.json({
       success: true,
       message: `Recipe is now ${result.rows[0].is_available ? 'available' : 'hidden'}`,

@@ -10,7 +10,7 @@ import {
   deletePantryItem,
   getPantryStats 
 } from '../services/api';
-import './PantryTracker.css';
+import './pantryTracker.css';
 
 export default function PantryTracker() {
   const [items, setItems] = useState([]);

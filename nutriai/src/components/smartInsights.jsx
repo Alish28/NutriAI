@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getNutritionSummary, getStreak } from '../services/api';
-import './SmartInsights.css';
+import './smartInsights.css';
 
 export default function SmartInsights() {
   const [insights, setInsights] = useState([]);

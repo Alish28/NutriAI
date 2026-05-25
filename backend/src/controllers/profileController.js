@@ -1,11 +1,10 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/UserModel');
+const User = require('../models/userModel');
 
-// Get full user profile
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.getFullProfile(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -27,32 +26,48 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Update user profile
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const profileData = req.body;
 
-    // FIXED: Convert string arrays AND empty strings to proper arrays or null
-    const arrayFields = ['health_goals', 'dietary_preferences', 'allergies', 'preferred_cuisines', 'nutrition_focus'];
-    
+    if (profileData.phone_number) {
+      const cleanedPhone = profileData.phone_number.replace(/\s|-/g, '');
+
+      if (!/^(\+977)?9[78]\d{8}$/.test(cleanedPhone)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please enter a valid Nepali mobile number'
+        });
+      }
+
+      profileData.phone_number = cleanedPhone;
+    }
+
+    const arrayFields = [
+      'health_goals',
+      'dietary_preferences',
+      'allergies',
+      'preferred_cuisines',
+      'nutrition_focus'
+    ];
+
     arrayFields.forEach(field => {
       if (profileData[field] !== undefined) {
-        // If it's a string, try to convert it
         if (typeof profileData[field] === 'string') {
           if (profileData[field].trim() === '') {
-            // Empty string → null (prevents array error)
             profileData[field] = null;
           } else {
-            // Non-empty string → array
-            profileData[field] = profileData[field].split(',').map(s => s.trim()).filter(Boolean);
-            // If result is empty array, set to null
+            profileData[field] = profileData[field]
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean);
+
             if (profileData[field].length === 0) {
               profileData[field] = null;
             }
           }
         } else if (Array.isArray(profileData[field])) {
-          // If it's already an array but empty, set to null
           if (profileData[field].length === 0) {
             profileData[field] = null;
           }
@@ -77,7 +92,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Update password
 exports.updatePassword = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -97,10 +111,9 @@ exports.updatePassword = async (req, res) => {
       });
     }
 
-    // Verify current password
     const user = await User.findByEmail(req.user.email);
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -108,7 +121,6 @@ exports.updatePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(newPassword, salt);
 
@@ -128,7 +140,6 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// Delete account
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -141,10 +152,9 @@ exports.deleteAccount = async (req, res) => {
       });
     }
 
-    // Verify password
     const user = await User.findByEmail(req.user.email);
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -168,13 +178,11 @@ exports.deleteAccount = async (req, res) => {
   }
 };
 
-// Export user data (GDPR compliance)
 exports.exportData = async (req, res) => {
   try {
     const userId = req.user.id;
-    
     const user = await User.getFullProfile(userId);
-    
+
     res.status(200).json({
       success: true,
       message: 'User data exported successfully',

@@ -4,7 +4,7 @@ import {
   submitAIFeedback,
   createMeal,
 } from "../services/api";
-import "./AIRecommendations.css";
+import "./aiRecommendations.css";
 
 export default function AIRecommendations() {
   const [recommendations, setRecommendations] = useState([]);

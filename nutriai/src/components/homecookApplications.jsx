@@ -1,18 +1,16 @@
-// nutriai/src/components/HomecookApplication.jsx
-// Component for users to apply to become a homecook
-
 import { useState, useEffect } from 'react';
 import { applyHomecook, getApplicationStatus } from '../services/api';
-import './HomecookApplication.css';
+import './homecookApplication.css';
 
 export default function HomecookApplication({ onClose }) {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     application_text: '',
+    phone_number: '',
     specialties: '',
     experience_years: 0,
     sample_dishes: '',
@@ -35,10 +33,25 @@ export default function HomecookApplication({ onClose }) {
     }
   };
 
+  const isValidNepalPhone = (phone) => {
+    const cleaned = phone.replace(/\s|-/g, '');
+    return /^(\+977)?9[78]\d{8}$/.test(cleaned);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
+    if (!formData.phone_number.trim()) {
+      setError('Please provide your phone number');
+      return;
+    }
+
+    if (!isValidNepalPhone(formData.phone_number)) {
+      setError('Please enter a valid Nepali phone number');
+      return;
+    }
+
     if (!formData.application_text.trim()) {
       setError('Please tell us why you want to become a homecook');
       return;
@@ -48,7 +61,8 @@ export default function HomecookApplication({ onClose }) {
 
     try {
       const dataToSubmit = {
-        application_text: formData.application_text,
+        application_text: formData.application_text.trim(),
+        phone_number: formData.phone_number.trim(),
         specialties: formData.specialties.split(',').map(s => s.trim()).filter(Boolean),
         experience_years: parseInt(formData.experience_years) || 0,
         sample_dishes: formData.sample_dishes.split(',').map(s => s.trim()).filter(Boolean),
@@ -67,23 +81,26 @@ export default function HomecookApplication({ onClose }) {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { bg: '#fff4e1', color: '#c05621', label: '⏳ Pending Review' },
-      approved: { bg: '#e4f7e9', color: '#166534', label: '✅ Approved' },
-      rejected: { bg: '#ffe5e5', color: '#b91c1c', label: '❌ Rejected' }
+      pending: { bg: '#fff4e1', color: '#c05621', label: 'Pending Review' },
+      approved: { bg: '#e4f7e9', color: '#166534', label: 'Approved' },
+      rejected: { bg: '#ffe5e5', color: '#b91c1c', label: 'Rejected' }
     };
+
     const badge = badges[status] || badges.pending;
-    
+
     return (
-      <div style={{
-        background: badge.bg,
-        color: badge.color,
-        padding: '12px 16px',
-        borderRadius: '10px',
-        fontWeight: '600',
-        fontSize: '15px',
-        textAlign: 'center',
-        marginBottom: '16px'
-      }}>
+      <div
+        style={{
+          background: badge.bg,
+          color: badge.color,
+          padding: '12px 16px',
+          borderRadius: '10px',
+          fontWeight: '600',
+          fontSize: '15px',
+          textAlign: 'center',
+          marginBottom: '16px'
+        }}
+      >
         {badge.label}
       </div>
     );
@@ -94,20 +111,19 @@ export default function HomecookApplication({ onClose }) {
       <div className="homecook-app-card">
         <div className="homecook-app-header">
           <h2>Homecook Application</h2>
-          {onClose && <button className="btn-close" onClick={onClose}>✕</button>}
+          {onClose && <button className="btn-close" onClick={onClose}>x</button>}
         </div>
         <p>Loading...</p>
       </div>
     );
   }
 
-  // If user already has an application
   if (application) {
     return (
       <div className="homecook-app-card">
         <div className="homecook-app-header">
           <h2>Homecook Application Status</h2>
-          {onClose && <button className="btn-close" onClick={onClose}>✕</button>}
+          {onClose && <button className="btn-close" onClick={onClose}>x</button>}
         </div>
 
         {getStatusBadge(application.status)}
@@ -116,23 +132,39 @@ export default function HomecookApplication({ onClose }) {
           <div className="detail-row">
             <span className="detail-label">Applied on:</span>
             <span className="detail-value">
-              {new Date(application.applied_at).toLocaleDateString()}
+              {application.applied_at
+                ? new Date(application.applied_at).toLocaleDateString()
+                : 'Not available'}
+            </span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">Phone number:</span>
+            <span className="detail-value">
+              {application.phone_number || 'Not provided'}
+            </span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">Phone verification:</span>
+            <span className="detail-value">
+              {application.phone_verified ? 'Verified by admin' : 'Pending admin verification'}
             </span>
           </div>
 
           {application.status === 'pending' && (
             <div className="info-box">
-              <p>✨ Your application is under review by our team!</p>
-              <p>We'll notify you once it's reviewed (usually within 1-2 business days).</p>
+              <p>Your application is under review by our team.</p>
+              <p>Your phone number will be manually verified when an admin approves your application.</p>
             </div>
           )}
 
           {application.status === 'approved' && (
             <div className="success-box">
-              <p>🎉 Congratulations! You're now an approved homecook!</p>
-              <p>You can now add your recipes and start selling homemade meals.</p>
+              <p>Congratulations! You are now an approved homecook.</p>
+              <p>You can now add recipes and start selling homemade meals.</p>
               <button className="btn-primary" onClick={onClose}>
-                Go to Dashboard →
+                Go to Dashboard
               </button>
             </div>
           )}
@@ -141,7 +173,7 @@ export default function HomecookApplication({ onClose }) {
             <div className="error-box">
               <p><strong>Reason for rejection:</strong></p>
               <p>{application.rejection_reason || 'No reason provided'}</p>
-              <p style={{marginTop: '12px', fontSize: '13px', color: '#666'}}>
+              <p style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
                 You can apply again after addressing the concerns mentioned above.
               </p>
             </div>
@@ -149,6 +181,7 @@ export default function HomecookApplication({ onClose }) {
 
           <div className="detail-section">
             <h4>Your Application</h4>
+
             <div className="detail-row">
               <span className="detail-label">Why you want to be a homecook:</span>
               <p className="detail-text">{application.application_text}</p>
@@ -188,36 +221,45 @@ export default function HomecookApplication({ onClose }) {
     );
   }
 
-  // Application form for new users
   return (
     <div className="homecook-app-card">
       <div className="homecook-app-header">
         <h2>Apply to Become a Homecook</h2>
-        {onClose && <button className="btn-close" onClick={onClose}>✕</button>}
+        {onClose && <button className="btn-close" onClick={onClose}>x</button>}
       </div>
 
       <div className="app-intro">
-        <p>👨‍🍳 Share your culinary passion and earn by selling homemade meals!</p>
-        <p>Join our community of home chefs and reach food lovers in your area.</p>
+        <p>Share your cooking and earn by selling homemade meals.</p>
+        <p>Phone numbers are used only for pickup and order coordination.</p>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Phone Number *</label>
+          <input
+            type="tel"
+            value={formData.phone_number}
+            onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+            required
+            placeholder="98XXXXXXXX or +97798XXXXXXXX"
+          />
+          <span className="hint">
+            Your number will be manually verified by admin after application review.
+          </span>
+        </div>
+
         <div className="form-group">
           <label>Why do you want to become a homecook? *</label>
           <textarea
             value={formData.application_text}
-            onChange={(e) => setFormData({...formData, application_text: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, application_text: e.target.value })}
             required
             rows="5"
             placeholder="Tell us about your cooking experience, passion, and what makes your food special..."
           />
-          <span className="hint">Minimum 50 characters</span>
+          <span className="hint">Minimum 50 characters recommended</span>
         </div>
 
         <div className="form-group">
@@ -225,8 +267,8 @@ export default function HomecookApplication({ onClose }) {
           <input
             type="text"
             value={formData.specialties}
-            onChange={(e) => setFormData({...formData, specialties: e.target.value})}
-            placeholder="e.g., Nepali Cuisine, Italian, Baking, Vegan Meals"
+            onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
+            placeholder="e.g., Nepali Cuisine, Baking, Vegan Meals"
           />
           <span className="hint">Separate with commas</span>
         </div>
@@ -237,7 +279,7 @@ export default function HomecookApplication({ onClose }) {
             <input
               type="number"
               value={formData.experience_years}
-              onChange={(e) => setFormData({...formData, experience_years: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, experience_years: e.target.value })}
               min="0"
               max="50"
               placeholder="0"
@@ -249,7 +291,7 @@ export default function HomecookApplication({ onClose }) {
             <input
               type="text"
               value={formData.sample_dishes}
-              onChange={(e) => setFormData({...formData, sample_dishes: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, sample_dishes: e.target.value })}
               placeholder="e.g., Dal Bhat, Momos, Biryani"
             />
           </div>
@@ -259,19 +301,19 @@ export default function HomecookApplication({ onClose }) {
           <label>Certifications (Optional)</label>
           <textarea
             value={formData.certifications}
-            onChange={(e) => setFormData({...formData, certifications: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
             rows="2"
             placeholder="Any food safety certifications, culinary training, or relevant qualifications..."
           />
         </div>
 
         <div className="requirements-box">
-          <h4>📋 Requirements:</h4>
+          <h4>Requirements:</h4>
           <ul>
-            <li>✓ Must be 18+ years old</li>
-            <li>✓ Follow food safety guidelines</li>
-            <li>✓ Provide quality, fresh meals</li>
-            <li>✓ Respond to orders within 24 hours</li>
+            <li>Must be 18+ years old</li>
+            <li>Follow food safety guidelines</li>
+            <li>Provide quality, fresh meals</li>
+            <li>Respond to orders within 24 hours</li>
           </ul>
         </div>
 

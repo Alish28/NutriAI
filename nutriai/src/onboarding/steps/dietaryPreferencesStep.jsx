@@ -1,135 +1,68 @@
-//3
 export default function DietaryPreferencesStep({ data, updateData, onNext, onBack }) {
-  const dietaryOptions = [
-    { value: 'Vegan', icon: '🌱' },
-    { value: 'Vegetarian', icon: '🥕' },
-    { value: 'Pescatarian', icon: '🐟' },
-    { value: 'Keto', icon: '🥑' },
-    { value: 'Paleo', icon: '🥩' },
-    { value: 'Gluten-Free', icon: '🌾' },
-    { value: 'Dairy-Free', icon: '🥛' },
-    { value: 'Low-Carb', icon: '🍞' }
-  ];
+  const dietaryOptions = ["Vegan", "Vegetarian", "Pescatarian", "Keto", "Gluten-Free", "Dairy-Free", "Low-Carb"];
+  const cuisineOptions = ["Nepali", "Indian", "Chinese", "Japanese", "Italian", "Mexican", "Mediterranean", "Thai"];
 
-  const cuisineOptions = [
-    { value: 'Italian', icon: '🍝' },
-    { value: 'Mexican', icon: '🌮' },
-    { value: 'Indian', icon: '🍛' },
-    { value: 'Chinese', icon: '🥡' },
-    { value: 'Japanese', icon: '🍱' },
-    { value: 'Nepali', icon: '🍲' },
-    { value: 'Mediterranean', icon: '🥗' },
-    { value: 'Thai', icon: '🍜' }
-  ];
-
-  const toggleDietaryPreference = (preference) => {
-    const currentPreferences = data.dietary_preferences || [];
-    const updatedPreferences = currentPreferences.includes(preference)
-      ? currentPreferences.filter(p => p !== preference)
-      : [...currentPreferences, preference];
-    updateData({ dietary_preferences: updatedPreferences });
-  };
-
-  const toggleCuisine = (cuisine) => {
-    const currentCuisines = data.preferred_cuisines || [];
-    const updatedCuisines = currentCuisines.includes(cuisine)
-      ? currentCuisines.filter(c => c !== cuisine)
-      : [...currentCuisines, cuisine];
-    updateData({ preferred_cuisines: updatedCuisines });
-  };
-
-  const toggleLocalPriority = () => {
-    updateData({ prioritize_local: !data.prioritize_local });
+  const toggleArrayValue = (field, value) => {
+    const current = data[field] || [];
+    updateData({
+      [field]: current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value],
+    });
   };
 
   return (
     <div className="onboarding-step">
       <h1 className="step-title">Dietary Preferences</h1>
-      <p className="step-subtitle">
-        Help us recommend the right meals for you.
-      </p>
+      <p className="step-subtitle">Help us recommend meals that fit your diet and taste.</p>
 
-      {/* Dietary Preferences */}
       <div className="form-section">
         <label className="section-label">Dietary Restrictions</label>
-        <p className="section-hint">Select all that apply.</p>
-        
-        <div className="pill-container" style={{ marginTop: '12px' }}>
+        <div className="pill-container" style={{ marginTop: "12px" }}>
           {dietaryOptions.map((option) => (
             <button
-              key={option.value}
+              key={option}
               type="button"
-              className={`pill-toggle ${(data.dietary_preferences || []).includes(option.value) ? 'selected' : ''}`}
-              onClick={() => toggleDietaryPreference(option.value)}
+              className={`pill-toggle ${(data.dietary_preferences || []).includes(option) ? "selected" : ""}`}
+              onClick={() => toggleArrayValue("dietary_preferences", option)}
             >
-              <span className="pill-icon">{option.icon}</span>
-              {option.value}
+              {option}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Allergies */}
       <div className="input-group">
         <label className="input-label">Allergies</label>
         <input
           type="text"
           className="input-field"
-          placeholder="e.g., Nuts, Shellfish, Soy (comma-separated)"
-          value={data.allergies}
+          placeholder="e.g., nuts, milk, eggs"
+          value={data.allergies || ""}
           onChange={(e) => updateData({ allergies: e.target.value })}
         />
-        <p className="section-hint">List any food allergies, separated by commas.</p>
+        <p className="section-hint">Separate allergies with commas.</p>
       </div>
 
-      {/* Preferred Cuisines */}
       <div className="form-section">
         <label className="section-label">Preferred Cuisines</label>
-        <p className="section-hint">What types of food do you enjoy?</p>
-        
-        <div className="pill-container" style={{ marginTop: '12px' }}>
+        <div className="pill-container" style={{ marginTop: "12px" }}>
           {cuisineOptions.map((cuisine) => (
             <button
-              key={cuisine.value}
+              key={cuisine}
               type="button"
-              className={`pill-toggle ${(data.preferred_cuisines || []).includes(cuisine.value) ? 'selected' : ''}`}
-              onClick={() => toggleCuisine(cuisine.value)}
+              className={`pill-toggle ${(data.preferred_cuisines || []).includes(cuisine) ? "selected" : ""}`}
+              onClick={() => toggleArrayValue("preferred_cuisines", cuisine)}
             >
-              <span className="pill-icon">{cuisine.icon}</span>
-              {cuisine.value}
+              {cuisine}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Local Priority Toggle */}
-      <div className="toggle-list">
-        <div className="toggle-item">
-          <div className="toggle-info">
-            <div className="toggle-title">Prioritize Local/Nepali Dishes</div>
-            <div className="toggle-description">
-              Feature traditional Nepali cuisine in your recommendations.
-            </div>
-          </div>
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={data.prioritize_local}
-              onChange={toggleLocalPriority}
-            />
-            <span className="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-
-      {/* Navigation */}
       <div className="nav-buttons">
-        <button type="button" className="btn-back" onClick={onBack}>
-          ← Back
-        </button>
-        <button type="button" className="btn-next" onClick={onNext}>
-          Next →
-        </button>
+        <button type="button" className="btn-back" onClick={onBack}>Back</button>
+        <button type="button" className="btn-next" onClick={onNext}>Next</button>
       </div>
     </div>
   );

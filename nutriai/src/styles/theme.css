@@ -1,55 +1,85 @@
 :root {
+  --nut-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --nut-font-xs: 12px;
+  --nut-font-sm: 13px;
+  --nut-font-md: 14px;
+  --nut-font-base: 15px;
+  --nut-font-lg: 18px;
+  --nut-font-xl: 22px;
+  --nut-font-2xl: 26px;
+  --nut-font-3xl: 32px;
+
+  --nut-weight-regular: 400;
+  --nut-weight-medium: 500;
+  --nut-weight-semibold: 600;
+  --nut-weight-bold: 700;
+
+  --nut-line-tight: 1.2;
+  --nut-line-normal: 1.45;
+
   --nut-bg-page: #f6f6f6;
   --nut-bg-surface: #ffffff;
   --nut-bg-surface-2: #fafafa;
   --nut-bg-surface-3: #f3f4f6;
   --nut-bg-input: #ffffff;
   --nut-bg-overlay: rgba(0, 0, 0, 0.5);
+
   --nut-text-primary: #111111;
   --nut-text-secondary: #555555;
   --nut-text-muted: #777777;
   --nut-text-hint: #999999;
   --nut-text-on-accent: #ffffff;
+
   --nut-border: #e5e5e5;
   --nut-border-strong: #cccccc;
   --nut-border-focus: #eea641;
+
   --nut-accent: #eea641;
   --nut-accent-dark: #d99536;
   --nut-accent-light: #fff7e9;
   --nut-accent-shadow: rgba(238, 166, 65, 0.3);
+
   --nut-green: #22c55e;
   --nut-green-dark: #16a34a;
   --nut-green-bg: #d1fae5;
   --nut-green-text: #065f46;
+
   --nut-red: #dc2626;
   --nut-red-dark: #b91c1c;
   --nut-red-bg: #fee2e2;
   --nut-red-text: #991b1b;
+
   --nut-blue: #0369a1;
   --nut-blue-dark: #0284c7;
   --nut-blue-bg: #dbeafe;
   --nut-blue-text: #1e40af;
+
   --nut-yellow: #ca8a04;
   --nut-yellow-bg: #fef3c7;
   --nut-yellow-text: #92400e;
+
   --nut-purple: #9333ea;
   --nut-purple-bg: #f3e8ff;
   --nut-purple-text: #6b21a8;
+
   --nut-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
   --nut-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
   --nut-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
+
   --nut-auth-right-bg: #fafafa;
   --nut-auth-input-bg: #ffffff;
   --nut-auth-input-color: #111111;
+
   --nut-mp-bg: #f7f4f0;
   --nut-mp-card: #ffffff;
   --nut-mp-text: #1a1208;
   --nut-mp-muted: #7a6e60;
   --nut-mp-border: #e8e0d5;
+
   --nut-chat-bg: #ffffff;
   --nut-chat-msg-bg: #f9f9f9;
 }
-
 [data-theme="dark"] {
   --nut-bg-page: #0f0f10;
   --nut-bg-surface: #1a1a1c;
