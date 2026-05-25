@@ -26,7 +26,11 @@ const cuisineEmoji = {
   mediterranean:'🫒', default:'🍽️',
 };
 const getCuisineEmoji = (type) => cuisineEmoji[(type||'').toLowerCase()] || cuisineEmoji.default;
-const formatNpr = (n) => `Rs. ${parseFloat(n||0).toLocaleString()}`;
+const formatNpr = (n) =>
+  `Rs. ${Number(n || 0).toLocaleString("en-NP", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const statusMeta = {
   pending:          { label:'Pending',          emoji:'⏳' },

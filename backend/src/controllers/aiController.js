@@ -331,7 +331,7 @@ exports.getWeeklyMealPlan = async (req, res) => {
           total_meals: days.reduce((sum, day) => sum + day.meals.length, 0),
           average_daily_calories: Math.round(totalCalories / 7),
           average_daily_protein: Math.round(totalProtein / 7),
-          estimated_weekly_cost: Math.round(totalEstimatedCost)
+          estimated_weekly_cost: Number(totalEstimatedCost.toFixed(2))
         }
       }
     });

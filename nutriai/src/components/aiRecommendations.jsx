@@ -87,7 +87,11 @@ export default function AIRecommendations() {
     if (score >= 60) return "Good Match";
     return "Worth Trying";
   };
-
+  const formatNpr = (amount) =>
+  `NPR ${Number(amount || 0).toLocaleString("en-NP", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
   return (
     <div className="ai-recommendations-card">
       <div className="ai-header">
@@ -183,7 +187,7 @@ export default function AIRecommendations() {
                   )}
                   {meal.estimated_cost && (
                     <span className="meta-tag">
-                      💰 NPR {(meal.estimated_cost * 100).toFixed(0)}
+                      💰 {formatNpr(meal.estimated_cost)}
                     </span>
                   )}
                   {meal.prep_time_minutes && (

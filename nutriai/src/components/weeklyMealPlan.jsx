@@ -23,6 +23,11 @@ export default function WeeklyMealPlan() {
   useEffect(() => {
     loadPlan();
   }, []);
+  const formatNpr = (amount) =>
+  `NPR ${Number(amount || 0).toLocaleString("en-NP", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
   if (loading) {
     return (
@@ -76,7 +81,7 @@ export default function WeeklyMealPlan() {
             <small>avg protein/day</small>
           </div>
           <div>
-            <span>NPR {plan.summary.estimated_weekly_cost || 0}</span>
+            <span>{formatNpr(plan.summary.estimated_weekly_cost)}</span>
             <small>weekly estimate</small>
           </div>
         </div>
