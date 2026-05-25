@@ -59,21 +59,13 @@ class User {
         dietary_preferences,
         allergies,
         preferred_cuisines,
-        prioritize_local,
         daily_budget,
         weekly_budget,
         shopping_style,
-        pantry_tracking,
-        leftover_alerts,
-        expiry_notifications,
         preferred_serving_size,
-        marketplace_access,
         personalization_strength,
         nutrition_focus,
         ai_auto_adjust,
-        email_notifications,
-        sms_notifications,
-        data_sharing,
         profile_image_url,
         onboarding_completed,
         homecook_status,
@@ -119,11 +111,42 @@ class User {
         const parsed = JSON.parse(value);
         return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
       } catch (e) {
-        return value.split(',').map(item => item.trim()).filter(Boolean);
+        const splitValue = value
+          .split(',')
+          .map(item => item.trim())
+          .filter(Boolean);
+
+        return splitValue.length > 0 ? splitValue : null;
       }
     }
 
     return null;
+  }
+
+  static prepareNumberValue(value) {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  static prepareIntegerValue(value) {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  static prepareBooleanValue(value) {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+
+    return Boolean(value);
   }
 
   static async updateProfile(id, profileData) {
@@ -139,21 +162,13 @@ class User {
       'dietary_preferences',
       'allergies',
       'preferred_cuisines',
-      'prioritize_local',
       'daily_budget',
       'weekly_budget',
       'shopping_style',
-      'pantry_tracking',
-      'leftover_alerts',
-      'expiry_notifications',
       'preferred_serving_size',
-      'marketplace_access',
       'personalization_strength',
       'nutrition_focus',
       'ai_auto_adjust',
-      'email_notifications',
-      'sms_notifications',
-      'data_sharing',
       'profile_image_url',
       'onboarding_completed',
       'pickup_lat',
@@ -169,23 +184,62 @@ class User {
       'nutrition_focus'
     ];
 
+    const numericFields = [
+      'weight',
+      'height',
+      'daily_budget',
+      'weekly_budget',
+      'pickup_lat',
+      'pickup_lng'
+    ];
+
+    const integerFields = [
+      'age',
+      'preferred_serving_size',
+      'personalization_strength'
+    ];
+
+    const booleanFields = [
+      'ai_auto_adjust',
+      'onboarding_completed'
+    ];
+
+    const nullableStringFields = [
+      'gender',
+      'activity_level',
+      'shopping_style',
+      'profile_image_url',
+      'pickup_address'
+    ];
+
     const updates = [];
     const values = [];
     let paramCount = 1;
 
     Object.keys(profileData).forEach(key => {
-      if (allowedFields.includes(key) && profileData[key] !== undefined) {
-        if (arrayFields.includes(key)) {
-          const arrayValue = this.prepareArrayValue(profileData[key]);
-          updates.push(`${key} = $${paramCount}`);
-          values.push(arrayValue);
-        } else {
-          updates.push(`${key} = $${paramCount}`);
-          values.push(profileData[key]);
-        }
-
-        paramCount++;
+      if (!allowedFields.includes(key) || profileData[key] === undefined) {
+        return;
       }
+
+      let value = profileData[key];
+
+      if (arrayFields.includes(key)) {
+        value = this.prepareArrayValue(value);
+      } else if (numericFields.includes(key)) {
+        value = this.prepareNumberValue(value);
+      } else if (integerFields.includes(key)) {
+        value = this.prepareIntegerValue(value);
+      } else if (booleanFields.includes(key)) {
+        value = this.prepareBooleanValue(value);
+      } else if (nullableStringFields.includes(key)) {
+        value = value === '' ? null : value;
+      } else if (key === 'full_name' || key === 'phone_number') {
+        value = typeof value === 'string' ? value.trim() : value;
+      }
+
+      updates.push(`${key} = $${paramCount}`);
+      values.push(value);
+      paramCount++;
     });
 
     if (updates.length === 0) {

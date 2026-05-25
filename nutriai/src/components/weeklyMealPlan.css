@@ -1,0 +1,153 @@
+.weekly-plan-card {
+  height: 100%;
+  background: var(--nut-bg-surface);
+  border: 1px solid var(--nut-border);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: var(--nut-shadow-sm);
+  color: var(--nut-text-primary);
+}
+
+.weekly-plan-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.weekly-plan-header h3 {
+  margin: 0 0 4px;
+  font-size: var(--nut-font-lg);
+  font-weight: var(--nut-weight-bold);
+}
+
+.weekly-plan-header p {
+  margin: 0;
+  color: var(--nut-text-secondary);
+  font-size: var(--nut-font-sm);
+}
+
+.weekly-plan-header button {
+  border: 1px solid var(--nut-border);
+  background: var(--nut-bg-surface-2);
+  color: var(--nut-text-primary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: var(--nut-weight-semibold);
+  cursor: pointer;
+}
+
+.weekly-plan-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.weekly-plan-summary div {
+  background: var(--nut-bg-surface-2);
+  border: 1px solid var(--nut-border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.weekly-plan-summary span {
+  display: block;
+  font-weight: var(--nut-weight-bold);
+  font-size: var(--nut-font-md);
+}
+
+.weekly-plan-summary small {
+  color: var(--nut-text-secondary);
+  font-size: var(--nut-font-xs);
+}
+
+.weekly-plan-days {
+  display: grid;
+  gap: 12px;
+}
+
+.weekly-plan-day {
+  border: 1px solid var(--nut-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--nut-bg-surface);
+}
+
+.weekly-plan-day-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--nut-bg-surface-2);
+  border-bottom: 1px solid var(--nut-border);
+}
+
+.weekly-plan-day-head span {
+  color: var(--nut-text-secondary);
+  font-size: var(--nut-font-xs);
+}
+
+.weekly-plan-meals {
+  display: grid;
+}
+
+.weekly-plan-meal {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 6px 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--nut-border);
+}
+
+.weekly-plan-meal:last-child {
+  border-bottom: 0;
+}
+
+.meal-type {
+  color: var(--nut-accent);
+  font-size: var(--nut-font-xs);
+  font-weight: var(--nut-weight-bold);
+  text-transform: capitalize;
+}
+
+.meal-name {
+  min-width: 0;
+  font-weight: var(--nut-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meal-meta {
+  grid-column: 2;
+  color: var(--nut-text-secondary);
+  font-size: var(--nut-font-xs);
+}
+
+.weekly-plan-footer,
+.weekly-plan-loading,
+.weekly-plan-error {
+  margin-top: 14px;
+  color: var(--nut-text-secondary);
+  font-size: var(--nut-font-sm);
+}
+
+.weekly-plan-error {
+  color: var(--nut-red-text);
+}
+
+@media (max-width: 720px) {
+  .weekly-plan-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-plan-meal {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-meta {
+    grid-column: auto;
+  }
+}

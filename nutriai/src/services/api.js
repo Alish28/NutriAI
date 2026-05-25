@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Helper function to get auth header
 const getAuthHeader = () => {
@@ -407,16 +407,27 @@ export const getAIInsights = async () => {
   
   return data;
 };
+// Get 7-day AI meal plan
+export const getWeeklyMealPlan = async (startDate = null) => {
+  const dateParam = startDate || new Date().toISOString().split('T')[0];
 
-// ============================================
-// ADD THESE FUNCTIONS TO: nutriai/src/services/api.js
-// Copy and paste AT THE END of your api.js file (before any export statements)
-// ============================================
+  const response = await fetch(`${API_URL}/ai/weekly-plan?start_date=${dateParam}`, {
+    method: 'GET',
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
 
-// ============================================
-// PANTRY API FUNCTIONS
-// ============================================
+  const data = await response.json();
 
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to get weekly meal plan');
+  }
+
+  return data;
+};
+
+//pantry
 export const getPantryItems = async () => {
   const response = await fetch(`${API_URL}/pantry`, {
     method: 'GET',

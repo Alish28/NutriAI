@@ -12,8 +12,13 @@ import HomecookApplication from "../components/homecookApplications.jsx";
 import HomecookDashboard from "../homecook/homecookDashboard.jsx";
 import AdminDashboard from "../admin/adminDashboard.jsx";
 import AIChatbot from "../components/aiChatbot.jsx";
+import WeeklyMealPlan from "../components/weeklyMealPlan.jsx";
 
-export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }) {
+export default function Dashboard({
+  onLogout,
+  onOpenProfile,
+  onOpenMarketplace,
+}) {
   const [isMealSidebarOpen, setIsMealSidebarOpen] = useState(false);
   const [isNavSidebarOpen, setIsNavSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -28,7 +33,10 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
   // Apply theme to document
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+    document.documentElement.setAttribute(
+      "data-theme",
+      darkMode ? "dark" : "light",
+    );
     localStorage.setItem("nutriai-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
@@ -59,7 +67,12 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
   const getInitials = (name) => {
     if (!name) return "U";
-    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getGreeting = () => {
@@ -88,26 +101,47 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
   return (
     <div className="dashboard-page">
-
       {/* ── Navigation Sidebar ── */}
       <aside className={`nav-sidebar ${isNavSidebarOpen ? "open" : ""}`}>
         <div className="nav-sidebar-header">
           <h3>Menu</h3>
-          <button className="nav-close-btn" onClick={() => setIsNavSidebarOpen(false)}>✕</button>
+          <button
+            className="nav-close-btn"
+            onClick={() => setIsNavSidebarOpen(false)}
+          >
+            ✕
+          </button>
         </div>
         <nav className="nav-sidebar-content">
-
-          <button className="nav-item" onClick={() => { setIsMealSidebarOpen(true); setIsNavSidebarOpen(false); }}>
+          <button
+            className="nav-item"
+            onClick={() => {
+              setIsMealSidebarOpen(true);
+              setIsNavSidebarOpen(false);
+            }}
+          >
             <span className="nav-icon">🍽️</span>
             <span>Add Meal</span>
           </button>
 
-          <button className="nav-item" onClick={() => { onOpenProfile(); setIsNavSidebarOpen(false); }}>
+          <button
+            className="nav-item"
+            onClick={() => {
+              onOpenProfile();
+              setIsNavSidebarOpen(false);
+            }}
+          >
             <span className="nav-icon">👤</span>
             <span>My Profile</span>
           </button>
 
-          <button className="nav-item" onClick={() => { setIsNavSidebarOpen(false); if (onOpenMarketplace) onOpenMarketplace(); }}>
+          <button
+            className="nav-item"
+            onClick={() => {
+              setIsNavSidebarOpen(false);
+              if (onOpenMarketplace) onOpenMarketplace();
+            }}
+          >
             <span className="nav-icon">🏪</span>
             <span>Marketplace</span>
           </button>
@@ -116,7 +150,13 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             <>
               <div className="nav-divider" />
               <div className="nav-section-title">Homecook</div>
-              <button className="nav-item" onClick={() => { setIsHomecookMode(true); setIsNavSidebarOpen(false); }}>
+              <button
+                className="nav-item"
+                onClick={() => {
+                  setIsHomecookMode(true);
+                  setIsNavSidebarOpen(false);
+                }}
+              >
                 <span className="nav-icon">👨‍🍳</span>
                 <span>Homecook Dashboard</span>
               </button>
@@ -127,7 +167,13 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             <>
               <div className="nav-divider" />
               <div className="nav-section-title">Admin</div>
-              <button className="nav-item" onClick={() => { setShowAdminPanel(true); setIsNavSidebarOpen(false); }}>
+              <button
+                className="nav-item"
+                onClick={() => {
+                  setShowAdminPanel(true);
+                  setIsNavSidebarOpen(false);
+                }}
+              >
                 <span className="nav-icon">⚡</span>
                 <span>Admin Panel</span>
               </button>
@@ -136,10 +182,7 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
           {/* Dark mode toggle in sidebar */}
           <div className="nav-divider" />
-          <button
-            className="nav-item"
-            onClick={() => setDarkMode((d) => !d)}
-          >
+          <button className="nav-item" onClick={() => setDarkMode((d) => !d)}>
             <span className="nav-icon">{darkMode ? "☀️" : "🌙"}</span>
             <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
           </button>
@@ -147,13 +190,20 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
       </aside>
 
       {isNavSidebarOpen && (
-        <div className="nav-sidebar-overlay" onClick={() => setIsNavSidebarOpen(false)} />
+        <div
+          className="nav-sidebar-overlay"
+          onClick={() => setIsNavSidebarOpen(false)}
+        />
       )}
 
       {/* ── Top Header ── */}
       <header className="dash-header">
         <div className="dash-header-left">
-          <button className="hamburger-btn" onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)} title="Menu">
+          <button
+            className="hamburger-btn"
+            onClick={() => setIsNavSidebarOpen(!isNavSidebarOpen)}
+            title="Menu"
+          >
             <span className="hamburger-line" />
             <span className="hamburger-line" />
             <span className="hamburger-line" />
@@ -169,7 +219,10 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         </div>
 
         <div className="dash-header-right">
-          <button className="icon-btn add-meal-btn" onClick={() => setIsMealSidebarOpen(true)}>
+          <button
+            className="icon-btn add-meal-btn"
+            onClick={() => setIsMealSidebarOpen(true)}
+          >
             ➕ Add Meal
           </button>
 
@@ -184,7 +237,11 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
           <button
             className="icon-btn chef-btn"
             onClick={handleChefButtonClick}
-            title={user?.homecook_approved ? "Homecook Dashboard" : "Become a Homecook"}
+            title={
+              user?.homecook_approved
+                ? "Homecook Dashboard"
+                : "Become a Homecook"
+            }
             data-approved={user?.homecook_approved ? "true" : "false"}
           >
             👨‍🍳
@@ -217,7 +274,9 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
             {user ? getInitials(user.full_name) : "U"}
           </button>
 
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </header>
 
@@ -225,7 +284,9 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
       {user && (
         <div className="welcome-banner">
           <div className="welcome-content">
-            <h2>{getGreeting()}, {user.full_name.split(" ")[0]}! 👋</h2>
+            <h2>
+              {getGreeting()}, {user.full_name.split(" ")[0]}! 👋
+            </h2>
             {user.homecook_approved && (
               <span className="homecook-badge">✨ Approved Homecook</span>
             )}
@@ -233,13 +294,19 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
           {userProfile && (
             <div className="welcome-stats">
               {userProfile.health_goals?.length > 0 && (
-                <span className="stat-badge">🎯 {userProfile.health_goals.join(", ")}</span>
+                <span className="stat-badge">
+                  🎯 {userProfile.health_goals.join(", ")}
+                </span>
               )}
               {userProfile.dietary_preferences?.length > 0 && (
-                <span className="stat-badge">🥗 {userProfile.dietary_preferences.join(", ")}</span>
+                <span className="stat-badge">
+                  🥗 {userProfile.dietary_preferences.join(", ")}
+                </span>
               )}
               {userProfile.activity_level && (
-                <span className="stat-badge">🏃 {userProfile.activity_level}</span>
+                <span className="stat-badge">
+                  🏃 {userProfile.activity_level}
+                </span>
               )}
             </div>
           )}
@@ -248,34 +315,43 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
 
       {/* ── Main Content ── */}
       <main className="dash-main">
+        <div className="dashboard-layout">
+          <section className="dashboard-column dashboard-column-main">
+            <div className="dashboard-tile">
+              <NutritionSummary />
+            </div>
 
-        {/* Row 1: Nutrition + Pantry side by side */}
-        <div className="dash-row-top">
-          <div className="dash-nutrition-col">
-            <NutritionSummary />
-          </div>
-          <div className="dash-pantry-col">
-            <PantryTracker />
-          </div>
+            <div className="dashboard-tile">
+              <AIRecommendations />
+            </div>
+
+            <div className="dashboard-tile">
+              <WeeklyChart />
+            </div>
+          </section>
+
+          <section className="dashboard-column dashboard-column-side">
+            <div className="dashboard-tile">
+              <WeeklyMealPlan />
+            </div>
+
+            <div className="dashboard-tile">
+              <PantryTracker />
+            </div>
+
+            <div className="dashboard-tile">
+              <StreakTracker />
+            </div>
+
+            <div className="dashboard-tile">
+              <WeeklyAverages />
+            </div>
+          </section>
         </div>
 
-        {/* Row 2: AI Recommendations full width */}
-        <div className="dash-ai-row">
-          <AIRecommendations />
-        </div>
-
-        {/* Row 3: Analytics — 3 equal columns filling full width */}
-        <div className="dash-analytics-row">
-          <WeeklyChart />
-          <StreakTracker />
-          <WeeklyAverages />
-        </div>
-
-        {/* Footer */}
         <footer className="dash-footer">
-          <span>© 2025 NutriAI. All rights reserved.</span>
+          <span>© 2026 NutriAI. All rights reserved.</span>
         </footer>
-
       </main>
 
       {/* ── Homecook Application Modal ── */}
@@ -283,11 +359,26 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         <div
           className="modal-overlay"
           onClick={() => setShowHomecookApp(false)}
-          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ width:"90%", maxWidth:"900px", maxHeight:"90vh", overflowY:"auto", background:"var(--dm-card)", borderRadius:"18px" }}
+            style={{
+              width: "90%",
+              maxWidth: "900px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "var(--dm-card)",
+              borderRadius: "18px",
+            }}
           >
             <HomecookApplication
               onClose={() => setShowHomecookApp(false)}
@@ -305,11 +396,26 @@ export default function Dashboard({ onLogout, onOpenProfile, onOpenMarketplace }
         <div
           className="modal-overlay"
           onClick={() => setShowAdminPanel(false)}
-          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ width:"95%", maxWidth:"1200px", maxHeight:"90vh", overflowY:"auto", background:"var(--dm-card)", borderRadius:"18px" }}
+            style={{
+              width: "95%",
+              maxWidth: "1200px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "var(--dm-card)",
+              borderRadius: "18px",
+            }}
           >
             <AdminDashboard onClose={() => setShowAdminPanel(false)} />
           </div>

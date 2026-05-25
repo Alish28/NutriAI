@@ -1,6 +1,15 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
 
+const normalizeNepalPhone = (phone) => {
+  if (!phone) return null;
+  return String(phone).replace(/\s|-/g, '');
+};
+
+const isValidNepalPhone = (phone) => {
+  return /^(\+977)?9[78]\d{8}$/.test(phone);
+};
+
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.getFullProfile(req.user.id);
@@ -29,12 +38,12 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const profileData = req.body;
+    const profileData = { ...req.body };
 
-    if (profileData.phone_number) {
-      const cleanedPhone = profileData.phone_number.replace(/\s|-/g, '');
+    if (profileData.phone_number !== undefined) {
+      const cleanedPhone = normalizeNepalPhone(profileData.phone_number);
 
-      if (!/^(\+977)?9[78]\d{8}$/.test(cleanedPhone)) {
+      if (cleanedPhone && !isValidNepalPhone(cleanedPhone)) {
         return res.status(400).json({
           success: false,
           message: 'Please enter a valid Nepali mobile number'
@@ -62,15 +71,11 @@ exports.updateProfile = async (req, res) => {
               .split(',')
               .map(s => s.trim())
               .filter(Boolean);
+          }
+        }
 
-            if (profileData[field].length === 0) {
-              profileData[field] = null;
-            }
-          }
-        } else if (Array.isArray(profileData[field])) {
-          if (profileData[field].length === 0) {
-            profileData[field] = null;
-          }
+        if (Array.isArray(profileData[field]) && profileData[field].length === 0) {
+          profileData[field] = null;
         }
       }
     });
@@ -112,6 +117,14 @@ exports.updatePassword = async (req, res) => {
     }
 
     const user = await User.findByEmail(req.user.email);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
 
     if (!isPasswordValid) {
@@ -153,6 +166,14 @@ exports.deleteAccount = async (req, res) => {
     }
 
     const user = await User.findByEmail(req.user.email);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {

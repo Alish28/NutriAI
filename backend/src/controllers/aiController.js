@@ -1,10 +1,9 @@
-/**
- * AI CONTROLLER
- * Handles AI recommendation API endpoints
- */
-
 const AIRecommendationEngine = require('../services/aiRecommendationEngine');
 const db = require('../config/database');
+
+const validMealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+const getToday = () => new Date().toISOString().split('T')[0];
 
 const addDays = (date, days) => {
   const next = new Date(date);
@@ -16,64 +15,88 @@ const getDayName = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', { weekday: 'long' });
 };
 
+const saveRecommendation = async (userId, rec, date) => {
+  const result = await db.query(
+    `
+    INSERT INTO ai_recommendations (
+      user_id,
+      meal_template_id,
+      recommended_meal_name,
+      meal_type,
+      calories,
+      protein,
+      carbs,
+      fats,
+      reason,
+      confidence_score,
+      recommended_for_date,
+      nutritional_gap_protein,
+      nutritional_gap_calories
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    RETURNING id
+    `,
+    [
+      userId,
+      rec.id,
+      rec.meal_name,
+      rec.meal_type,
+      rec.calories,
+      rec.protein,
+      rec.carbs,
+      rec.fats,
+      rec.reason,
+      rec.confidence_score,
+      date,
+      rec.nutritional_gap_protein,
+      rec.nutritional_gap_calories
+    ]
+  );
+
+  return result.rows[0].id;
+};
+
 // GET /api/ai/recommendations
-// Get AI meal recommendations for user
 exports.getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
     const { meal_type, date } = req.query;
-    
-    // Validate meal_type
-    const validMealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+    const targetDate = date || getToday();
+
     if (!meal_type || !validMealTypes.includes(meal_type)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid meal_type. Must be: breakfast, lunch, dinner, or snack'
       });
     }
-    
-    // Get recommendations from AI engine
+
     const recommendations = await AIRecommendationEngine.getRecommendations(
       userId,
       meal_type,
-      date
+      targetDate
     );
-    
-    // Save recommendations to database for tracking
+
+    const savedRecommendations = [];
+
     for (const rec of recommendations) {
-      await db.query(`
-        INSERT INTO ai_recommendations (
-          user_id, meal_template_id, recommended_meal_name, meal_type,
-          calories, protein, carbs, fats, reason, confidence_score,
-          recommended_for_date, nutritional_gap_protein, nutritional_gap_calories
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      `, [
-        userId,
-        rec.id,
-        rec.meal_name,
-        rec.meal_type,
-        rec.calories,
-        rec.protein,
-        rec.carbs,
-        rec.fats,
-        rec.reason,
-        rec.confidence_score,
-        date || new Date().toISOString().split('T')[0],
-        rec.nutritional_gap_protein,
-        rec.nutritional_gap_calories
-      ]);
+      const recommendationId = await saveRecommendation(userId, rec, targetDate);
+
+      savedRecommendations.push({
+        ...rec,
+        recommendation_id: recommendationId,
+        meal_template_id: rec.id
+      });
     }
-    
+
     res.json({
       success: true,
       data: {
-        recommendations,
+        recommendations: savedRecommendations,
         meal_type,
-        date: date || new Date().toISOString().split('T')[0],
-        count: recommendations.length
+        date: targetDate,
+        count: savedRecommendations.length
       }
     });
-    
   } catch (error) {
     console.error('Error getting AI recommendations:', error);
     res.status(500).json({
@@ -85,59 +108,61 @@ exports.getRecommendations = async (req, res) => {
 };
 
 // POST /api/ai/feedback
-// User accepts or rejects a recommendation
 exports.submitFeedback = async (req, res) => {
   try {
     const userId = req.user.id;
     const { recommendation_id, accepted, meal_template_id } = req.body;
-    
+
     if (!recommendation_id) {
       return res.status(400).json({
         success: false,
         message: 'recommendation_id is required'
       });
     }
-    
-    // Update recommendation record
-    await db.query(`
+
+    await db.query(
+      `
       UPDATE ai_recommendations
       SET 
         was_accepted = $1,
         was_rejected = $2
       WHERE id = $3 AND user_id = $4
-    `, [accepted, !accepted, recommendation_id, userId]);
-    
-    // If accepted, increase meal template popularity
+      `,
+      [Boolean(accepted), !Boolean(accepted), recommendation_id, userId]
+    );
+
     if (accepted && meal_template_id) {
-      await db.query(`
+      await db.query(
+        `
         UPDATE meal_templates
-        SET popularity_score = LEAST(popularity_score + 5, 100)
+        SET popularity_score = LEAST(COALESCE(popularity_score, 50) + 5, 100)
         WHERE id = $1
-      `, [meal_template_id]);
+        `,
+        [meal_template_id]
+      );
     }
-    
+
     res.json({
       success: true,
-      message: accepted ? 'Thank you for your feedback!' : 'We\'ll improve our recommendations'
+      message: accepted ? 'Thank you for your feedback!' : 'We will improve your recommendations'
     });
-    
   } catch (error) {
     console.error('Error submitting feedback:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to submit feedback'
+      message: 'Failed to submit feedback',
+      error: error.message
     });
   }
 };
 
 // GET /api/ai/insights
-// Get AI insights about user's eating patterns
 exports.getInsights = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Get user's meal history (last 30 days)
-    const historyQuery = await db.query(`
+
+    const historyQuery = await db.query(
+      `
       SELECT 
         meal_type,
         COUNT(*) as count,
@@ -147,87 +172,90 @@ exports.getInsights = async (req, res) => {
       WHERE user_id = $1 
         AND meal_date >= CURRENT_DATE - INTERVAL '30 days'
       GROUP BY meal_type
-    `, [userId]);
-    
+      `,
+      [userId]
+    );
+
     const mealHistory = historyQuery.rows;
-    
-    // Get recommendation acceptance rate
-    const feedbackQuery = await db.query(`
+
+    const feedbackQuery = await db.query(
+      `
       SELECT 
         COUNT(*) FILTER (WHERE was_accepted = true) as accepted_count,
         COUNT(*) as total_recommendations
       FROM ai_recommendations
       WHERE user_id = $1
-    `, [userId]);
-    
+      `,
+      [userId]
+    );
+
     const feedback = feedbackQuery.rows[0];
-    const acceptanceRate = feedback.total_recommendations > 0
-      ? Math.round((feedback.accepted_count / feedback.total_recommendations) * 100)
+    const totalRecommendations = parseInt(feedback.total_recommendations || 0);
+    const acceptedCount = parseInt(feedback.accepted_count || 0);
+
+    const acceptanceRate = totalRecommendations > 0
+      ? Math.round((acceptedCount / totalRecommendations) * 100)
       : 0;
-    
-    // Generate insights
+
     const insights = [];
-    
-    // Insight 1: Most logged meal type
+
     if (mealHistory.length > 0) {
-      const mostLogged = mealHistory.reduce((prev, current) => 
-        (prev.count > current.count) ? prev : current
+      const mostLogged = mealHistory.reduce((prev, current) =>
+        parseInt(prev.count) > parseInt(current.count) ? prev : current
       );
+
       insights.push({
         type: 'pattern',
         title: 'Meal Logging Pattern',
-        message: `You log ${mostLogged.meal_type} most often (${mostLogged.count} times in last 30 days)`
+        message: `You log ${mostLogged.meal_type} most often (${mostLogged.count} times in the last 30 days).`
       });
     }
-    
-    // Insight 2: Protein intake
-    const avgProtein = mealHistory.reduce((sum, meal) => 
-      sum + parseFloat(meal.avg_protein || 0), 0
+
+    const avgProtein = mealHistory.reduce(
+      (sum, meal) => sum + parseFloat(meal.avg_protein || 0),
+      0
     ) / Math.max(mealHistory.length, 1);
-    
-    if (avgProtein < 20) {
+
+    if (avgProtein > 0 && avgProtein < 20) {
       insights.push({
         type: 'suggestion',
         title: 'Protein Boost Needed',
-        message: `Your average protein per meal is ${Math.round(avgProtein)}g. Consider high-protein options.`
+        message: `Your average protein per meal is ${Math.round(avgProtein)}g. Consider higher-protein meals.`
       });
     }
-    
-    // Insight 3: AI learning
-    if (acceptanceRate > 0) {
+
+    if (totalRecommendations > 0) {
       insights.push({
         type: 'ai',
-        title: 'AI Learning Progress',
-        message: `You've accepted ${acceptanceRate}% of AI recommendations. The system is learning your preferences!`
+        title: 'Recommendation Learning',
+        message: `You have accepted ${acceptanceRate}% of AI recommendations.`
       });
     }
-    
+
     res.json({
       success: true,
       data: {
         insights,
         acceptance_rate: acceptanceRate,
-        total_recommendations: parseInt(feedback.total_recommendations),
+        total_recommendations: totalRecommendations,
         meal_history: mealHistory
       }
     });
-    
   } catch (error) {
     console.error('Error getting insights:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate insights'
+      message: 'Failed to generate insights',
+      error: error.message
     });
   }
 };
 
 // GET /api/ai/weekly-plan
-// Generates 7 days x breakfast/lunch/dinner/snack using the same explainable engine.
 exports.getWeeklyMealPlan = async (req, res) => {
   try {
     const userId = req.user.id;
-    const startDate = req.query.start_date || new Date().toISOString().split('T')[0];
-    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+    const startDate = req.query.start_date || getToday();
 
     const days = [];
     let totalCalories = 0;
@@ -238,13 +266,17 @@ exports.getWeeklyMealPlan = async (req, res) => {
       const date = addDays(startDate, dayIndex);
       const meals = [];
 
-      for (let mealIndex = 0; mealIndex < mealTypes.length; mealIndex++) {
-        const mealType = mealTypes[mealIndex];
-        const recommendations = await AIRecommendationEngine.getRecommendations(userId, mealType, date);
+      for (let mealIndex = 0; mealIndex < validMealTypes.length; mealIndex++) {
+        const mealType = validMealTypes[mealIndex];
+        const recommendations = await AIRecommendationEngine.getRecommendations(
+          userId,
+          mealType,
+          date
+        );
 
         if (recommendations.length > 0) {
-          // Rotate through top results so the week does not repeat the same meal every day.
           const selected = recommendations[(dayIndex + mealIndex) % recommendations.length];
+
           meals.push({
             meal_type: mealType,
             meal_template_id: selected.id,
@@ -255,7 +287,7 @@ exports.getWeeklyMealPlan = async (req, res) => {
             carbs: Number(selected.carbs || 0),
             fats: Number(selected.fats || 0),
             cuisine_type: selected.cuisine_type,
-            estimated_cost: selected.estimated_cost ? Number(selected.estimated_cost) : null,
+            estimated_cost: selected.estimated_cost ? Number(selected.estimated_cost) : 0,
             confidence_score: selected.confidence_score,
             reason: selected.reason
           });
@@ -267,6 +299,11 @@ exports.getWeeklyMealPlan = async (req, res) => {
           meals.push({
             meal_type: mealType,
             meal_name: 'No suitable meal found',
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fats: 0,
+            estimated_cost: 0,
             reason: 'Add more meal templates for this meal type.'
           });
         }
