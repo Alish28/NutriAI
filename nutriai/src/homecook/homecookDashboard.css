@@ -4,7 +4,7 @@
   min-height: 100vh;
   background: #f8f9fa;
   padding: 32px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  font-family: var(--nut-font-family);
 }
 
 /* Header */

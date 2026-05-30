@@ -33,9 +33,9 @@ function App() {
 
     // FIX: Check if token looks valid before even calling the API
     // JWT tokens have 3 parts separated by dots
-    const tokenParts = token.split('.');
+    const tokenParts = token.split(".");
     if (tokenParts.length !== 3) {
-      console.warn('Invalid token format, clearing...');
+      console.warn("Invalid token format, clearing...");
       clearAuth();
       setLoading(false);
       return;
@@ -46,7 +46,7 @@ function App() {
       const payload = JSON.parse(atob(tokenParts[1]));
       const now = Math.floor(Date.now() / 1000);
       if (payload.exp && payload.exp < now) {
-        console.warn('Token expired, clearing...');
+        console.warn("Token expired, clearing...");
         clearAuth();
         setLoading(false);
         return;
@@ -100,7 +100,7 @@ function App() {
   };
 
   const handleLoginSuccess = async () => {
-    setIsAuthenticated(true);
+    setLoading(true);
     await checkAuthStatus();
   };
 
@@ -125,12 +125,23 @@ function App() {
   // Loading screen
   if (loading) {
     return (
-      <div className="app-root" style={{
-        display:"flex", alignItems:"center", justifyContent:"center",
-        height:"100vh", flexDirection:"column", gap:16,
-      }}>
-        <div style={{ fontSize:48, animation:"spin 1s linear infinite" }}>🍽️</div>
-        <p style={{ fontSize:16, color:"#666", fontWeight:500 }}>Loading NutriAI…</p>
+      <div
+        className="app-root"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
+        <div style={{ fontSize: 48, animation: "spin 1s linear infinite" }}>
+          🍽️
+        </div>
+        <p style={{ fontSize: 16, color: "#666", fontWeight: 500 }}>
+          Loading NutriAI…
+        </p>
         <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
       </div>
     );
@@ -141,29 +152,46 @@ function App() {
     if (currentView === "signup") {
       return (
         <div className="app-root">
-          <Signup onBackToLogin={() => setCurrentView("login")} onSignedUp={handleSignupSuccess}/>
+          <Signup
+            onBackToLogin={() => setCurrentView("login")}
+            onSignedUp={handleSignupSuccess}
+          />
         </div>
       );
     }
     return (
       <div className="app-root">
-        <Login onLogin={handleLoginSuccess} onGoToSignup={() => setCurrentView("signup")}/>
+        <Login
+          onLogin={handleLoginSuccess}
+          onGoToSignup={() => setCurrentView("signup")}
+        />
       </div>
     );
   }
 
   if (isAdmin && currentView === "adminDashboard") {
-    return <div className="app-root"><AdminDashboard onLogout={handleUserLogout}/></div>;
+    return (
+      <div className="app-root">
+        <AdminDashboard onLogout={handleUserLogout} />
+      </div>
+    );
   }
 
   if (requiresOnboarding && currentView === "onboarding") {
-    return <div className="app-root"><Onboarding onComplete={handleOnboardingComplete}/></div>;
+    return (
+      <div className="app-root">
+        <Onboarding onComplete={handleOnboardingComplete} />
+      </div>
+    );
   }
 
   if (currentView === "profile") {
     return (
       <div className="app-root">
-        <Profile onBack={() => setCurrentView("dashboard")} onLogout={handleUserLogout}/>
+        <Profile
+          onBack={() => setCurrentView("dashboard")}
+          onLogout={handleUserLogout}
+        />
       </div>
     );
   }
@@ -171,7 +199,7 @@ function App() {
   if (currentView === "marketplace") {
     return (
       <div className="app-root">
-        <Marketplace onBack={() => setCurrentView("dashboard")}/>
+        <Marketplace onBack={() => setCurrentView("dashboard")} />
       </div>
     );
   }

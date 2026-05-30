@@ -1,6 +1,5 @@
 /* dashboard.css */
 
-/* ── CSS variable bridge (uses global dark mode tokens) ── */
 .dashboard-page {
   --bg:         var(--dm-bg, #f6f6f6);
   --card-bg:    var(--dm-card, #ffffff);
@@ -32,7 +31,7 @@ body, .app-root { height: 100%; }
   flex-direction: column;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  font-family: var(--nut-font-family);
   position: relative;
   transition: background 0.25s ease, color 0.25s ease;
 }

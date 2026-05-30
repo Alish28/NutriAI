@@ -17,12 +17,9 @@ const {
 router.get('/all', getAllRecipes);
 
 // Get single recipe by ID (public)
-router.get('/:id', getRecipeById);
-
-// PROTECTED ROUTES (auth required)
-
-// Get MY recipes (homecook's own recipes)
 router.get('/my/recipes', protect, getMyRecipes);
+
+router.get('/:id', getRecipeById);
 
 // Create new recipe (homecook only - checked in controller)
 router.post('/', protect, createRecipe);

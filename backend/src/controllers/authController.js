@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, full_name, role } = req.body;
+    const { email, password, full_name } = req.body;
 
     if (!email || !password || !full_name) {
       return res.status(400).json({
@@ -28,7 +28,7 @@ exports.register = async (req, res) => {
       email,
       password_hash,
       full_name,
-      role: role || 'consumer'
+      role: 'consumer'
     });
 
     const token = jwt.sign(

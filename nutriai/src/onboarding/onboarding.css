@@ -4,7 +4,7 @@
   overflow-y: auto;
   background: var(--nut-bg-page);
   color: var(--nut-text-primary);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  font-family: var(--nut-font-family);
 }
 
 .onboarding-header {

@@ -1,5 +1,6 @@
 :root {
   --nut-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --nut-font-display: "Playfair Display", Georgia, serif;
 
   --nut-font-xs: 12px;
   --nut-font-sm: 13px;

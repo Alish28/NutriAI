@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
 
 :root {
   --mp-bg: #f7f4f0;
@@ -24,7 +24,7 @@
   height: 100vh;
   overflow-y: auto;
   background: var(--mp-bg);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--nut-font-family);
   color: var(--mp-text);
 }
 
@@ -52,7 +52,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 20px;
   font-weight: 700;
   color: var(--mp-text);
@@ -73,7 +73,7 @@
 }
 
 .marketplaceHeaderTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 22px;
   font-weight: 700;
   color: var(--mp-text);
@@ -201,7 +201,7 @@
 }
 
 .heroTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 42px;
   font-weight: 700;
   color: #ffffff;
@@ -391,7 +391,7 @@
 }
 
 .recipeCardName {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 17px;
   font-weight: 700;
   color: var(--mp-text);
@@ -485,7 +485,7 @@
 
 .emptyStateIcon { font-size: 64px; margin-bottom: 16px; }
 .emptyStateTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 24px;
   font-weight: 700;
   color: var(--mp-text);
@@ -591,7 +591,7 @@
 .modalBody { padding: 28px; }
 
 .modalRecipeName {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 26px;
   font-weight: 700;
   color: var(--mp-text);
@@ -702,7 +702,7 @@
 }
 
 .orderFormTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 16px;
@@ -787,7 +787,7 @@
 }
 
 .homecookSectionTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 22px;
   font-weight: 700;
   color: var(--mp-text);
@@ -848,7 +848,7 @@
 }
 
 .orderCardName {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 17px;
   font-weight: 700;
   color: var(--mp-text);
@@ -935,7 +935,7 @@
 }
 
 .recipeFormTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 22px;
   font-weight: 700;
   color: var(--mp-text);
@@ -1033,7 +1033,7 @@
 }
 
 .reviewModalTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 20px;
@@ -1120,7 +1120,7 @@
 .locationManagerHeader { margin-bottom: 28px; }
 
 .locationManagerTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 26px;
   font-weight: 700;
   color: var(--mp-text);
@@ -1142,7 +1142,7 @@
 .locationPermissionIcon { font-size: 64px; margin-bottom: 20px; }
 
 .locationPermissionBox h4 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--nut-font-family);
   font-size: 22px;
   font-weight: 700;
   color: var(--mp-text);
